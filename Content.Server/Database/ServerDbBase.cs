@@ -204,6 +204,7 @@ namespace Content.Server.Database
         // HL2RP CHANGE START character-inventory-snapshot
         public async Task SaveCharacterInventorySnapshotAsync(NetUserId userId, int slot, JsonDocument snapshot)
         {
+            var serialized = snapshot.RootElement.GetRawText();
             await using var db = await GetDb();
             var existing = await db.DbContext.CharacterInventorySnapshot
                 .SingleOrDefaultAsync(x => x.UserId == userId.UserId && x.Slot == slot);
@@ -214,14 +215,14 @@ namespace Content.Server.Database
                 {
                     UserId = userId.UserId,
                     Slot = slot,
-                    Snapshot = snapshot,
+                    Snapshot = serialized,
                     UpdatedAt = DateTime.UtcNow,
                 };
                 db.DbContext.CharacterInventorySnapshot.Add(existing);
             }
             else
             {
-                existing.Snapshot = snapshot;
+                existing.Snapshot = serialized;
                 existing.UpdatedAt = DateTime.UtcNow;
             }
 
@@ -231,10 +232,15 @@ namespace Content.Server.Database
         public async Task<JsonDocument?> GetCharacterInventorySnapshotAsync(NetUserId userId, int slot)
         {
             await using var db = await GetDb();
-            return await db.DbContext.CharacterInventorySnapshot
+            var snapshot = await db.DbContext.CharacterInventorySnapshot
                 .Where(x => x.UserId == userId.UserId && x.Slot == slot)
                 .Select(x => x.Snapshot)
                 .SingleOrDefaultAsync();
+
+            if (snapshot == null)
+                return null;
+
+            return JsonDocument.Parse(snapshot);
         }
 
         public async Task DeleteCharacterInventorySnapshotAsync(NetUserId userId, int slot)

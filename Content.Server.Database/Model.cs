@@ -369,7 +369,7 @@ namespace Content.Server.Database
         public int Id { get; set; }
         public Guid UserId { get; set; }
         public int Slot { get; set; }
-        [Column(TypeName = "jsonb")] public JsonDocument Snapshot { get; set; } = null!;
+        [Column(TypeName = "jsonb")] public string Snapshot { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; }
     }
     // HL2RP CHANGE END character-inventory-snapshot
