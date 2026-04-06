@@ -1,0 +1,12 @@
+- type: species
+  id: Dwarf
+  name: species-name-dwarf
+  roundStart: true
+  prototype: MobDwarf
+  dollPrototype: AppearanceDwarf
+  skinColoration: HumanToned
+  # Corvax-SpeciesAgeLore-Start
+  youngAge: 60
+  oldAge: 300
+  maxAge: 600
+  # Corvax-SpeciesAgeLore-End

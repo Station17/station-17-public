@@ -1,0 +1,16 @@
+- type: species
+  id: Ipc
+  name: species-name-Ipc
+  roundStart: true
+  sponsorOnly: false # Corvax-Sponsors
+  prototype: MobIpc
+  defaultSkinTone: "#eb943d"
+  dollPrototype: AppearanceIpc
+  skinColoration: Hues
+  maleFirstNames: NamesIpcFirstMale
+  femaleFirstNames: NamesIpcFirstFemale
+  maleLastNames: NamesIpcLast # Corvax-LastnameGender
+  femaleLastNames: NamesIpcLast # Corvax-LastnameGender
+  minAge: 0
+  sexes:
+  - Unsexed

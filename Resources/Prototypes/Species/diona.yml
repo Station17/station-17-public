@@ -1,0 +1,20 @@
+- type: species
+  id: Diona
+  name: species-name-diona
+  roundStart: true
+  prototype: MobDiona
+  defaultSkinTone: "#cdb369"
+  dollPrototype: AppearanceDiona
+  skinColoration: Hues
+  maleFirstNames: NamesDionaFirst
+  femaleFirstNames: NamesDionaFirst
+  maleLastNames: NamesDionaLast # Corvax-LastnameGender
+  femaleLastNames: NamesDionaLast # Corvax-LastnameGender
+  naming: TheFirstofLast
+  sexes:
+  - Unsexed
+  # Corvax-SpeciesAgeLore-Start
+  youngAge: 3000
+  oldAge: 6000
+  maxAge: 12000
+  # Corvax-SpeciesAgeLore-End

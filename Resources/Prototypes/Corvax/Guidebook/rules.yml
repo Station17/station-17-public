@@ -1,0 +1,168 @@
+# Default rules
+- type: guideEntry
+  id: CorvaxRuleset
+  name: guide-entry-corvax-ruleset
+  priority: 0
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules.xml"
+  children:
+  - CorvaxRule0
+  - CorvaxRule1
+  - CorvaxRule2
+  - CorvaxRule3
+  - CorvaxRule31
+  - CorvaxRule32
+  - CorvaxRule33
+  - CorvaxRule34
+  - CorvaxRule35
+  - CorvaxRule36
+  - CorvaxRule37
+  - CorvaxRule38
+  - CorvaxRule39
+  - CorvaxRule4
+  - CorvaxRule6
+  - CorvaxRule7
+  - CorvaxRule8
+  - CorvaxRule9
+  - CorvaxRule10
+  - CorvaxPunishmentTypes
+
+- type: guideEntry
+  id: CorvaxRule0
+  name: guide-entry-corvax-rule0
+  priority: 1
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule0.xml"
+
+- type: guideEntry
+  id: CorvaxRule1
+  name: guide-entry-corvax-rule1
+  priority: 2
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule1.xml"
+
+- type: guideEntry
+  id: CorvaxRule2
+  name: guide-entry-corvax-rule2
+  priority: 3
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule2.xml"
+
+- type: guideEntry
+  id: CorvaxRule3
+  name: guide-entry-corvax-rule3
+  priority: 4
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.xml"
+
+- type: guideEntry
+  id: CorvaxRule31
+  name: guide-entry-corvax-rule31
+  priority: 5
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.1.xml"
+
+- type: guideEntry
+  id: CorvaxRule32
+  name: guide-entry-corvax-rule32
+  priority: 6
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.2.xml"
+
+- type: guideEntry
+  id: CorvaxRule33
+  name: guide-entry-corvax-rule33
+  priority: 7
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.3.xml"
+
+- type: guideEntry
+  id: CorvaxRule34
+  name: guide-entry-corvax-rule34
+  priority: 8
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.4.xml"
+
+- type: guideEntry
+  id: CorvaxRule35
+  name: guide-entry-corvax-rule35
+  priority: 9
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.5.xml"
+
+- type: guideEntry
+  id: CorvaxRule36
+  name: guide-entry-corvax-rule36
+  priority: 10
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.6.xml"
+
+- type: guideEntry
+  id: CorvaxRule37
+  name: guide-entry-corvax-rule37
+  priority: 11
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.7.xml"
+
+- type: guideEntry
+  id: CorvaxRule38
+  name: guide-entry-corvax-rule38
+  priority: 12
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.8.xml"
+
+- type: guideEntry
+  id: CorvaxRule39
+  name: guide-entry-corvax-rule39
+  priority: 13
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule3.9.xml"
+
+- type: guideEntry
+  id: CorvaxRule4
+  name: guide-entry-corvax-rule4
+  priority: 14
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule4.xml"
+
+- type: guideEntry
+  id: CorvaxRule6
+  name: guide-entry-corvax-rule6
+  priority: 15
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule6.xml"
+
+- type: guideEntry
+  id: CorvaxRule7
+  name: guide-entry-corvax-rule7
+  priority: 16
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule7.xml"
+
+- type: guideEntry
+  id: CorvaxRule8
+  name: guide-entry-corvax-rule8
+  priority: 17
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule8.xml"
+
+- type: guideEntry
+  id: CorvaxRule9
+  name: guide-entry-corvax-rule9
+  priority: 18
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule9.xml"
+
+- type: guideEntry
+  id: CorvaxRule10
+  name: guide-entry-corvax-rule10
+  priority: 19
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/CorvaxRules/Rule10.xml"
+
+- type: guideEntry
+  id: CorvaxPunishmentTypes
+  name: guide-entry-corvax-punishment-types
+  priority: 20
+  ruleEntry: true
+  text: "/ServerInfo/Corvax/Guidebook/ServerRules/PunishmentTypes.xml"

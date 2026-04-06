@@ -1,0 +1,13 @@
+- type: species
+  id: Vulpkanin
+  name: species-name-vulpkanin
+  roundStart: True
+  prototype: MobVulpkanin
+  defaultSkinTone:  "#eb943d" #Corvax-Vulp_Port "#5a3f2d"
+  dollPrototype: AppearanceVulpkanin
+  skinColoration: Hues #Corvax-Vulp_Port VulpkaninColors
+  maleFirstNames: NamesVulpFirstMale #Corvax-Vulp_Port names_vulpkanin_male
+  femaleFirstNames: NamesVulpFirstFemale #Corvax-Vulp_Port names_vulpkanin_female
+  maleLastNames: NamesVulpLast # Corvax-LastnameGender
+  femaleLastNames: NamesVulpLast # Corvax-LastnameGender
+  #lastNames: names_vulpkanin_last
