@@ -96,7 +96,8 @@ namespace Content.Client.Lobby.UI
             RandomizeEverythingButton.Disabled = locked;
             NameRandomize.Disabled = locked;
             ImportButton.Disabled = locked;
-            TabContainer.Disabled = locked;
+            TabContainer.SetOnlyStylePseudoClass(StylePseudoClass.Disabled, locked);
+            TabContainer.MouseFilter = locked ? MouseFilterMode.Stop : MouseFilterMode.Pass;
         }
         // HL2RP CHANGE END profile-lock-ui
 
