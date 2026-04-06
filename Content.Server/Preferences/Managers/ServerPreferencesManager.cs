@@ -285,7 +285,13 @@ namespace Content.Server.Preferences.Managers
                 [slot] = profile
             };
 
-            prefsData.Prefs = new PlayerPreferences(profiles, slot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
+            // HL2RP CHANGE START selected-character-safety
+            // Keep current selected slot when saving another character slot.
+            var selectedSlot = profiles.ContainsKey(curPrefs.SelectedCharacterIndex)
+                ? curPrefs.SelectedCharacterIndex
+                : slot;
+            prefsData.Prefs = new PlayerPreferences(profiles, selectedSlot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
+            // HL2RP CHANGE END selected-character-safety
 
             // HL2RP CHANGE START profile-lock
             prefsData.LockedSlots.Add(slot);

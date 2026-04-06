@@ -223,22 +223,16 @@ public sealed partial class HumanoidProfileEditor
                     var selectedJobPrio = (JobPriority)selectedPrio;
                     Profile = Profile?.WithJobPriority(job.ID, selectedJobPrio);
 
-                    foreach (var (jobId, other) in _jobPriorities)
+                    foreach (var (jobId, _) in _jobPriorities)
                     {
-                        // Sync other selectors with the same job in case of multiple department jobs
                         if (jobId == job.ID)
-                        {
-                            other.Select(selectedPrio);
-                            continue;
-                        }
-
-                        if (selectedJobPrio != JobPriority.High || (JobPriority)other.Selected != JobPriority.High)
                             continue;
 
                         // HL2RP CHANGE START single-role-job-preference
-                        // Disable any other high priorities.
-                        other.Select((int)JobPriority.Never);
-                        Profile = Profile?.WithJobPriority(jobId, JobPriority.Never);
+                        // Profile.WithJobPriority() already guarantees a single High choice.
+                        // Keep model and UI synced through UpdateJobPriorities() to avoid selector re-entrant events.
+                        if (selectedJobPrio == JobPriority.High)
+                            Profile = Profile?.WithJobPriority(jobId, JobPriority.Never);
                         // HL2RP CHANGE END single-role-job-preference
                     }
 

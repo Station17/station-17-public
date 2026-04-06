@@ -73,6 +73,33 @@ namespace Content.Client.Lobby.UI
             }
         }
 
+        // HL2RP CHANGE START profile-lock-ui
+        private bool IsProfileLocked()
+        {
+            if (Profile == null || CharacterSlot == null)
+                return false;
+
+            var prefs = _preferencesManager.Preferences;
+            return prefs != null && prefs.Characters.ContainsKey(CharacterSlot.Value);
+        }
+
+        private void UpdateProfileLockState()
+        {
+            var locked = IsProfileLocked();
+            ProfileLockNoticeLabel.Visible = locked;
+            ProfileLockNoticeLabel.SetMarkup(locked
+                ? "[color=gray]Этот персонаж уже сохранен и заблокирован: редактирование и смена роли отключены.[/color]"
+                : string.Empty);
+
+            NameEdit.Editable = !locked;
+            AgeEdit.Editable = !locked;
+            RandomizeEverythingButton.Disabled = locked;
+            NameRandomize.Disabled = locked;
+            ImportButton.Disabled = locked;
+            TabContainer.Disabled = locked;
+        }
+        // HL2RP CHANGE END profile-lock-ui
+
         private ISawmill _sawmill;
 
         private MarkingsViewModel _markingsModel = new();
@@ -381,6 +408,9 @@ namespace Content.Client.Lobby.UI
             UpdateSaveButton();
             UpdateMarkings();
             UpdateTTSVoicesControls(); // Corvax-TTS
+            // HL2RP CHANGE START profile-lock-ui
+            UpdateProfileLockState();
+            // HL2RP CHANGE END profile-lock-ui
 
             RefreshAntags();
             RefreshJobs();
@@ -428,8 +458,13 @@ namespace Content.Client.Lobby.UI
 
         private void UpdateSaveButton()
         {
-            SaveButton.Disabled = Profile is null || !IsDirty;
-            ResetButton.Disabled = Profile is null || !IsDirty;
+            // HL2RP CHANGE START profile-lock-ui
+            var locked = IsProfileLocked();
+            SaveButton.Disabled = Profile is null || !IsDirty || locked;
+            ResetButton.Disabled = Profile is null || !IsDirty || locked;
+            SaveButton.ToolTip = locked ? "Персонаж заблокирован после первого сохранения." : null;
+            ResetButton.ToolTip = locked ? "Персонаж заблокирован после первого сохранения." : null;
+            // HL2RP CHANGE END profile-lock-ui
         }
 
         private void SetPreviewRotation(Direction direction)

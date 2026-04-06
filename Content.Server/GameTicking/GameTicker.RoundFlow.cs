@@ -388,9 +388,21 @@ namespace Content.Server.GameTicking
 
                 readyPlayers.Add(session);
                 HumanoidCharacterProfile profile;
-                if (_prefsManager.TryGetCachedPreferences(userId, out var preferences))
+                if (_prefsManager.TryGetCachedPreferences(userId, out var preferences) &&
+                    preferences.Characters.Count > 0)
                 {
-                    profile = (HumanoidCharacterProfile)preferences.SelectedCharacter;
+                    // HL2RP CHANGE START selected-character-safety
+                    // Prefer the explicit selection, but don't fall back to random if the slot is stale.
+                    if (preferences.Characters.TryGetValue(preferences.SelectedCharacterIndex, out var selectedProfile) &&
+                        selectedProfile != null)
+                    {
+                        profile = selectedProfile;
+                    }
+                    else
+                    {
+                        profile = (HumanoidCharacterProfile)preferences.Characters.First().Value!;
+                    }
+                    // HL2RP CHANGE END selected-character-safety
                 }
                 else
                 {

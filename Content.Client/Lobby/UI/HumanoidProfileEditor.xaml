@@ -41,6 +41,10 @@
                             <Button Name="ExportButton" Text="{Loc 'humanoid-profile-editor-export-button'}"/>
                             <Button Name="ExportImageButton" Text="{Loc 'humanoid-profile-editor-export-image-button'}"/>
                             <Button Name="OpenImagesButton" Text="{Loc 'humanoid-profile-editor-open-image-button'}"/>
+                            <RichTextLabel Name="ProfileLockNoticeLabel"
+                                           Visible="False"
+                                           MaxWidth="260"
+                                           HorizontalExpand="True"/>
                         </BoxContainer>
                     </ui:HighlightedContainer>
                 </BoxContainer>
