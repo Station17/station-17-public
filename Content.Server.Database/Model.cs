@@ -341,6 +341,11 @@ namespace Content.Server.Database
         public string EyeColor { get; set; } = null!;
         public string SkinColor { get; set; } = null!;
         public int SpawnPriority { get; set; } = 0;
+        // HL2RP CHANGE START: profile lock/role + persisted inventory storage.
+        public string? CharacterRole { get; set; }
+        public bool CharacterLocked { get; set; }
+        [Column(TypeName = "jsonb")] public JsonDocument? PersistedInventory { get; set; }
+        // HL2RP CHANGE END: profile lock/role + persisted inventory storage.
         public List<Job> Jobs { get; } = new();
         public List<Antag> Antags { get; } = new();
         public List<Trait> Traits { get; } = new();

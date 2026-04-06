@@ -219,6 +219,11 @@ namespace Content.Server.Database
             profile.EyeColor = appearance.EyeColor.ToHex();
             profile.SkinColor = appearance.SkinColor.ToHex();
             profile.SpawnPriority = (int) humanoid.SpawnPriority;
+            // HL2RP CHANGE START: persist immutable character metadata + inventory snapshot.
+            profile.CharacterRole = humanoid.SelectedRole;
+            profile.CharacterLocked = humanoid.IsCharacterLocked;
+            profile.PersistedInventory = JsonSerializer.SerializeToDocument(humanoid.SavedInventory);
+            // HL2RP CHANGE END: persist immutable character metadata + inventory snapshot.
             profile.OrganMarkings = JsonSerializer.SerializeToDocument(dataNode.ToJsonNode());
 
             // support for downgrades - at some point this should be removed

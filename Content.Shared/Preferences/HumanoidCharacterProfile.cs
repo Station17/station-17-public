@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Content.Shared.CCVar;
 using Content.Shared.Corvax.TTS;
 using Content.Shared.GameTicking;
+using Content.Shared.HL2RP.CharacterPersistence;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Preferences.Loadouts;
@@ -128,6 +129,26 @@ namespace Content.Shared.Preferences
         public PreferenceUnavailableMode PreferenceUnavailable { get; private set; } =
             PreferenceUnavailableMode.SpawnAsOverflow;
 
+        // HL2RP CHANGE START: immutable character + persistence metadata.
+        /// <summary>
+        /// Chosen role for this character. Set on initial creation and then locked.
+        /// </summary>
+        [DataField]
+        public string? SelectedRole { get; private set; }
+
+        /// <summary>
+        /// Once locked, profile can no longer be edited by the player.
+        /// </summary>
+        [DataField]
+        public bool IsCharacterLocked { get; private set; }
+
+        /// <summary>
+        /// Persisted inventory snapshot restored for the next round.
+        /// </summary>
+        [DataField]
+        public CharacterInventorySnapshot SavedInventory { get; private set; } = new();
+        // HL2RP CHANGE END: immutable character + persistence metadata.
+
         public HumanoidCharacterProfile(
             string name,
             string flavortext,
@@ -142,7 +163,12 @@ namespace Content.Shared.Preferences
             PreferenceUnavailableMode preferenceUnavailable,
             HashSet<ProtoId<AntagPrototype>> antagPreferences,
             HashSet<ProtoId<TraitPrototype>> traitPreferences,
-            Dictionary<string, RoleLoadout> loadouts)
+            Dictionary<string, RoleLoadout> loadouts,
+            // HL2RP CHANGE START: constructor data for immutable characters + persistence.
+            string? selectedRole = null,
+            bool isCharacterLocked = false,
+            CharacterInventorySnapshot? savedInventory = null)
+            // HL2RP CHANGE END: constructor data for immutable characters + persistence.
         {
             Name = name;
             FlavorText = flavortext;
@@ -158,6 +184,11 @@ namespace Content.Shared.Preferences
             _antagPreferences = antagPreferences;
             _traitPreferences = traitPreferences;
             _loadouts = loadouts;
+            // HL2RP CHANGE START: constructor initialization for immutable/persisted fields.
+            SelectedRole = selectedRole;
+            IsCharacterLocked = isCharacterLocked;
+            SavedInventory = savedInventory ?? new CharacterInventorySnapshot();
+            // HL2RP CHANGE END: constructor initialization for immutable/persisted fields.
 
             var hasHighPrority = false;
             foreach (var (key, value) in _jobPriorities)
@@ -189,7 +220,12 @@ namespace Content.Shared.Preferences
                 other.PreferenceUnavailable,
                 new HashSet<ProtoId<AntagPrototype>>(other.AntagPreferences),
                 new HashSet<ProtoId<TraitPrototype>>(other.TraitPreferences),
-                new Dictionary<string, RoleLoadout>(other.Loadouts))
+                new Dictionary<string, RoleLoadout>(other.Loadouts),
+                // HL2RP CHANGE START: copy immutable/persisted fields.
+                other.SelectedRole,
+                other.IsCharacterLocked,
+                other.SavedInventory.Clone())
+                // HL2RP CHANGE END: copy immutable/persisted fields.
         {
         }
 
@@ -388,6 +424,23 @@ namespace Content.Shared.Preferences
         {
             return new(this) { PreferenceUnavailable = mode };
         }
+
+        // HL2RP CHANGE START: helper modifiers for immutable character flow.
+        public HumanoidCharacterProfile WithSelectedRole(string? roleId)
+        {
+            return new(this) { SelectedRole = roleId };
+        }
+
+        public HumanoidCharacterProfile WithSavedInventory(CharacterInventorySnapshot inventory)
+        {
+            return new(this) { SavedInventory = inventory };
+        }
+
+        public HumanoidCharacterProfile WithCharacterLock(bool locked = true)
+        {
+            return new(this) { IsCharacterLocked = locked };
+        }
+        // HL2RP CHANGE END: helper modifiers for immutable character flow.
 
         public HumanoidCharacterProfile WithAntagPreferences(IEnumerable<ProtoId<AntagPrototype>> antagPreferences)
         {

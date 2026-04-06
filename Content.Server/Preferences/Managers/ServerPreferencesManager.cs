@@ -8,6 +8,7 @@ using Content.Server.Database;
 using Content.Shared.Body;
 using Content.Shared.CCVar;
 using Content.Shared.Construction.Prototypes;
+using Content.Shared.HL2RP.CharacterPersistence;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Markings;
 using Content.Shared.Humanoid.Prototypes;
@@ -175,6 +176,12 @@ namespace Content.Server.Preferences.Managers
                 loadouts[role.RoleName] = loadout;
             }
 
+            // HL2RP CHANGE START: load persisted character inventory metadata.
+            var persistedInventory = profile.PersistedInventory is { } persisted
+                ? TryDeserialize<CharacterInventorySnapshot>(persisted) ?? new CharacterInventorySnapshot()
+                : new CharacterInventorySnapshot();
+            // HL2RP CHANGE END: load persisted character inventory metadata.
+
             return new HumanoidCharacterProfile(
                 profile.CharacterName,
                 profile.FlavorText,
@@ -194,7 +201,10 @@ namespace Content.Server.Preferences.Managers
                 (PreferenceUnavailableMode) profile.PreferenceUnavailable,
                 antags.ToHashSet(),
                 traits.ToHashSet(),
-                loadouts
+                loadouts,
+                profile.CharacterRole,
+                profile.CharacterLocked,
+                persistedInventory
             );
         }
 
@@ -241,7 +251,8 @@ namespace Content.Server.Preferences.Managers
                 await SetProfile(userId, message.Slot, message.Profile);
         }
 
-        public async Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile)
+        // HL2RP CHANGE START: enforce immutable profile after initial save.
+        public async Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile, bool bypassCharacterLock = false)
         {
             if (!_cachedPlayerPrefs.TryGetValue(userId, out var prefsData) || !prefsData.PrefsLoaded)
             {
@@ -255,12 +266,34 @@ namespace Content.Server.Preferences.Managers
             var curPrefs = prefsData.Prefs!;
             var session = _playerManager.GetSessionById(userId);
 
+            var hasExistingProfile = curPrefs.Characters.TryGetValue(slot, out var existingProfile);
+            if (!bypassCharacterLock && hasExistingProfile && existingProfile!.IsCharacterLocked)
+            {
+                _sawmill.Warning($"User {userId} attempted to edit locked character in slot {slot}.");
+                return;
+            }
+
             // Corvax-Sponsors-Start
             var sponsorPrototypes = _sponsors != null && _sponsors.TryGetServerPrototypes(session.UserId, out var prototypes)
                 ? prototypes.ToArray()
                 : [];
             profile.EnsureValid(session, _dependencies, sponsorPrototypes);
             // Corvax-Sponsors-End
+
+            if (!bypassCharacterLock && !profile.IsCharacterLocked)
+            {
+                if (profile.SelectedRole == null)
+                {
+                    var selectedRole = profile.JobPriorities
+                        .Where(x => x.Value == JobPriority.High)
+                        .Select(x => x.Key.Id)
+                        .FirstOrDefault()
+                        ?? profile.JobPriorities.Keys.Select(x => x.Id).FirstOrDefault();
+                    profile = profile.WithSelectedRole(selectedRole);
+                }
+
+                profile = profile.WithCharacterLock();
+            }
 
             var profiles = new Dictionary<int, HumanoidCharacterProfile>(curPrefs.Characters)
             {
@@ -272,6 +305,7 @@ namespace Content.Server.Preferences.Managers
             if (ShouldStorePrefs(session.Channel.AuthType))
                 await _db.SaveCharacterSlotAsync(userId, profile, slot);
         }
+        // HL2RP CHANGE END: enforce immutable profile after initial save.
 
         public async Task SetConstructionFavorites(NetUserId userId, List<ProtoId<ConstructionPrototype>> favorites)
         {

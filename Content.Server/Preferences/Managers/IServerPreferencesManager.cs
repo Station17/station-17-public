@@ -23,7 +23,9 @@ namespace Content.Server.Preferences.Managers
         IEnumerable<KeyValuePair<NetUserId, HumanoidCharacterProfile>> GetSelectedProfilesForPlayers(List<NetUserId> userIds);
         bool HavePreferencesLoaded(ICommonSession session);
 
-        Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile);
+        // HL2RP CHANGE START: allow internal systems to bypass character lock updates.
+        Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile, bool bypassCharacterLock = false);
+        // HL2RP CHANGE END: allow internal systems to bypass character lock updates.
         Task SetConstructionFavorites(NetUserId userId, List<ProtoId<ConstructionPrototype>> favorites);
     }
 }
