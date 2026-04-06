@@ -779,6 +779,44 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("ban_template", (string)null);
                 });
 
+            // HL2RP CHANGE START character-inventory-snapshot
+            modelBuilder.Entity("Content.Server.Database.CharacterInventorySnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Snapshot")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("snapshot");
+
+                    b.Property<int>("Slot")
+                        .HasColumnType("integer")
+                        .HasColumnName("slot");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK_character_inventory_snapshot");
+
+                    b.HasIndex("UserId", "Slot")
+                        .IsUnique()
+                        .HasDatabaseName("IX_character_inventory_snapshot_user_id_slot");
+
+                    b.ToTable("character_inventory_snapshot", (string)null);
+                });
+            // HL2RP CHANGE END character-inventory-snapshot
+
             modelBuilder.Entity("Content.Server.Database.Blacklist", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -1124,6 +1162,12 @@ namespace Content.Server.Database.Migrations.Postgres
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("species");
+
+                    // HL2RP CHANGE START profile-lock
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
+                    // HL2RP CHANGE END profile-lock
 
                     // Corvax-TTS-Start
                     b.Property<string>("Voice")

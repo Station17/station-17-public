@@ -10,43 +10,43 @@ namespace Content.Server.Database.Migrations.Sqlite
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "IsLocked",
-                table: "Profile",
+                name: "is_locked",
+                table: "profile",
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: false);
 
             migrationBuilder.CreateTable(
-                name: "CharacterInventorySnapshot",
+                name: "character_inventory_snapshot",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                    id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Slot = table.Column<int>(type: "INTEGER", nullable: false),
-                    Snapshot = table.Column<string>(type: "TEXT", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    user_id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    slot = table.Column<int>(type: "INTEGER", nullable: false),
+                    snapshot = table.Column<string>(type: "jsonb", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CharacterInventorySnapshot", x => x.Id);
+                    table.PrimaryKey("PK_character_inventory_snapshot", x => x.id);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CharacterInventorySnapshot_UserId_Slot",
-                table: "CharacterInventorySnapshot",
-                columns: new[] { "UserId", "Slot" },
+                name: "IX_character_inventory_snapshot_user_id_slot",
+                table: "character_inventory_snapshot",
+                columns: new[] { "user_id", "slot" },
                 unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CharacterInventorySnapshot");
+                name: "character_inventory_snapshot");
 
             migrationBuilder.DropColumn(
-                name: "IsLocked",
-                table: "Profile");
+                name: "is_locked",
+                table: "profile");
         }
     }
 }
