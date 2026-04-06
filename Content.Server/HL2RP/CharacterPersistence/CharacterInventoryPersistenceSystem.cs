@@ -76,7 +76,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
     private EntityUid? SpawnSavedEntry(SavedInventoryEntry entry)
     {
         var spawned = Spawn(entry.Prototype);
-        if (!TryComp<MetaDataComponent>(spawned, out var meta) || meta.EntityPrototype == null)
+        if (MetaData(spawned).EntityPrototype == null)
         {
             Del(spawned);
             return null;
@@ -139,7 +139,8 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         if (HasComp<UnSaveableComponent>(item))
             return null;
 
-        if (!TryComp<MetaDataComponent>(item, out var meta) || meta.EntityPrototype == null)
+        var meta = MetaData(item);
+        if (meta.EntityPrototype == null)
             return null;
 
         var entry = new SavedInventoryEntry
