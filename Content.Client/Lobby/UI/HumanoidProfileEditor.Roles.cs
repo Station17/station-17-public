@@ -209,7 +209,10 @@ public sealed partial class HumanoidProfileEditor
                 icon.Texture = _sprite.Frame0(jobIcon.Icon);
                 selector.Setup(items, job.LocalizedName, 200, job.LocalizedDescription, icon, job.Guides);
 
-                if (!_requirements.IsAllowed(job, (HumanoidCharacterProfile?)_preferencesManager.Preferences?.SelectedCharacter, out var reason))
+                // HL2RP CHANGE START single-role-job-preference
+                // Validate role requirements against the profile currently being edited.
+                if (!_requirements.IsAllowed(job, Profile, out var reason))
+                // HL2RP CHANGE END single-role-job-preference
                 {
                     selector.LockRequirements(reason);
                 }

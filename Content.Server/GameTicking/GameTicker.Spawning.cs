@@ -184,7 +184,11 @@ namespace Content.Server.GameTicking
             }
 
             string speciesId;
-            if (_randomizeCharacters)
+            // HL2RP CHANGE START selected-character-safety
+            // Do not overwrite an explicitly selected character profile with a random one.
+            // Random character fallback should only apply when preferences are unavailable.
+            if (_randomizeCharacters && !_prefsManager.TryGetCachedPreferences(player.UserId, out _))
+            // HL2RP CHANGE END selected-character-safety
             {
                 var weightId = _cfg.GetCVar(CCVars.ICRandomSpeciesWeights);
 
