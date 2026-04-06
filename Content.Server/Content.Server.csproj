@@ -11,6 +11,10 @@
   <Import Project="../MSBuild/Content.props" />
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="NetCord" />
     <PackageReference Include="prometheus-net" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" />

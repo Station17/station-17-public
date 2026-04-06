@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Content.Server.Database.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteServerDbContext))]
-    [Migration("20260120200455_BanRefactor")]
-    partial class BanRefactor
+    [Migration("20260406172928_FixDatabaseFinal")]
+    partial class FixDatabaseFinal
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -749,6 +749,39 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("blacklist", (string)null);
                 });
 
+            modelBuilder.Entity("Content.Server.Database.CharacterInventorySnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("character_inventory_snapshot_id");
+
+                    b.Property<int>("Slot")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("slot");
+
+                    b.Property<string>("Snapshot")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("snapshot");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK_character_inventory_snapshot");
+
+                    b.HasIndex("UserId", "Slot")
+                        .IsUnique();
+
+                    b.ToTable("character_inventory_snapshot", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.ConnectionLog", b =>
                 {
                     b.Property<int>("Id")
@@ -1026,9 +1059,17 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("hair_name");
 
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_locked");
+
                     b.Property<byte[]>("Markings")
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
+
+                    b.Property<byte[]>("OrganMarkings")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("organ_markings");
 
                     b.Property<int>("PreferenceId")
                         .HasColumnType("INTEGER")
@@ -1060,6 +1101,11 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("species");
+
+                    b.Property<string>("Voice")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("voice");
 
                     b.HasKey("Id")
                         .HasName("PK_profile");

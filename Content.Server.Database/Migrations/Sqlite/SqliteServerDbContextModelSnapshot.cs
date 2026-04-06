@@ -733,22 +733,34 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.ToTable("ban_template", (string)null);
                 });
 
-            // HL2RP CHANGE START character-inventory-snapshot
+            modelBuilder.Entity("Content.Server.Database.Blacklist", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("UserId")
+                        .HasName("PK_blacklist");
+
+                    b.ToTable("blacklist", (string)null);
+                });
+
             modelBuilder.Entity("Content.Server.Database.CharacterInventorySnapshot", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id");
+                        .HasColumnName("character_inventory_snapshot_id");
+
+                    b.Property<int>("Slot")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("slot");
 
                     b.Property<string>("Snapshot")
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("snapshot");
-
-                    b.Property<int>("Slot")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("slot");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT")
@@ -762,24 +774,9 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasName("PK_character_inventory_snapshot");
 
                     b.HasIndex("UserId", "Slot")
-                        .IsUnique()
-                        .HasDatabaseName("IX_character_inventory_snapshot_user_id_slot");
+                        .IsUnique();
 
                     b.ToTable("character_inventory_snapshot", (string)null);
-                });
-            // HL2RP CHANGE END character-inventory-snapshot
-
-            modelBuilder.Entity("Content.Server.Database.Blacklist", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("UserId")
-                        .HasName("PK_blacklist");
-
-                    b.ToTable("blacklist", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.ConnectionLog", b =>
@@ -1059,6 +1056,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("hair_name");
 
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("is_locked");
+
                     b.Property<byte[]>("Markings")
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
@@ -1098,18 +1099,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("species");
 
-                    // HL2RP CHANGE START profile-lock
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("is_locked");
-                    // HL2RP CHANGE END profile-lock
-
-                    // Corvax-TTS-Start
                     b.Property<string>("Voice")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("voice");
-                    // Corvax-TTS-End
 
                     b.HasKey("Id")
                         .HasName("PK_profile");
