@@ -988,6 +988,14 @@ namespace Content.Server.Database.Migrations.Sqlite
                         .HasColumnType("TEXT")
                         .HasColumnName("char_name");
 
+                    b.Property<bool>("CharacterLocked")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("character_locked");
+
+                    b.Property<string>("CharacterRole")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("character_role");
+
                     b.Property<string>("EyeColor")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -1038,6 +1046,10 @@ namespace Content.Server.Database.Migrations.Sqlite
                     b.Property<int>("PreferenceUnavailable")
                         .HasColumnType("INTEGER")
                         .HasColumnName("pref_unavailable");
+
+                    b.Property<string>("PersistedInventory")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("persisted_inventory");
 
                     b.Property<string>("Sex")
                         .IsRequired()

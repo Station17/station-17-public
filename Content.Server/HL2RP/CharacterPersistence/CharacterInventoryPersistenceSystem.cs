@@ -7,6 +7,7 @@ using Content.Shared.HL2RP.CharacterPersistence;
 using Content.Shared.Inventory;
 using Content.Shared.Stacks;
 using Content.Shared.Storage;
+using Content.Shared.Storage.EntitySystems;
 using Robust.Server.Player;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Player;
@@ -16,11 +17,11 @@ namespace Content.Server.HL2RP.CharacterPersistence;
 // HL2RP CHANGE START: persistent character inventory behavior.
 public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 {
-    [Dependency] private readonly IInventorySystem _inventory = default!;
+    [Dependency] private readonly InventorySystem _inventory = default!;
     [Dependency] private readonly SharedStorageSystem _storage = default!;
     [Dependency] private readonly SharedStackSystem _stack = default!;
     [Dependency] private readonly MindSystem _mind = default!;
-    [Dependency] private readonly IServerPlayerManager _player = default!;
+    [Dependency] private readonly IPlayerManager _player = default!;
     [Dependency] private readonly IServerPreferencesManager _prefs = default!;
 
     public override void Initialize()
@@ -56,6 +57,11 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
         foreach (var (slotName, saved) in profile.SavedInventory.EquippedSlots)
         {
+            // HL2RP CHANGE START: overwrite spawn-loadout slot contents with persisted item.
+            if (_inventory.TryGetSlotEntity(ev.Mob, slotName, out var existing))
+                Del(existing.Value);
+            // HL2RP CHANGE END: overwrite spawn-loadout slot contents with persisted item.
+
             var item = SpawnSavedEntry(saved);
             if (item == null)
                 continue;
