@@ -122,6 +122,10 @@ namespace Content.Server.Database
                 prefs.Profiles.Add(newProfile);
             }
 
+            // HL2RP CHANGE START profile-lock
+            newProfile.IsLocked = true;
+            // HL2RP CHANGE END profile-lock
+
             await db.DbContext.SaveChangesAsync();
         }
 
@@ -196,6 +200,51 @@ namespace Content.Server.Database
 
             await db.DbContext.SaveChangesAsync();
         }
+
+        // HL2RP CHANGE START character-inventory-snapshot
+        public async Task SaveCharacterInventorySnapshotAsync(NetUserId userId, int slot, JsonDocument snapshot)
+        {
+            await using var db = await GetDb();
+            var existing = await db.DbContext.CharacterInventorySnapshot
+                .SingleOrDefaultAsync(x => x.UserId == userId.UserId && x.Slot == slot);
+
+            if (existing == null)
+            {
+                existing = new CharacterInventorySnapshot
+                {
+                    UserId = userId.UserId,
+                    Slot = slot,
+                    Snapshot = snapshot,
+                    UpdatedAt = DateTime.UtcNow,
+                };
+                db.DbContext.CharacterInventorySnapshot.Add(existing);
+            }
+            else
+            {
+                existing.Snapshot = snapshot;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await db.DbContext.SaveChangesAsync();
+        }
+
+        public async Task<JsonDocument?> GetCharacterInventorySnapshotAsync(NetUserId userId, int slot)
+        {
+            await using var db = await GetDb();
+            return await db.DbContext.CharacterInventorySnapshot
+                .Where(x => x.UserId == userId.UserId && x.Slot == slot)
+                .Select(x => x.Snapshot)
+                .SingleOrDefaultAsync();
+        }
+
+        public async Task DeleteCharacterInventorySnapshotAsync(NetUserId userId, int slot)
+        {
+            await using var db = await GetDb();
+            await db.DbContext.CharacterInventorySnapshot
+                .Where(x => x.UserId == userId.UserId && x.Slot == slot)
+                .ExecuteDeleteAsync();
+        }
+        // HL2RP CHANGE END character-inventory-snapshot
 
         private static async Task SetSelectedCharacterSlotAsync(NetUserId userId, int newSlot, ServerDbContext db)
         {

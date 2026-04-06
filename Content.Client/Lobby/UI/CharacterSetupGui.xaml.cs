@@ -32,6 +32,9 @@ namespace Content.Client.Lobby.UI
 
         public event Action<int>? SelectCharacter;
         public event Action<int>? DeleteCharacter;
+        // HL2RP CHANGE START create-character-flow
+        public event Action? CreateCharacterRequested;
+        // HL2RP CHANGE END create-character-flow
 
         public CharacterSetupGui(HumanoidProfileEditor profileEditor)
         {
@@ -55,8 +58,9 @@ namespace Content.Client.Lobby.UI
 
             _createNewCharacterButton.OnPressed += args =>
             {
-                _preferencesManager.CreateCharacter(HumanoidCharacterProfile.Random());
-                ReloadCharacterPickers();
+                // HL2RP CHANGE START create-character-flow
+                CreateCharacterRequested?.Invoke();
+                // HL2RP CHANGE END create-character-flow
                 args.Event.Handle();
             };
 

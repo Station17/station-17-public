@@ -1,3 +1,4 @@
+using System.Linq;
 using Content.Client.Guidebook;
 using Content.Client.Corvax.TTS;
 using Content.Client.Humanoid;
@@ -5,6 +6,7 @@ using Content.Client.Inventory;
 using Content.Client.Lobby.UI;
 using Content.Client.Players.PlayTimeTracking;
 using Content.Shared.CCVar;
+using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Markings;
 using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Preferences;
@@ -192,19 +194,48 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
 
     private void SaveProfile()
     {
-        DebugTools.Assert(EditedProfile != null);
-
-        if (EditedProfile == null || EditedSlot == null)
+        var editedProfile = EditedProfile;
+        var editedSlot = EditedSlot;
+        if (editedProfile == null || editedSlot == null)
             return;
 
         var selected = _preferencesManager.Preferences?.SelectedCharacterIndex;
+        var preferences = _preferencesManager.Preferences;
 
-        if (selected == null)
+        if (selected == null || preferences == null)
             return;
 
-        _preferencesManager.UpdateCharacter(EditedProfile, EditedSlot.Value);
+        // HL2RP CHANGE START profile-lock
+        if (preferences.Characters.ContainsKey(editedSlot.Value))
+            return;
+        // HL2RP CHANGE END profile-lock
+
+        _preferencesManager.UpdateCharacter(editedProfile, editedSlot.Value);
         ReloadCharacterSetup();
     }
+
+    // HL2RP CHANGE START create-character-flow
+    private void BeginCreateCharacter()
+    {
+        if (_profileEditor == null || _characterSetup == null || !_preferencesManager.ServerDataLoaded || _preferencesManager.Preferences == null)
+            return;
+
+        var preferences = _preferencesManager.Preferences;
+        var settings = _preferencesManager.Settings;
+        if (preferences == null || settings == null)
+            return;
+
+        var characters = preferences.Characters;
+        var lowest = Enumerable.Range(0, settings.MaxCharacterSlots)
+            .Except(characters.Keys)
+            .FirstOrNull();
+
+        if (lowest == null)
+            return;
+
+        _profileEditor.SetProfile(HumanoidCharacterProfile.Random(), lowest.Value);
+    }
+    // HL2RP CHANGE END create-character-flow
 
     private void CloseProfileEditor()
     {
@@ -308,6 +339,10 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
                 _characterSetup?.ReloadCharacterPickers();
             }
         };
+
+        // HL2RP CHANGE START create-character-flow
+        _characterSetup.CreateCharacterRequested += BeginCreateCharacter;
+        // HL2RP CHANGE END create-character-flow
 
         if (_stateManager.CurrentState is LobbyState lobby)
         {

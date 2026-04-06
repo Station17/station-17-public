@@ -132,9 +132,9 @@ public sealed partial class HumanoidProfileEditor
         var items = new[]
         {
                 ("humanoid-profile-editor-job-priority-never-button", (int) JobPriority.Never),
-                ("humanoid-profile-editor-job-priority-low-button", (int) JobPriority.Low),
-                ("humanoid-profile-editor-job-priority-medium-button", (int) JobPriority.Medium),
+                // HL2RP CHANGE START single-role-job-preference
                 ("humanoid-profile-editor-job-priority-high-button", (int) JobPriority.High),
+                // HL2RP CHANGE END single-role-job-preference
             };
 
         foreach (var department in departments)
@@ -235,9 +235,11 @@ public sealed partial class HumanoidProfileEditor
                         if (selectedJobPrio != JobPriority.High || (JobPriority)other.Selected != JobPriority.High)
                             continue;
 
-                        // Lower any other high priorities to medium.
-                        other.Select((int)JobPriority.Medium);
-                        Profile = Profile?.WithJobPriority(jobId, JobPriority.Medium);
+                        // HL2RP CHANGE START single-role-job-preference
+                        // Disable any other high priorities.
+                        other.Select((int)JobPriority.Never);
+                        Profile = Profile?.WithJobPriority(jobId, JobPriority.Never);
+                        // HL2RP CHANGE END single-role-job-preference
                     }
 
                     // TODO: Only reload on high change (either to or from).

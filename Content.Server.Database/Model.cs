@@ -20,6 +20,7 @@ namespace Content.Server.Database
 
         public DbSet<Preference> Preference { get; set; } = null!;
         public DbSet<Profile> Profile { get; set; } = null!;
+        public DbSet<CharacterInventorySnapshot> CharacterInventorySnapshot { get; set; } = null!;
         public DbSet<AssignedUserId> AssignedUserId { get; set; } = null!;
         public DbSet<Player> Player { get; set; } = default!;
         public DbSet<Admin> Admin { get; set; } = null!;
@@ -59,6 +60,12 @@ namespace Content.Server.Database
             modelBuilder.Entity<Profile>()
                 .HasIndex(p => new {p.Slot, PrefsId = p.PreferenceId})
                 .IsUnique();
+
+            // HL2RP CHANGE START character-inventory-snapshot
+            modelBuilder.Entity<CharacterInventorySnapshot>()
+                .HasIndex(s => new { s.UserId, s.Slot })
+                .IsUnique();
+            // HL2RP CHANGE END character-inventory-snapshot
 
             modelBuilder.Entity<Antag>()
                 .HasIndex(p => new {HumanoidProfileId = p.ProfileId, p.AntagName})
@@ -351,7 +358,21 @@ namespace Content.Server.Database
 
         public int PreferenceId { get; set; }
         public Preference Preference { get; set; } = null!;
+        // HL2RP CHANGE START profile-lock
+        public bool IsLocked { get; set; }
+        // HL2RP CHANGE END profile-lock
     }
+
+    // HL2RP CHANGE START character-inventory-snapshot
+    public class CharacterInventorySnapshot
+    {
+        public int Id { get; set; }
+        public Guid UserId { get; set; }
+        public int Slot { get; set; }
+        [Column(TypeName = "jsonb")] public JsonDocument Snapshot { get; set; } = null!;
+        public DateTime UpdatedAt { get; set; }
+    }
+    // HL2RP CHANGE END character-inventory-snapshot
 
     public class Job
     {

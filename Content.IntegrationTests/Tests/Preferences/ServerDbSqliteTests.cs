@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
 using Content.Server.Database;
 using Content.Server.Preferences.Managers;
@@ -145,6 +146,50 @@ namespace Content.IntegrationTests.Tests.Preferences
             await db.SaveCharacterSlotAsync(username, null, 1);
             var prefs = await db.GetPlayerPreferencesAsync(username);
             Assert.That(prefs!.Profiles, Has.Count.EqualTo(1));
+            await pair.CleanReturnAsync();
+        }
+
+        [Test]
+        public async Task TestProfileGetsLockedAfterSave()
+        {
+            var pair = await PoolManager.GetServerClient();
+            var db = GetDb(pair.Server);
+            var username = new NetUserId(new Guid("640bd619-fc8d-4fe2-bf3c-4a5fb17d6dde"));
+
+            await db.InitPrefsAsync(username, new HumanoidCharacterProfile());
+            await db.SaveCharacterSlotAsync(username, CharlieCharlieson(), 1);
+
+            var prefs = await db.GetPlayerPreferencesAsync(username);
+            var profile = prefs!.Profiles.Find(p => p.Slot == 1);
+            Assert.That(profile, Is.Not.Null);
+            Assert.That(profile!.IsLocked, Is.True);
+
+            await pair.CleanReturnAsync();
+        }
+
+        [Test]
+        public async Task TestCharacterInventorySnapshotSaveLoadDelete()
+        {
+            var pair = await PoolManager.GetServerClient();
+            var db = GetDb(pair.Server);
+            var username = new NetUserId(new Guid("640bd619-fc8d-4fe2-bf3c-4a5fb17d6ddf"));
+
+            await db.InitPrefsAsync(username, new HumanoidCharacterProfile());
+
+            using var snapshot = JsonSerializer.SerializeToDocument(new Dictionary<string, string>
+            {
+                ["test"] = "value"
+            });
+            await db.SaveCharacterInventorySnapshotAsync(username, 0, snapshot);
+
+            var loaded = await db.GetCharacterInventorySnapshotAsync(username, 0);
+            Assert.That(loaded, Is.Not.Null);
+            Assert.That(loaded!.RootElement.GetProperty("test").GetString(), Is.EqualTo("value"));
+
+            await db.DeleteCharacterInventorySnapshotAsync(username, 0);
+            var deleted = await db.GetCharacterInventorySnapshotAsync(username, 0);
+            Assert.That(deleted, Is.Null);
+
             await pair.CleanReturnAsync();
         }
 

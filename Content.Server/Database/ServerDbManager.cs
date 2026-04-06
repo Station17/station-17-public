@@ -53,6 +53,11 @@ namespace Content.Server.Database
         // Single method for two operations for transaction.
         Task DeleteSlotAndSetSelectedIndex(NetUserId userId, int deleteSlot, int newSlot);
         Task<Preference?> GetPlayerPreferencesAsync(NetUserId userId, CancellationToken cancel);
+        // HL2RP CHANGE START character-inventory-snapshot
+        Task SaveCharacterInventorySnapshotAsync(NetUserId userId, int slot, JsonDocument snapshot);
+        Task<JsonDocument?> GetCharacterInventorySnapshotAsync(NetUserId userId, int slot);
+        Task DeleteCharacterInventorySnapshotAsync(NetUserId userId, int slot);
+        // HL2RP CHANGE END character-inventory-snapshot
         #endregion
 
         #region User Ids
@@ -476,6 +481,26 @@ namespace Content.Server.Database
             DbReadOpsMetric.Inc();
             return RunDbCommand(() => _db.GetPlayerPreferencesAsync(userId, cancel));
         }
+
+        // HL2RP CHANGE START character-inventory-snapshot
+        public Task SaveCharacterInventorySnapshotAsync(NetUserId userId, int slot, JsonDocument snapshot)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.SaveCharacterInventorySnapshotAsync(userId, slot, snapshot));
+        }
+
+        public Task<JsonDocument?> GetCharacterInventorySnapshotAsync(NetUserId userId, int slot)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetCharacterInventorySnapshotAsync(userId, slot));
+        }
+
+        public Task DeleteCharacterInventorySnapshotAsync(NetUserId userId, int slot)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.DeleteCharacterInventorySnapshotAsync(userId, slot));
+        }
+        // HL2RP CHANGE END character-inventory-snapshot
 
         public Task AssignUserIdAsync(string name, NetUserId userId)
         {

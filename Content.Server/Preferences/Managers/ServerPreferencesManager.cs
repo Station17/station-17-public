@@ -91,6 +91,16 @@ namespace Content.Server.Preferences.Managers
             return new PlayerPreferences(profiles, prefs.SelectedCharacterSlot, Color.FromHex(prefs.AdminOOCColor), constructionFavorites);
         }
 
+        // HL2RP CHANGE START profile-lock
+        internal HashSet<int> GetLockedSlots(Preference prefs)
+        {
+            return prefs.Profiles
+                .Where(p => p.IsLocked)
+                .Select(p => p.Slot)
+                .ToHashSet();
+        }
+        // HL2RP CHANGE END profile-lock
+
         internal HumanoidCharacterProfile ConvertProfiles(Profile profile)
         {
 
@@ -255,6 +265,14 @@ namespace Content.Server.Preferences.Managers
             var curPrefs = prefsData.Prefs!;
             var session = _playerManager.GetSessionById(userId);
 
+            // HL2RP CHANGE START profile-lock
+            if (prefsData.LockedSlots.Contains(slot))
+            {
+                _sawmill.Warning($"User {userId} attempted to edit locked character slot {slot}.");
+                return;
+            }
+            // HL2RP CHANGE END profile-lock
+
             // Corvax-Sponsors-Start
             var sponsorPrototypes = _sponsors != null && _sponsors.TryGetServerPrototypes(session.UserId, out var prototypes)
                 ? prototypes.ToArray()
@@ -268,6 +286,10 @@ namespace Content.Server.Preferences.Managers
             };
 
             prefsData.Prefs = new PlayerPreferences(profiles, slot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
+
+            // HL2RP CHANGE START profile-lock
+            prefsData.LockedSlots.Add(slot);
+            // HL2RP CHANGE END profile-lock
 
             if (ShouldStorePrefs(session.Channel.AuthType))
                 await _db.SaveCharacterSlotAsync(userId, profile, slot);
@@ -326,6 +348,10 @@ namespace Content.Server.Preferences.Managers
             var arr = new Dictionary<int, HumanoidCharacterProfile>(curPrefs.Characters);
             arr.Remove(slot);
 
+            // HL2RP CHANGE START profile-lock
+            prefsData.LockedSlots.Remove(slot);
+            // HL2RP CHANGE END profile-lock
+
             prefsData.Prefs = new PlayerPreferences(arr, nextSlot ?? curPrefs.SelectedCharacterIndex, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
 
             if (ShouldStorePrefs(message.MsgChannel.AuthType))
@@ -338,6 +364,10 @@ namespace Content.Server.Preferences.Managers
                 {
                     await _db.SaveCharacterSlotAsync(userId, null, slot);
                 }
+
+                // HL2RP CHANGE START character-inventory-snapshot
+                await _db.DeleteCharacterInventorySnapshotAsync(userId, slot);
+                // HL2RP CHANGE END character-inventory-snapshot
             }
         }
 
@@ -403,6 +433,9 @@ namespace Content.Server.Preferences.Managers
                 {
                     var prefs = await GetOrCreatePreferencesAsync(session.UserId, cancel);
                     prefsData.Prefs = ConvertPreferences(prefs);
+                    // HL2RP CHANGE START profile-lock
+                    prefsData.LockedSlots = GetLockedSlots(prefs);
+                    // HL2RP CHANGE END profile-lock
                 }
             }
         }
@@ -546,6 +579,9 @@ namespace Content.Server.Preferences.Managers
         {
             public bool PrefsLoaded;
             public PlayerPreferences? Prefs;
+            // HL2RP CHANGE START profile-lock
+            public HashSet<int> LockedSlots = new();
+            // HL2RP CHANGE END profile-lock
         }
 
         void IPostInjectInit.PostInject()
