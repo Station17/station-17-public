@@ -43,7 +43,7 @@
     ```bash
     git submodule update --init --recursive
     ```
-    3.  **Скомпилируйте проект:**
+3.  **Скомпилируйте проект:**
     ```bash
     dotnet build
     ```
