@@ -510,7 +510,7 @@ namespace Content.Server.Preferences.Managers
             _netManager.ServerSendMessage(msg, session.Channel);
         }
 
-        private static bool TryBuildPreviewFromSnapshot(JsonDocument snapshot, [NotNullWhen(true)] out CharacterInventoryPreviewData? preview)
+        private static bool TryBuildPreviewFromSnapshot(JsonDocument snapshot, out CharacterInventoryPreviewData? preview)
         {
             preview = null;
 
