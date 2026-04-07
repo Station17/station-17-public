@@ -61,11 +61,13 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
     private async void OnRoundEnded(RoundEndedEvent ev)
     {
+        // Save is intentionally spread over multiple ticks to avoid hard frame stalls at round end.
         foreach (var (userId, mob) in _spawnedMobs)
         {
             if (!Exists(mob))
                 continue;
 
+            await Task.Yield();
             await SaveSnapshot(userId, mob);
         }
     }

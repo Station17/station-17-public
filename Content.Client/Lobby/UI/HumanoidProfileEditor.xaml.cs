@@ -509,6 +509,13 @@ namespace Content.Client.Lobby.UI
 
         private void SetDirty()
         {
+            // Locked profiles are immutable in HL2RP flow: never prompt to save.
+            if (IsProfileLocked())
+            {
+                IsDirty = false;
+                return;
+            }
+
             // If it equals default then reset the button.
             if (Profile == null || _preferencesManager.Preferences?.SelectedCharacter.MemberwiseEquals(Profile) == true)
             {
