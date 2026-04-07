@@ -15,6 +15,7 @@ namespace Content.Client.Lobby
         GameSettings? Settings { get; }
         PlayerPreferences? Preferences { get; }
         CharacterInventoryPreviewData? SelectedCharacterInventoryPreview { get; }
+        CharacterInventoryPreviewData? GetCharacterInventoryPreview(int slot);
         void Initialize();
         void SelectCharacter(HumanoidCharacterProfile profile);
         void SelectCharacter(int slot);

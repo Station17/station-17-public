@@ -540,7 +540,11 @@ namespace Content.Client.Lobby.UI
             if (Profile == null)
                 return;
 
-            SpriteView.LoadPreview(Profile, JobOverride, ShowClothes.Pressed);
+            CharacterInventoryPreviewData? preview = null;
+            if (CharacterSlot is { } slot)
+                preview = _preferencesManager.GetCharacterInventoryPreview(slot);
+
+            SpriteView.LoadPreview(Profile, JobOverride, ShowClothes.Pressed, preview);
 
             // Check and set the dirty flag to enable the save/reset buttons as appropriate.
             SetDirty();

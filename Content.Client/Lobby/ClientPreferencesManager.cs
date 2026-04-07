@@ -35,6 +35,9 @@ namespace Content.Client.Lobby
                 ? preview
                 : null;
 
+        public CharacterInventoryPreviewData? GetCharacterInventoryPreview(int slot)
+            => _characterInventoryPreviews.GetValueOrDefault(slot);
+
         public void Initialize()
         {
             IoCManager.Instance!.TryResolveType(out _sponsorsManager); // Corvax-Sponsors
