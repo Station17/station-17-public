@@ -1,6 +1,6 @@
 using Robust.Shared.Serialization;
 
-namespace Content.Shared.Preferences;
+namespace Content.Shared.HL2RP.CharacterPersistence;
 
 [Serializable, NetSerializable]
 public sealed class CharacterInventoryPreviewData

@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Corvax.Interfaces.Shared;
 using Content.Shared.Construction.Prototypes;
+using Content.Shared.HL2RP.CharacterPersistence;
 using Content.Shared.Preferences;
 using Robust.Client;
 using Robust.Client.Player;

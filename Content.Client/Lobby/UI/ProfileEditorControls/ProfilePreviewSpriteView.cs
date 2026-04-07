@@ -1,4 +1,5 @@
 using Content.Shared.Preferences;
+using Content.Shared.HL2RP.CharacterPersistence;
 using Content.Shared.Roles;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Player;

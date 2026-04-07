@@ -3,7 +3,7 @@ using Lidgren.Network;
 using Robust.Shared.Network;
 using Robust.Shared.Serialization;
 
-namespace Content.Shared.Preferences;
+namespace Content.Shared.HL2RP.CharacterPersistence;
 
 /// <summary>
 /// Server -> client: minimal snapshot data for character preview rendering.

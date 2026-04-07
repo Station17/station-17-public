@@ -8,6 +8,7 @@ using Content.Shared.Hands.Components;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Hands.EntitySystems;
+using Content.Shared.HL2RP.CharacterPersistence;
 using Content.Shared.Inventory;
 using Content.Shared.Preferences;
 using Content.Shared.Preferences.Loadouts;

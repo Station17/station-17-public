@@ -1,0 +1,10 @@
+---
+description: Place new files under HL2RP and use design doc for unclear tasks
+alwaysApply: true
+---
+
+# HL2RP File Placement And Task Clarification
+
+- Create all new files only inside the `HL2RP` directory tree.
+- Do not add new files outside `HL2RP` unless the user explicitly requests an exception.
+- If a task is unclear, consult `Station-17-HL2RP.md` and use it as guidance before implementation.
