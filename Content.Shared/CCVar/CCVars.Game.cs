@@ -33,7 +33,7 @@ public sealed partial class CCVars
     ///     If enabled, late join is restricted to the character's selected (High) role only.
     /// </summary>
     public static readonly CVarDef<bool>
-        GameLateJoinRestrictToSelectedRole = CVarDef.Create("game.latejoin_restrict_selected_role", false, CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);
+        GameLateJoinRestrictToSelectedRole = CVarDef.Create("game.latejoin_restrict_selected_role", true, CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);
 
     /// <summary>
     ///     Controls the default game preset.

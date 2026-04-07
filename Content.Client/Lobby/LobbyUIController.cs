@@ -58,6 +58,7 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         base.Initialize();
         _prototypeManager.PrototypesReloaded += OnProtoReload;
         _preferencesManager.OnServerDataLoaded += PreferencesDataLoaded;
+        _preferencesManager.OnCharacterInventoryPreviewUpdated += OnCharacterInventoryPreviewUpdated;
         _requirements.Updated += OnRequirementsUpdated;
 
         _configurationManager.OnValueChanged(CCVars.FlavorText, args =>
@@ -134,6 +135,14 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         ReloadCharacterSetup();
     }
 
+    private void OnCharacterInventoryPreviewUpdated(int slot, CharacterInventoryPreviewData? _)
+    {
+        if (_preferencesManager.Preferences?.SelectedCharacterIndex != slot)
+            return;
+
+        RefreshLobbyPreview();
+    }
+
     public void OnStateEntered(LobbyState state)
     {
         PreviewPanel?.SetLoaded(_preferencesManager.ServerDataLoaded);
@@ -181,7 +190,7 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
             return;
         }
 
-        PreviewPanel.ProfilePreviewSpriteView.LoadPreview(humanoid);
+        PreviewPanel.ProfilePreviewSpriteView.LoadPreview(humanoid, inventoryPreview: _preferencesManager.SelectedCharacterInventoryPreview);
         PreviewPanel.SetSummaryText(humanoid.Summary);
     }
 
@@ -233,7 +242,9 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         if (lowest == null)
             return;
 
-        _profileEditor.SetProfile(HumanoidCharacterProfile.Random(), lowest.Value);
+        var profile = HumanoidCharacterProfile.Random()
+            .WithJobPriority("Civilian", JobPriority.High);
+        _profileEditor.SetProfile(profile, lowest.Value);
     }
     // HL2RP CHANGE END create-character-flow
 

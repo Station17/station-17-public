@@ -4,8 +4,10 @@ using Content.Client.Station;
 using Content.Shared.Body;
 using Content.Shared.Clothing;
 using Content.Shared.GameTicking;
+using Content.Shared.Hands.Components;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Prototypes;
+using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Inventory;
 using Content.Shared.Preferences;
 using Content.Shared.Preferences.Loadouts;
@@ -33,7 +35,11 @@ public sealed partial class ProfilePreviewSpriteView
     /// <summary>
     /// Loads the profile onto a dummy entity.
     /// </summary>
-    private void LoadHumanoidEntity(HumanoidCharacterProfile? humanoid, JobPrototype? job, bool jobClothes)
+    private void LoadHumanoidEntity(
+        HumanoidCharacterProfile? humanoid,
+        JobPrototype? job,
+        bool jobClothes,
+        CharacterInventoryPreviewData? inventoryPreview = null)
     {
         EntProtoId? previewEntity = null;
         if (humanoid != null && jobClothes)
@@ -62,6 +68,8 @@ public sealed partial class ProfilePreviewSpriteView
         if (humanoid != null && jobClothes)
         {
             DebugTools.Assert(job != null);
+            if (inventoryPreview != null && inventoryPreview.HasAnyItems && TryApplySavedInventoryPreview(inventoryPreview))
+                return;
 
             GiveDummyJobClothes(humanoid, job);
 
@@ -71,6 +79,57 @@ public sealed partial class ProfilePreviewSpriteView
                 GiveDummyLoadout(loadout);
             }
         }
+    }
+
+    private bool TryApplySavedInventoryPreview(CharacterInventoryPreviewData preview)
+    {
+        var inventorySys = EntMan.System<InventorySystem>();
+        if (!inventorySys.TryGetSlots(PreviewDummy, out var slots))
+            return false;
+
+        var anyApplied = false;
+        foreach (var slot in slots)
+        {
+            if (!preview.InventorySlots.TryGetValue(slot.Name, out var protoId))
+                continue;
+
+            if (!_prototypeManager.HasIndex<EntityPrototype>(protoId))
+                continue;
+
+            if (inventorySys.TryUnequip(PreviewDummy, slot.Name, out var unequippedItem, silent: true, force: true, reparent: false))
+                EntMan.DeleteEntity(unequippedItem!.Value);
+
+            var item = EntMan.SpawnEntity(protoId, MapCoordinates.Nullspace);
+            if (!inventorySys.TryEquip(PreviewDummy, item, slot.Name, true, true))
+            {
+                EntMan.DeleteEntity(item);
+                continue;
+            }
+
+            anyApplied = true;
+        }
+
+        if (preview.Hands.Count > 0 &&
+            EntMan.HasComponent<HandsComponent>(PreviewDummy))
+        {
+            var handsSys = EntMan.System<SharedHandsSystem>();
+            foreach (var (handId, protoId) in preview.Hands)
+            {
+                if (!_prototypeManager.HasIndex<EntityPrototype>(protoId))
+                    continue;
+
+                var item = EntMan.SpawnEntity(protoId, MapCoordinates.Nullspace);
+                if (!handsSys.TryPickup(PreviewDummy, item, handId, checkActionBlocker: false, animate: false))
+                {
+                    EntMan.DeleteEntity(item);
+                    continue;
+                }
+
+                anyApplied = true;
+            }
+        }
+
+        return anyApplied;
     }
 
     /// <summary>

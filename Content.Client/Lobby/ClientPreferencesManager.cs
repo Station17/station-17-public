@@ -23,9 +23,16 @@ namespace Content.Client.Lobby
         private ISharedSponsorsManager? _sponsorsManager; // Corvax-Sponsors
 
         public event Action? OnServerDataLoaded;
+        public event Action<int, CharacterInventoryPreviewData?>? OnCharacterInventoryPreviewUpdated;
 
         public GameSettings Settings { get; private set; } = default!;
         public PlayerPreferences Preferences { get; private set; } = default!;
+        private readonly Dictionary<int, CharacterInventoryPreviewData?> _characterInventoryPreviews = new();
+
+        public CharacterInventoryPreviewData? SelectedCharacterInventoryPreview
+            => Preferences != null && _characterInventoryPreviews.TryGetValue(Preferences.SelectedCharacterIndex, out var preview)
+                ? preview
+                : null;
 
         public void Initialize()
         {
@@ -34,6 +41,7 @@ namespace Content.Client.Lobby
             _netManager.RegisterNetMessage<MsgUpdateCharacter>();
             _netManager.RegisterNetMessage<MsgSelectCharacter>();
             _netManager.RegisterNetMessage<MsgDeleteCharacter>();
+            _netManager.RegisterNetMessage<MsgCharacterInventoryPreview>(HandleCharacterInventoryPreview);
 
             _baseClient.RunLevelChanged += BaseClientOnRunLevelChanged;
         }
@@ -44,6 +52,7 @@ namespace Content.Client.Lobby
             {
                 Settings = default!;
                 Preferences = default!;
+                _characterInventoryPreviews.Clear();
             }
         }
 
@@ -130,6 +139,12 @@ namespace Content.Client.Lobby
             Settings = message.Settings;
 
             OnServerDataLoaded?.Invoke();
+        }
+
+        private void HandleCharacterInventoryPreview(MsgCharacterInventoryPreview message)
+        {
+            _characterInventoryPreviews[message.Slot] = message.Preview;
+            OnCharacterInventoryPreviewUpdated?.Invoke(message.Slot, message.Preview);
         }
     }
 }

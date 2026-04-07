@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Content.Client.UserInterface.ControlExtensions;
 using Content.Client.Guidebook.Controls;
@@ -76,10 +77,25 @@ public sealed partial class LayerMarkingPicker : BoxContainer
     {
         foreach (var marking in _allMarkings.Values.OrderBy(marking => Loc.GetString($"marking-{marking.ID}")))
         {
+            if (ShouldHideInCharacterEditor(marking.ID))
+                continue;
+
             var item = new LayerMarkingItem(_markingsModel, _organ, _layer, marking, true);
             Items.AddChild(item);
         }
         _searchable = Items.GetSearchableControls();
+    }
+
+    private static bool ShouldHideInCharacterEditor(string id)
+    {
+        // HL2RP customization restrictions.
+        if (id is "CatEars" or "CatTail")
+            return true;
+
+        if (id.StartsWith("Cyberlimb", StringComparison.Ordinal))
+            return true;
+
+        return false;
     }
 
     private void UpdateCount()

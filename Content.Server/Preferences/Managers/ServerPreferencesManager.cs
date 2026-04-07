@@ -60,6 +60,7 @@ namespace Content.Server.Preferences.Managers
             _netManager.RegisterNetMessage<MsgUpdateCharacter>(HandleUpdateCharacterMessage);
             _netManager.RegisterNetMessage<MsgDeleteCharacter>(HandleDeleteCharacterMessage);
             _netManager.RegisterNetMessage<MsgUpdateConstructionFavorites>(HandleUpdateConstructionFavoritesMessage);
+            _netManager.RegisterNetMessage<MsgCharacterInventoryPreview>();
             _sawmill = _log.GetSawmill("prefs");
         }
 
@@ -238,6 +239,8 @@ namespace Content.Server.Preferences.Managers
             {
                 await _db.SaveSelectedCharacterIndexAsync(message.MsgChannel.UserId, message.SelectedCharacterIndex);
             }
+
+            await SendCharacterInventoryPreviewAsync(_playerManager.GetSessionById(userId), index);
         }
 
         private async void HandleUpdateCharacterMessage(MsgUpdateCharacter message)
@@ -375,6 +378,14 @@ namespace Content.Server.Preferences.Managers
                 await _db.DeleteCharacterInventorySnapshotAsync(userId, slot);
                 // HL2RP CHANGE END character-inventory-snapshot
             }
+
+            // Push empty preview so client lobby model falls back to job clothes.
+            var clearMsg = new MsgCharacterInventoryPreview
+            {
+                Slot = slot,
+                Preview = null
+            };
+            _netManager.ServerSendMessage(clearMsg, message.MsgChannel);
         }
 
         private async void HandleUpdateConstructionFavoritesMessage(MsgUpdateConstructionFavorites message)
@@ -475,6 +486,89 @@ namespace Content.Server.Preferences.Managers
                 MaxCharacterSlots = GetMaxUserCharacterSlots(session.UserId) // Corvax-Sponsors
             };
             _netManager.ServerSendMessage(msg, session.Channel);
+
+            // Send selected character inventory preview for lobby rendering.
+            _ = SendCharacterInventoryPreviewAsync(session, prefsData.Prefs.SelectedCharacterIndex);
+        }
+
+        private async Task SendCharacterInventoryPreviewAsync(ICommonSession session, int slot)
+        {
+            CharacterInventoryPreviewData? previewData = null;
+            var snapshot = await _db.GetCharacterInventorySnapshotAsync(session.UserId, slot);
+            if (snapshot != null &&
+                TryBuildPreviewFromSnapshot(snapshot, out var parsed))
+            {
+                previewData = parsed;
+            }
+
+            var msg = new MsgCharacterInventoryPreview
+            {
+                Slot = slot,
+                Preview = previewData
+            };
+            _netManager.ServerSendMessage(msg, session.Channel);
+        }
+
+        private static bool TryBuildPreviewFromSnapshot(JsonDocument snapshot, [NotNullWhen(true)] out CharacterInventoryPreviewData? preview)
+        {
+            preview = null;
+
+            try
+            {
+                var root = snapshot.RootElement;
+                var data = new CharacterInventoryPreviewData();
+
+                if (root.TryGetProperty("InventorySlots", out var slots) && slots.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var slot in slots.EnumerateArray())
+                    {
+                        if (!slot.TryGetProperty("SlotId", out var slotIdElem) || slotIdElem.ValueKind != JsonValueKind.String)
+                            continue;
+
+                        if (!slot.TryGetProperty("Item", out var itemElem) || itemElem.ValueKind != JsonValueKind.Object)
+                            continue;
+
+                        if (!itemElem.TryGetProperty("Prototype", out var protoElem) || protoElem.ValueKind != JsonValueKind.String)
+                            continue;
+
+                        var slotId = slotIdElem.GetString();
+                        var proto = protoElem.GetString();
+                        if (string.IsNullOrWhiteSpace(slotId) || string.IsNullOrWhiteSpace(proto))
+                            continue;
+
+                        data.InventorySlots[slotId] = proto;
+                    }
+                }
+
+                if (root.TryGetProperty("Hands", out var hands) && hands.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var hand in hands.EnumerateArray())
+                    {
+                        if (!hand.TryGetProperty("HandId", out var handIdElem) || handIdElem.ValueKind != JsonValueKind.String)
+                            continue;
+
+                        if (!hand.TryGetProperty("Item", out var itemElem) || itemElem.ValueKind != JsonValueKind.Object)
+                            continue;
+
+                        if (!itemElem.TryGetProperty("Prototype", out var protoElem) || protoElem.ValueKind != JsonValueKind.String)
+                            continue;
+
+                        var handId = handIdElem.GetString();
+                        var proto = protoElem.GetString();
+                        if (string.IsNullOrWhiteSpace(handId) || string.IsNullOrWhiteSpace(proto))
+                            continue;
+
+                        data.Hands[handId] = proto;
+                    }
+                }
+
+                preview = data.HasAnyItems ? data : null;
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public void OnClientDisconnected(ICommonSession session)

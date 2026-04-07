@@ -23,7 +23,8 @@ public sealed partial class HumanoidProfileEditor
 
     private void RandomizeEverything()
     {
-        Profile = HumanoidCharacterProfile.Random();
+        Profile = HumanoidCharacterProfile.Random()
+            .WithJobPriority("Civilian", JobPriority.High);
         SetProfile(Profile, CharacterSlot);
         SetDirty();
     }

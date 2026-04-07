@@ -162,6 +162,8 @@ namespace Content.Client.Lobby.UI
             SetupHl2RpTab();
             // Hide the legacy job priorities tab. HL2RP uses the dedicated HL2RP role tab.
             TabContainer.SetTabVisible(2, false);
+            // Hide Antags tab for HL2RP flow.
+            TabContainer.SetTabVisible(3, false);
 
             ImportButton.OnPressed += args =>
             {
