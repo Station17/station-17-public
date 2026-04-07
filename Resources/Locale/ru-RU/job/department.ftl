@@ -10,3 +10,9 @@ department-Silicon = Синтетики
 department-Specific = На определённых станциях
 
 department-Unknown = Неизвестный
+
+department-CityAdministration = Департамент Администрации Сити
+department-CivilWorkersUnion = Гражданский Союз Рабочих
+department-CivilDefense = Департамент Гражданской Обороны
+department-Civilians = Департамент гражданских
+department-Underground = Подполье

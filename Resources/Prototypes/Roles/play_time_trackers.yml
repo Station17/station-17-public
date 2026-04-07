@@ -147,3 +147,49 @@
 
 - type: playTimeTracker
   id: JobWarden
+
+
+- type: playTimeTracker
+  id: JobCityAdministrator
+
+- type: playTimeTracker
+  id: JobAdministratorSecretary
+
+- type: playTimeTracker
+  id: JobCWUHead
+
+- type: playTimeTracker
+  id: JobCWUWorker
+
+- type: playTimeTracker
+  id: JobCivilDefenseSectorCommander
+
+- type: playTimeTracker
+  id: JobCivilDefenseDispatcher
+
+- type: playTimeTracker
+  id: JobCivilDefenseOfficer
+
+- type: playTimeTracker
+  id: JobCivilDefenseUnit
+
+- type: playTimeTracker
+  id: JobCivilDefenseRecruit
+
+- type: playTimeTracker
+  id: JobLoyalist
+
+- type: playTimeTracker
+  id: JobCivilian
+
+- type: playTimeTracker
+  id: JobVortigauntSlave
+
+- type: playTimeTracker
+  id: JobResistanceCoordinator
+
+- type: playTimeTracker
+  id: JobRebel
+
+- type: playTimeTracker
+  id: JobVortigauntFree

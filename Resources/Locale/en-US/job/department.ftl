@@ -10,3 +10,9 @@ department-Silicon = Silicon
 department-Specific = Station specific
 
 department-Unknown = Unknown
+
+department-CityAdministration = City Administration Department
+department-CivilWorkersUnion = Civil Workers Union
+department-CivilDefense = Civil Defense Department
+department-Civilians = Civilians Department
+department-Underground = Underground

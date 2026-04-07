@@ -8,3 +8,9 @@ department-Security-description = Поддерживайте порядок на
 department-Science-description = Изучайте артефакты и аномалии, обеспечивайте членов экипажа новыми продвинутыми устройствами.
 department-Silicon-description = Соблюдайте свои законы, служите экипажу.
 department-Specific-description = Должности, которые есть не на всех станциях.
+
+department-CityAdministration-description = Пустышки ролей для администрации Сити.
+department-CivilWorkersUnion-description = Пустышки ролей для гражданского союза рабочих.
+department-CivilDefense-description = Пустышки ролей для гражданской обороны.
+department-Civilians-description = Пустышки ролей для департамента гражданских.
+department-Underground-description = Пустышки ролей для подполья.

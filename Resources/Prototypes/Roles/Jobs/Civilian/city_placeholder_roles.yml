@@ -1,0 +1,134 @@
+- type: job
+  id: CityAdministrator
+  name: job-name-city-administrator
+  description: job-description-city-administrator
+  playTimeTracker: JobCityAdministrator
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: AdministratorSecretary
+  name: job-name-administrator-secretary
+  description: job-description-administrator-secretary
+  playTimeTracker: JobAdministratorSecretary
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: CWUHead
+  name: job-name-cwu-head
+  description: job-description-cwu-head
+  playTimeTracker: JobCWUHead
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: CWUWorker
+  name: job-name-cwu-worker
+  description: job-description-cwu-worker
+  playTimeTracker: JobCWUWorker
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: CivilDefenseSectorCommander
+  name: job-name-civil-defense-sector-commander
+  description: job-description-civil-defense-sector-commander
+  playTimeTracker: JobCivilDefenseSectorCommander
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: CivilDefenseDispatcher
+  name: job-name-civil-defense-dispatcher
+  description: job-description-civil-defense-dispatcher
+  playTimeTracker: JobCivilDefenseDispatcher
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: CivilDefenseOfficer
+  name: job-name-civil-defense-officer
+  description: job-description-civil-defense-officer
+  playTimeTracker: JobCivilDefenseOfficer
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: CivilDefenseUnit
+  name: job-name-civil-defense-unit
+  description: job-description-civil-defense-unit
+  playTimeTracker: JobCivilDefenseUnit
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: CivilDefenseRecruit
+  name: job-name-civil-defense-recruit
+  description: job-description-civil-defense-recruit
+  playTimeTracker: JobCivilDefenseRecruit
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: Loyalist
+  name: job-name-loyalist
+  description: job-description-loyalist
+  playTimeTracker: JobLoyalist
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: Civilian
+  name: job-name-civilian
+  description: job-description-civilian
+  playTimeTracker: JobCivilian
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: VortigauntSlave
+  name: job-name-vortigaunt-slave
+  description: job-description-vortigaunt-slave
+  playTimeTracker: JobVortigauntSlave
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: ResistanceCoordinator
+  name: job-name-resistance-coordinator
+  description: job-description-resistance-coordinator
+  playTimeTracker: JobResistanceCoordinator
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: Rebel
+  name: job-name-rebel
+  description: job-description-rebel
+  playTimeTracker: JobRebel
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
+
+- type: job
+  id: VortigauntFree
+  name: job-name-vortigaunt-free
+  description: job-description-vortigaunt-free
+  playTimeTracker: JobVortigauntFree
+  setPreference: true
+  canBeAntag: false
+  supervisors: job-supervisors-everyone
