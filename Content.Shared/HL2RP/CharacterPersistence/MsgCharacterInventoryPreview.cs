@@ -18,7 +18,7 @@ public sealed class MsgCharacterInventoryPreview : NetMessage
     public override void ReadFromBuffer(NetIncomingMessage buffer, IRobustSerializer serializer)
     {
         Slot = buffer.ReadVariableInt32();
-        var hasPreview = buffer.ReadBoolean();
+        var hasPreview = buffer.ReadByte() != 0;
         if (!hasPreview)
         {
             Preview = null;
@@ -35,7 +35,7 @@ public sealed class MsgCharacterInventoryPreview : NetMessage
     public override void WriteToBuffer(NetOutgoingMessage buffer, IRobustSerializer serializer)
     {
         buffer.WriteVariableInt32(Slot);
-        buffer.Write(Preview != null);
+        buffer.Write((byte) (Preview != null ? 1 : 0));
         if (Preview == null)
             return;
 
