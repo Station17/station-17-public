@@ -244,16 +244,16 @@ namespace Content.Server.GameTicking
             var restrictLateJoinToSelectedRole =
                 lateJoin && _cfg.GetCVar(CCVars.GameLateJoinRestrictToSelectedRole);
 
-            HashSet<ProtoId<JobPrototype>>? allowedLateJoinRoles = null;
+            HashSet<string>? allowedLateJoinRoles = null;
             if (restrictLateJoinToSelectedRole)
             {
                 allowedLateJoinRoles = character.JobPriorities
                     .Where(p => p.Value == JobPriority.High)
-                    .Select(p => p.Key)
+                    .Select(p => p.Key.Id)
                     .ToHashSet();
 
                 // If a specific role was requested (e.g. from UI/command), enforce the same rule.
-                if (jobId != null && !allowedLateJoinRoles.Contains(jobId.Value))
+                if (jobId != null && !allowedLateJoinRoles.Contains(jobId))
                     jobId = null;
             }
 
@@ -265,7 +265,7 @@ namespace Content.Server.GameTicking
 
             if (restrictLateJoinToSelectedRole &&
                 jobId != null &&
-                (allowedLateJoinRoles == null || !allowedLateJoinRoles.Contains(jobId.Value)))
+                (allowedLateJoinRoles == null || !allowedLateJoinRoles.Contains(jobId)))
             {
                 jobId = null;
             }
