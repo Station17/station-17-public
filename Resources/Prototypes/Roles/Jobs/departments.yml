@@ -148,3 +148,53 @@
   - Psychologist
   - Pilot # Corvax-Pilot
   primary: false
+
+- type: department
+  id: CityAdministration
+  name: department-CityAdministration
+  description: department-CityAdministration-description
+  color: "#5C6D7A"
+  roles:
+  - CityAdministrator
+  - AdministratorSecretary
+
+- type: department
+  id: CivilWorkersUnion
+  name: department-CivilWorkersUnion
+  description: department-CivilWorkersUnion-description
+  color: "#4F8A5B"
+  roles:
+  - CWUHead
+  - CWUWorker
+
+- type: department
+  id: CivilDefense
+  name: department-CivilDefense
+  description: department-CivilDefense-description
+  color: "#3B6A8F"
+  roles:
+  - CivilDefenseSectorCommander
+  - CivilDefenseDispatcher
+  - CivilDefenseOfficer
+  - CivilDefenseUnit
+  - CivilDefenseRecruit
+
+- type: department
+  id: Civilians
+  name: department-Civilians
+  description: department-Civilians-description
+  color: "#7B8C4A"
+  roles:
+  - Loyalist
+  - Civilian
+  - VortigauntSlave
+
+- type: department
+  id: Underground
+  name: department-Underground
+  description: department-Underground-description
+  color: "#6E4A7E"
+  roles:
+  - ResistanceCoordinator
+  - Rebel
+  - VortigauntFree
