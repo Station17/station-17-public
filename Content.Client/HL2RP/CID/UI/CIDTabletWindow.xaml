@@ -1,53 +1,46 @@
 <ui:CIDTabletWindow
     xmlns="https://spacestation14.io"
+    xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
     xmlns:ui="clr-namespace:Content.Client.HL2RP.CID.UI"
     SetSize="840 620">
-    <BoxContainer Orientation="Vertical" Margin="8 8 8 8">
-        <BoxContainer Orientation="Horizontal" Margin="0 0 0 6">
-            <Label Text="CID Планшет" HorizontalExpand="True"/>
-            <TextureButton Name="CloseButton" StyleClasses="windowCloseButton"/>
-        </BoxContainer>
-
-        <TabContainer Name="Tabs" VerticalExpand="True" HorizontalExpand="True">
-            <BoxContainer Name="InfoTab" Orientation="Vertical" Margin="8 8 8 8">
-                <Label Name="InfoNameLabel" Text="Имя: -"/>
-                <Label Name="InfoSurnameLabel" Text="Фамилия: -"/>
-                <Label Name="InfoNumberLabel" Text="Номер гражданина: -"/>
-                <Label Name="InfoLpLabel" Text="LP: 0"/>
-                <Label Name="InfoJobLabel" Text="Должность: -"/>
+    <PanelContainer ModulateSelfOverride="#101010">
+        <PanelContainer.PanelOverride>
+            <gfx:StyleBoxFlat BackgroundColor="#101010" BorderColor="#2A2A2A" BorderThickness="2" />
+        </PanelContainer.PanelOverride>
+        <BoxContainer Orientation="Vertical" Margin="8 8 8 8">
+            <BoxContainer Orientation="Horizontal" Margin="0 0 0 6">
+                <Label Text="CID ПЛАНШЕТ" HorizontalExpand="True" FontColorOverride="#EAEAEA"/>
+                <TextureButton Name="CloseButton" StyleClasses="windowCloseButton" Modulate="#C05050"/>
             </BoxContainer>
 
-            <BoxContainer Name="DatabaseTab" Orientation="Horizontal" Margin="8 8 8 8" SeparationOverride="8">
-                <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
-                    <ItemList Name="RecordsList" VerticalExpand="True"/>
-                </ScrollContainer>
-                <BoxContainer Orientation="Vertical" MinWidth="280" SeparationOverride="6">
-                    <Label Name="DetailsHeader" Text="Выберите запись"/>
-                    <Label Name="DetailsNameLabel" Text="Имя: -"/>
-                    <Label Name="DetailsSurnameLabel" Text="Фамилия: -"/>
-                    <Label Name="DetailsNumberLabel" Text="Номер: -"/>
-                    <Label Name="DetailsLpLabel" Text="LP: -"/>
-                    <Label Name="DetailsLevelLabel" Text="LP уровень: -"/>
-                    <Label Name="DetailsTokensLabel" Text="Токены: -"/>
-                    <Label Name="DetailsJobLabel" Text="Должность: -"/>
-                    <Label Name="DetailsAccessLabel" Text="Access: -"/>
+            <TabContainer Name="Tabs" VerticalExpand="True" HorizontalExpand="True" TabFontColorOverride="#F0F0F0" TabFontColorInactiveOverride="#9A9A9A">
+                <BoxContainer Name="InfoTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="4">
+                    <Label Name="InfoNameLabel" Text="Имя: -" FontColorOverride="#D6D6D6"/>
+                    <Label Name="InfoSurnameLabel" Text="Фамилия: -" FontColorOverride="#D6D6D6"/>
+                    <Label Name="InfoNumberLabel" Text="Номер гражданина: -" FontColorOverride="#D6D6D6"/>
+                    <Label Name="InfoLpLabel" Text="LP: 0" FontColorOverride="#D6D6D6"/>
+                    <Label Name="InfoJobLabel" Text="Должность: -" FontColorOverride="#D6D6D6"/>
+                </BoxContainer>
+
+                <BoxContainer Name="DatabaseTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
+                    <Label Text="Записи CID" FontColorOverride="#EAEAEA"/>
+                    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                        <ItemList Name="RecordsList" VerticalExpand="True"/>
+                    </ScrollContainer>
+                </BoxContainer>
+
+                <BoxContainer Name="IssueTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
+                    <Label Name="IssueStatusLabel" Text="Вставьте пустую CID карту в слот выдачи" FontColorOverride="#CFCFCF"/>
+                    <LineEdit Name="IssueNameLine" PlaceHolder="Имя"/>
+                    <LineEdit Name="IssueSurnameLine" PlaceHolder="Фамилия"/>
                     <BoxContainer Orientation="Horizontal" SeparationOverride="4">
-                        <LineEdit Name="SetLpLine" PlaceHolder="Новое LP" HorizontalExpand="True"/>
-                        <Button Name="SetLpButton" Text="Применить"/>
+                        <LineEdit Name="IssueNumberLine" PlaceHolder="6-значный номер" HorizontalExpand="True"/>
+                        <Button Name="GenerateNumberButton" Text="Сгенерировать"/>
                     </BoxContainer>
+                    <Button Name="WriteCardButton" Text="Записать карту"/>
                 </BoxContainer>
-            </BoxContainer>
 
-            <BoxContainer Name="IssueTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
-                <Label Name="IssueStatusLabel" Text="Вставьте пустую CID карту в слот выдачи"/>
-                <LineEdit Name="IssueNameLine" PlaceHolder="Имя"/>
-                <LineEdit Name="IssueSurnameLine" PlaceHolder="Фамилия"/>
-                <BoxContainer Orientation="Horizontal" SeparationOverride="4">
-                    <LineEdit Name="IssueNumberLine" PlaceHolder="6-значный номер" HorizontalExpand="True"/>
-                    <Button Name="GenerateNumberButton" Text="Сгенерировать"/>
-                </BoxContainer>
-                <Button Name="WriteCardButton" Text="Записать карту"/>
-            </BoxContainer>
-        </TabContainer>
-    </BoxContainer>
+            </TabContainer>
+        </BoxContainer>
+    </PanelContainer>
 </ui:CIDTabletWindow>

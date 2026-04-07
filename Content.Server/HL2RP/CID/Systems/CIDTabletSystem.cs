@@ -187,6 +187,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             canIssue,
             canViewDetails,
             comp.IssueCard != null,
+            generatedNumber,
             records,
             selectedDetails);
 

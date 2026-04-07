@@ -47,6 +47,7 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
     public bool CanIssue { get; }
     public bool CanViewDetails { get; }
     public bool HasIssueCard { get; }
+    public string? GeneratedNumber { get; }
     public List<CIDDatabaseRecord> Records { get; }
     public CIDRecordDetails? SelectedRecord { get; }
 
@@ -60,6 +61,7 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
         bool canIssue,
         bool canViewDetails,
         bool hasIssueCard,
+        string? generatedNumber,
         List<CIDDatabaseRecord> records,
         CIDRecordDetails? selectedRecord)
     {
@@ -72,6 +74,7 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
         CanIssue = canIssue;
         CanViewDetails = canViewDetails;
         HasIssueCard = hasIssueCard;
+        GeneratedNumber = generatedNumber;
         Records = records;
         SelectedRecord = selectedRecord;
     }
