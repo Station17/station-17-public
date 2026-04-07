@@ -44,6 +44,22 @@ namespace Content.Client.LateJoin
 
         private readonly Control _base;
 
+        private HashSet<string>? GetAllowedLateJoinJobs()
+        {
+            if (!_configManager.GetCVar(CCVars.GameLateJoinRestrictToSelectedRole))
+                return null;
+
+            if (_preferencesManager.Preferences?.SelectedCharacter is not HumanoidCharacterProfile humanoid)
+                return null;
+
+            var selected = humanoid.JobPriorities
+                .Where(p => p.Value == JobPriority.High)
+                .Select(p => p.Key.Id)
+                .ToHashSet();
+
+            return selected.Count > 0 ? selected : null;
+        }
+
         public LateJoinGui()
         {
             MinSize = SetSize = new Vector2(450, 560);
@@ -83,6 +99,7 @@ namespace Content.Client.LateJoin
             _jobLists.Clear();
             _jobButtons.Clear();
             _jobCategories.Clear();
+            var allowedLateJoinJobs = GetAllowedLateJoinJobs();
 
             if (!_gameTicker.DisallowedLateJoin && _gameTicker.StationNames.Count == 0)
                 _sawmill.Warning("No stations exist, nothing to display in late-join GUI");
@@ -283,6 +300,12 @@ namespace Content.Client.LateJoin
                         else if (value == 0)
                         {
                             jobButton.Disabled = true;
+                        }
+
+                        if (allowedLateJoinJobs != null && !allowedLateJoinJobs.Contains(prototype.ID))
+                        {
+                            jobButton.Disabled = true;
+                            jobButton.ToolTip = Loc.GetString("late-join-gui-restricted-role-tooltip");
                         }
 
                         if (!_jobButtons[id].ContainsKey(prototype.ID))

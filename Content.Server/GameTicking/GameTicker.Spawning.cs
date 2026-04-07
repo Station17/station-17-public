@@ -241,11 +241,35 @@ namespace Content.Server.GameTicking
             if (jobBans != null)
                 restrictedRoles.UnionWith(jobBans);
 
+            var restrictLateJoinToSelectedRole =
+                lateJoin && _cfg.GetCVar(CCVars.GameLateJoinRestrictToSelectedRole);
+
+            HashSet<ProtoId<JobPrototype>>? allowedLateJoinRoles = null;
+            if (restrictLateJoinToSelectedRole)
+            {
+                allowedLateJoinRoles = character.JobPriorities
+                    .Where(p => p.Value == JobPriority.High)
+                    .Select(p => p.Key)
+                    .ToHashSet();
+
+                // If a specific role was requested (e.g. from UI/command), enforce the same rule.
+                if (jobId != null && !allowedLateJoinRoles.Contains(jobId.Value))
+                    jobId = null;
+            }
+
             // Pick best job best on prefs.
             jobId ??= _stationJobs.PickBestAvailableJobWithPriority(station,
                 character.JobPriorities,
-                true,
+                !restrictLateJoinToSelectedRole,
                 restrictedRoles);
+
+            if (restrictLateJoinToSelectedRole &&
+                jobId != null &&
+                (allowedLateJoinRoles == null || !allowedLateJoinRoles.Contains(jobId.Value)))
+            {
+                jobId = null;
+            }
+
             // If no job available, stay in lobby, or if no lobby spawn as observer
             if (jobId is null)
             {

@@ -334,16 +334,15 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
     private static bool ShouldPersistComponent(Type componentType)
     {
-        // Skip engine/framework components and persistence marker itself.
-        if (componentType == typeof(SaveCompsComponent))
-            return false;
-
+        // HL2RP safety mode: only persist explicitly HL2RP components.
+        // This prevents restoring arbitrary game/runtime components with invariants
+        // (e.g. GravityAffected/Bloodstream-related states) from stale snapshots.
         var ns = componentType.Namespace ?? string.Empty;
-        if (ns.StartsWith("Robust.", StringComparison.Ordinal))
+        if (!ns.Contains(".HL2RP.", StringComparison.Ordinal))
             return false;
 
-        // Core entity lifecycle/transform components are not safe to reflectively restore.
-        if (componentType.Name is "MetaDataComponent" or "TransformComponent" or "ContainerManagerComponent")
+        // Skip persistence marker itself.
+        if (componentType == typeof(SaveCompsComponent))
             return false;
 
         return true;
