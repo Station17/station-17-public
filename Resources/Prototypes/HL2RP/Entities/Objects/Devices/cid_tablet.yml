@@ -1,0 +1,42 @@
+- type: entity
+  parent: BaseItem
+  id: CIDTablet
+  name: CID tablet
+  description: Administrative tablet for viewing and issuing CID cards.
+  components:
+  - type: Sprite
+    sprite: Objects/Devices/pda.rsi
+    state: pda-boxer
+  - type: Icon
+    sprite: Objects/Devices/pda.rsi
+    state: pda-boxer
+  - type: Item
+    size: Small
+  - type: ActivatableUI
+    key: enum.CIDTabletUiKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.CIDTabletUiKey.Key:
+        type: CIDTabletBoundUserInterface
+  - type: ContainerContainer
+    containers:
+      cid-main-card: !type:ContainerSlot { }
+      cid-issue-card: !type:ContainerSlot { }
+  - type: ItemSlots
+    slots:
+      cid-main-card:
+        name: Основная CID-карта
+        whitelist:
+          components:
+          - CIDCard
+      cid-issue-card:
+        name: Пустая CID-карта для выдачи
+        whitelist:
+          components:
+          - CIDCard
+  - type: CIDTablet
+  - type: Tag
+    tags:
+    - DoorBumpOpener
+

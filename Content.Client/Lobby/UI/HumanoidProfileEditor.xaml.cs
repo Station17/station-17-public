@@ -5,6 +5,7 @@ using Content.Client.Players.PlayTimeTracking;
 using Content.Client.Sprite;
 using Content.Shared.CCVar;
 using Content.Shared.GameTicking;
+using Content.Shared.HL2RP.CharacterPersistence;
 using Content.Shared.Humanoid;
 using Content.Shared.Humanoid.Markings;
 using Content.Shared.Preferences;

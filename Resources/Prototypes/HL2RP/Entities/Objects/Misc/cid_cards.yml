@@ -1,0 +1,23 @@
+- type: entity
+  parent: IDCardStandard
+  id: CIDCard
+  name: CID card
+  description: Civil identification card used by City administration systems.
+  components:
+  - type: Sprite
+    layers:
+    - state: silver
+    - state: stripe_top
+      color: "#2f7f6f"
+    - state: stripe_bottom
+      color: "#20554b"
+  - type: CIDCard
+    lpCount: 0
+    lpLevel: 0
+    tokensCount: 0
+    cNumber: ""
+    access: 0
+    job: "Без должности"
+    isBlank: true
+  - type: SaveComps
+
