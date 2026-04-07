@@ -281,10 +281,10 @@ public sealed partial class StationJobsSystem
         IReadOnlyDictionary<NetUserId, HumanoidCharacterProfile> profiles,
         IReadOnlyList<EntityUid> stations)
     {
-        var givenStations = stations.ToList();
-        if (givenStations.Count == 0)
-            return; // Don't attempt to assign them if there are no stations.
-        // For players without jobs, give them the overflow job if they have that set...
+        _ = profiles;
+        _ = stations;
+
+        // HL2RP: For players without assigned jobs, always keep them in lobby.
         foreach (var player in allPlayersToAssign)
         {
             if (assignedJobs.ContainsKey(player))
@@ -292,29 +292,7 @@ public sealed partial class StationJobsSystem
                 continue;
             }
 
-            var profile = profiles[player];
-            if (profile.PreferenceUnavailable != PreferenceUnavailableMode.SpawnAsOverflow)
-            {
-                assignedJobs.Add(player, (null, EntityUid.Invalid));
-                continue;
-            }
-
-            _random.Shuffle(givenStations);
-
-            foreach (var station in givenStations)
-            {
-                // Pick a random overflow job from that station
-                var overflows = GetOverflowJobs(station).ToList();
-                _random.Shuffle(overflows);
-
-                // Stations with no overflow slots should simply get skipped over.
-                if (overflows.Count == 0)
-                    continue;
-
-                // If the overflow exists, put them in as it.
-                assignedJobs.Add(player, (overflows[0], givenStations[0]));
-                break;
-            }
+            assignedJobs.Add(player, (null, EntityUid.Invalid));
         }
     }
 

@@ -126,7 +126,7 @@ namespace Content.Shared.Preferences
         /// </summary>
         [DataField]
         public PreferenceUnavailableMode PreferenceUnavailable { get; private set; } =
-            PreferenceUnavailableMode.SpawnAsOverflow;
+            PreferenceUnavailableMode.StayInLobby;
 
         public HumanoidCharacterProfile(
             string name,
@@ -389,7 +389,8 @@ namespace Content.Shared.Preferences
 
         public HumanoidCharacterProfile WithPreferenceUnavailable(PreferenceUnavailableMode mode)
         {
-            return new(this) { PreferenceUnavailable = mode };
+            // HL2RP: always keep players in lobby when preferred role is unavailable.
+            return new(this) { PreferenceUnavailable = PreferenceUnavailableMode.StayInLobby };
         }
 
         public HumanoidCharacterProfile WithAntagPreferences(IEnumerable<ProtoId<AntagPrototype>> antagPreferences)
@@ -590,12 +591,7 @@ namespace Content.Shared.Preferences
 
             var appearance = HumanoidCharacterAppearance.EnsureValid(Appearance, Species, Sex, sponsorPrototypes);
 
-            var prefsUnavailableMode = PreferenceUnavailable switch
-            {
-                PreferenceUnavailableMode.StayInLobby => PreferenceUnavailableMode.StayInLobby,
-                PreferenceUnavailableMode.SpawnAsOverflow => PreferenceUnavailableMode.SpawnAsOverflow,
-                _ => PreferenceUnavailableMode.StayInLobby // Invalid enum values.
-            };
+            var prefsUnavailableMode = PreferenceUnavailableMode.StayInLobby;
 
             var spawnPriority = SpawnPriority switch
             {

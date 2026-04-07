@@ -178,6 +178,9 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         {
             foreach (var component in AllComps(item))
             {
+                if (!ShouldPersistComponent(component.GetType()))
+                    continue;
+
                 var componentName = _componentFactory.GetComponentName(component.GetType());
 
                 data.ComponentStates.Add(new SnapshotComponentData
@@ -300,6 +303,9 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
             if (!_componentFactory.TryGetRegistration(componentData.Name, out var registration))
                 continue;
 
+            if (!ShouldPersistComponent(registration.Type))
+                continue;
+
             if (!EntityManager.TryGetComponent(item, registration.Type, out var component))
             {
                 // Component existed on the saved entity instance but isn't present on the prototype.
@@ -313,8 +319,32 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
                     continue;
             }
 
-            RestoreComponentFields(component, componentData.Fields);
+            try
+            {
+                RestoreComponentFields(component, componentData.Fields);
+            }
+            catch
+            {
+                // Never let one broken component state crash player spawn.
+            }
         }
+    }
+
+    private static bool ShouldPersistComponent(Type componentType)
+    {
+        // Skip engine/framework components and persistence marker itself.
+        if (componentType == typeof(SaveCompsComponent))
+            return false;
+
+        var ns = componentType.Namespace ?? string.Empty;
+        if (ns.StartsWith("Robust.", StringComparison.Ordinal))
+            return false;
+
+        // Core entity lifecycle/transform components are not safe to reflectively restore.
+        if (componentType.Name is "MetaDataComponent" or "TransformComponent" or "ContainerManagerComponent")
+            return false;
+
+        return true;
     }
 
     private static Dictionary<string, string> SerializeComponentFields(IComponent component)
