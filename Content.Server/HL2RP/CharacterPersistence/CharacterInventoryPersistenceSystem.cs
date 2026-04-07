@@ -357,6 +357,9 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
             if (!prop.CanRead || !prop.CanWrite || prop.GetIndexParameters().Length != 0)
                 continue;
 
+            if (prop.GetCustomAttributes(typeof(DataFieldAttribute), true).Length == 0)
+                continue;
+
             if (!TrySerializeMemberValue(prop.PropertyType, prop.GetValue(component), out var serialized))
                 continue;
 
@@ -406,6 +409,12 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
     private static bool TrySerializeMemberValue(Type memberType, object? value, out string serialized)
     {
+        if (!IsSafePersistedMemberType(memberType))
+        {
+            serialized = string.Empty;
+            return false;
+        }
+
         try
         {
             serialized = JsonSerializer.Serialize(value, memberType);
@@ -420,6 +429,12 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
     private static bool TryDeserializeMemberValue(Type memberType, string serialized, out object? value)
     {
+        if (!IsSafePersistedMemberType(memberType))
+        {
+            value = null;
+            return false;
+        }
+
         try
         {
             value = JsonSerializer.Deserialize(serialized, memberType);
@@ -430,6 +445,25 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
             value = null;
             return false;
         }
+    }
+
+    private static bool IsSafePersistedMemberType(Type memberType)
+    {
+        // Never serialize/restore component references or runtime entity/system objects.
+        if (typeof(IComponent).IsAssignableFrom(memberType))
+            return false;
+
+        if (typeof(EntityUid).IsAssignableFrom(memberType) ||
+            typeof(NetEntity).IsAssignableFrom(memberType) ||
+            typeof(IEntitySystem).IsAssignableFrom(memberType))
+            return false;
+
+        var ns = memberType.Namespace ?? string.Empty;
+        if (ns.StartsWith("Robust.", StringComparison.Ordinal) &&
+            !ns.StartsWith("Robust.Shared.Maths", StringComparison.Ordinal))
+            return false;
+
+        return true;
     }
 
     private sealed class CharacterInventorySnapshotData
