@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Numerics;
 using Content.Client.Lobby.UI.Loadouts;
@@ -223,12 +224,13 @@ public sealed partial class HumanoidProfileEditor
 
                 selector.OnSelected += selectedPrio =>
                 {
+                    var selectedJobId = (string) job.ID;
                     var selectedJobPrio = (JobPriority)selectedPrio;
                     Profile = Profile?.WithJobPriority(job.ID, selectedJobPrio);
 
                     foreach (var (jobId, _) in _jobPriorities)
                     {
-                        if (jobId == job.ID)
+                        if (string.Equals(jobId, selectedJobId, StringComparison.Ordinal))
                             continue;
 
                         // HL2RP CHANGE START single-role-job-preference
