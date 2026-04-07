@@ -16,6 +16,8 @@ using Robust.Shared.Enums;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Reflection;
+using Robust.Shared.Serialization.Manager.Attributes;
 
 namespace Content.Server.HL2RP.CharacterPersistence;
 
@@ -29,6 +31,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
     [Dependency] private readonly SharedContainerSystem _containers = default!;
     [Dependency] private readonly StackSystem _stack = default!;
     [Dependency] private readonly IPrototypeManager _prototype = default!;
+    [Dependency] private readonly IComponentFactory _componentFactory = default!;
 
     private readonly Dictionary<NetUserId, EntityUid> _spawnedMobs = new();
 
@@ -171,6 +174,20 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         if (TryComp<Content.Shared.Stacks.StackComponent>(item, out var stack))
             data.StackCount = stack.Count;
 
+        if (HasComp<SaveCompsComponent>(item))
+        {
+            foreach (var component in EntityManager.GetComponents(item))
+            {
+                var componentName = _componentFactory.GetComponentName(component.GetType());
+
+                data.ComponentStates.Add(new SnapshotComponentData
+                {
+                    Name = componentName,
+                    Fields = SerializeComponentFields(component)
+                });
+            }
+        }
+
         if (TryComp<ContainerManagerComponent>(item, out var manager))
         {
             foreach (var (containerId, container) in manager.Containers)
@@ -266,7 +283,111 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
             }
         }
 
+        RestoreComponentStates(item, data);
+
         return item;
+    }
+
+    private void RestoreComponentStates(EntityUid item, SnapshotItemData data)
+    {
+        if (!HasComp<SaveCompsComponent>(item) || data.ComponentStates.Count == 0)
+            return;
+
+        foreach (var componentData in data.ComponentStates)
+        {
+            if (!_componentFactory.TryGetRegistration(componentData.Name, out var registration))
+                continue;
+
+            if (!TryComp(item, registration.Type, out var component))
+                continue;
+
+            RestoreComponentFields(component, componentData.Fields);
+        }
+    }
+
+    private static Dictionary<string, string> SerializeComponentFields(IComponent component)
+    {
+        var data = new Dictionary<string, string>();
+        var componentType = component.GetType();
+
+        foreach (var prop in componentType.GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+        {
+            if (!prop.CanRead || !prop.CanWrite || prop.GetIndexParameters().Length != 0)
+                continue;
+
+            if (!TrySerializeMemberValue(prop.PropertyType, prop.GetValue(component), out var serialized))
+                continue;
+
+            data[prop.Name] = serialized;
+        }
+
+        foreach (var field in componentType.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic))
+        {
+            if (field.IsStatic || field.IsInitOnly || field.IsLiteral)
+                continue;
+
+            if (!field.IsPublic && field.GetCustomAttributes(typeof(DataFieldAttribute), true).Length == 0)
+                continue;
+
+            if (!TrySerializeMemberValue(field.FieldType, field.GetValue(component), out var serialized))
+                continue;
+
+            data[field.Name] = serialized;
+        }
+
+        return data;
+    }
+
+    private static void RestoreComponentFields(IComponent component, Dictionary<string, string> fields)
+    {
+        var componentType = component.GetType();
+
+        foreach (var (name, value) in fields)
+        {
+            var prop = componentType.GetProperty(name, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            if (prop != null && prop.CanWrite && prop.GetIndexParameters().Length == 0)
+            {
+                if (TryDeserializeMemberValue(prop.PropertyType, value, out var parsed))
+                    prop.SetValue(component, parsed);
+
+                continue;
+            }
+
+            var field = componentType.GetField(name, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+            if (field == null || field.IsStatic || field.IsInitOnly || field.IsLiteral)
+                continue;
+
+            if (TryDeserializeMemberValue(field.FieldType, value, out var parsedField))
+                field.SetValue(component, parsedField);
+        }
+    }
+
+    private static bool TrySerializeMemberValue(Type memberType, object? value, out string serialized)
+    {
+        try
+        {
+            serialized = JsonSerializer.Serialize(value, memberType);
+            return true;
+        }
+        catch
+        {
+            serialized = string.Empty;
+            return false;
+        }
+    }
+
+    private static bool TryDeserializeMemberValue(Type memberType, string serialized, out object? value)
+    {
+        try
+        {
+            value = JsonSerializer.Deserialize(serialized, memberType);
+            return true;
+        }
+        catch
+        {
+            value = null;
+            return false;
+        }
     }
 
     private sealed class CharacterInventorySnapshotData
@@ -292,5 +413,12 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         public string Prototype { get; set; } = string.Empty;
         public int? StackCount { get; set; }
         public Dictionary<string, List<SnapshotItemData>> Containers { get; set; } = new();
+        public List<SnapshotComponentData> ComponentStates { get; set; } = new();
+    }
+
+    private sealed class SnapshotComponentData
+    {
+        public string Name { get; set; } = string.Empty;
+        public Dictionary<string, string> Fields { get; set; } = new();
     }
 }
