@@ -209,7 +209,7 @@ public sealed partial class HumanoidProfileEditor
                 icon.Texture = _sprite.Frame0(jobIcon.Icon);
                 selector.Setup(items, job.LocalizedName, 200, job.LocalizedDescription, icon, job.Guides);
                 selector.Select((int) JobPriority.Never);
-                selector.LockRequirements("Выбор роли доступен во вкладке HL2RP.");
+                selector.LockRequirements(FormattedMessage.FromUnformatted("Выбор роли доступен во вкладке HL2RP."));
 
                 // HL2RP CHANGE START single-role-job-preference
                 // Validate role requirements against the profile currently being edited.

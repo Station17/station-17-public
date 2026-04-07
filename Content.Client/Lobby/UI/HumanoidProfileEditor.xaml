@@ -63,6 +63,7 @@
                                 <BoxContainer Orientation="Vertical" SeparationOverride="4">
                                     <Button Name="Hl2RpRoleCivilian" Text="Гражданин" ToggleMode="True" />
                                     <Button Name="Hl2RpRoleLoyalist" Text="Лоялист" ToggleMode="True" />
+                                    <Button Name="Hl2RpRoleVortigauntSlave" Text="Вортигонт" ToggleMode="True" />
 
                                     <Button Name="Hl2RpRoleCivilDefense" Text="Сотрудник ГО" ToggleMode="True" />
                                     <BoxContainer Name="Hl2RpCivilDefenseRanks" Orientation="Vertical" SeparationOverride="4" Visible="False" Margin="12 0 0 0">
@@ -89,6 +90,17 @@
                                     <Button Name="Hl2RpRoleCwuHead" Text="Глава ГСР" ToggleMode="True" />
                                     <Button Name="Hl2RpRoleCivilDefenseSectorCommander" Text="Секторный Командир" ToggleMode="True" />
                                     <Button Name="Hl2RpRoleCivilDefenseDispatcher" Text="Диспетчер" ToggleMode="True" />
+                                </BoxContainer>
+                            </BoxContainer>
+
+                            <Control MinHeight="6" />
+
+                            <BoxContainer Orientation="Vertical" SeparationOverride="6">
+                                <Label Text="Сопротивление:" />
+                                <BoxContainer Orientation="Vertical" SeparationOverride="4">
+                                    <Button Name="Hl2RpRoleResistanceCoordinator" Text="Координатор Сопротивления" ToggleMode="True" />
+                                    <Button Name="Hl2RpRoleRebel" Text="Повстанец" ToggleMode="True" />
+                                    <Button Name="Hl2RpRoleVortigauntFree" Text="Свободный вортигонт" ToggleMode="True" />
                                 </BoxContainer>
                             </BoxContainer>
                         </BoxContainer>
