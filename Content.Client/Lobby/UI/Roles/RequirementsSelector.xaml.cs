@@ -20,7 +20,6 @@ public sealed partial class RequirementsSelector : BoxContainer
     private readonly RadioOptions<int> _options;
     private readonly StripeBack _lockStripe;
     private List<ProtoId<GuideEntryPrototype>>? _guides;
-    private bool _suppressSelectedEvent;
 
     public event Action<int>? OnSelected;
     public event Action<List<ProtoId<GuideEntryPrototype>>>? OnOpenGuidebook;
@@ -43,10 +42,6 @@ public sealed partial class RequirementsSelector : BoxContainer
         _options.OnItemSelected += args =>
         {
             _options.Select(args.Id);
-
-            if (_suppressSelectedEvent)
-                return;
-
             OnSelected?.Invoke(args.Id);
         };
 
@@ -137,14 +132,6 @@ public sealed partial class RequirementsSelector : BoxContainer
 
     public void Select(int id)
     {
-        _suppressSelectedEvent = true;
-        try
-        {
-            _options.Select(id);
-        }
-        finally
-        {
-            _suppressSelectedEvent = false;
-        }
+        _options.Select(id);
     }
 }
