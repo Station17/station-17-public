@@ -97,6 +97,24 @@ namespace Content.Client.Lobby.UI
             NameRandomize.Disabled = locked;
             ImportButton.Disabled = locked;
             TabContainer.MouseFilter = locked ? MouseFilterMode.Stop : MouseFilterMode.Pass;
+
+            // HL2RP role buttons
+            Hl2RpRoleCivilian.Disabled = locked;
+            Hl2RpRoleLoyalist.Disabled = locked;
+            Hl2RpRoleCivilDefense.Disabled = locked;
+            Hl2RpRoleCwuWorker.Disabled = locked;
+            Hl2RpCivilDefenseRCT.Disabled = locked;
+            Hl2RpCivilDefenseI5.Disabled = locked;
+            Hl2RpCivilDefenseI4.Disabled = locked;
+            Hl2RpCivilDefenseI3.Disabled = locked;
+            Hl2RpCivilDefenseI2.Disabled = locked;
+            Hl2RpCivilDefenseI1.Disabled = locked;
+            Hl2RpCivilDefenseOFC.Disabled = locked;
+            Hl2RpRoleCityAdministrator.Disabled = locked;
+            Hl2RpRoleAdministratorSecretary.Disabled = locked;
+            Hl2RpRoleCwuHead.Disabled = locked;
+            Hl2RpRoleCivilDefenseSectorCommander.Disabled = locked;
+            Hl2RpRoleCivilDefenseDispatcher.Disabled = locked;
         }
         // HL2RP CHANGE END profile-lock-ui
 
@@ -134,6 +152,8 @@ namespace Content.Client.Lobby.UI
             _allowFlavorText = _cfgManager.GetCVar(CCVars.FlavorText);
 
             Markings.SetModel(_markingsModel);
+
+            SetupHl2RpTab();
 
             ImportButton.OnPressed += args =>
             {
@@ -179,7 +199,8 @@ namespace Content.Client.Lobby.UI
 
             #region Appearance
 
-            TabContainer.SetTabTitle(0, Loc.GetString("humanoid-profile-editor-appearance-tab"));
+            TabContainer.SetTabTitle(0, "HL2RP");
+            TabContainer.SetTabTitle(1, Loc.GetString("humanoid-profile-editor-appearance-tab"));
 
             #region Sex
 
@@ -276,7 +297,7 @@ namespace Content.Client.Lobby.UI
 
             #region Jobs
 
-            TabContainer.SetTabTitle(1, Loc.GetString("humanoid-profile-editor-jobs-tab"));
+            TabContainer.SetTabTitle(2, Loc.GetString("humanoid-profile-editor-jobs-tab"));
 
             PreferenceUnavailableButton.AddItem(
                 Loc.GetString("humanoid-profile-editor-preference-unavailable-stay-in-lobby-button"),
@@ -300,15 +321,15 @@ namespace Content.Client.Lobby.UI
 
             #endregion Jobs
 
-            TabContainer.SetTabTitle(2, Loc.GetString("humanoid-profile-editor-antags-tab"));
+            TabContainer.SetTabTitle(3, Loc.GetString("humanoid-profile-editor-antags-tab"));
 
             RefreshTraits();
 
-            TabContainer.SetTabTitle(3, Loc.GetString("humanoid-profile-editor-traits-tab")); // Corvax-TTS-Edit
+            TabContainer.SetTabTitle(4, Loc.GetString("humanoid-profile-editor-traits-tab")); // Corvax-TTS-Edit
 
             #region Markings
 
-            TabContainer.SetTabTitle(4, Loc.GetString("humanoid-profile-editor-markings-tab"));
+            TabContainer.SetTabTitle(5, Loc.GetString("humanoid-profile-editor-markings-tab"));
 
             _markingsModel.MarkingsChanged += (_, _) => OnMarkingChange();
             _markingsModel.MarkingsReset += OnMarkingChange;
@@ -345,6 +366,116 @@ namespace Content.Client.Lobby.UI
 
             UpdateSpeciesGuidebookIcon();
             IsDirty = false;
+        }
+
+        private void Hl2RpSetRole(string jobId)
+        {
+            if (Profile == null)
+                return;
+
+            if (IsProfileLocked())
+                return;
+
+            Profile = Profile.WithJobPriority(jobId, JobPriority.High);
+            JobOverride = _prototypeManager.TryIndex<JobPrototype>(jobId, out var job) ? job : null;
+            ReloadPreview();
+            UpdateJobPriorities();
+            UpdateHl2RpSelection();
+            SetDirty();
+        }
+
+        private void UpdateHl2RpSelection()
+        {
+            if (Profile == null)
+                return;
+
+            var selectedHigh = Profile.JobPriorities.FirstOrDefault(p => p.Value == JobPriority.High).Key;
+            var selected = selectedHigh.Id;
+
+            // reset all toggles
+            Hl2RpRoleCivilian.Pressed = false;
+            Hl2RpRoleLoyalist.Pressed = false;
+            Hl2RpRoleCivilDefense.Pressed = false;
+            Hl2RpRoleCwuWorker.Pressed = false;
+            Hl2RpCivilDefenseRCT.Pressed = false;
+            Hl2RpCivilDefenseI5.Pressed = false;
+            Hl2RpCivilDefenseI4.Pressed = false;
+            Hl2RpCivilDefenseI3.Pressed = false;
+            Hl2RpCivilDefenseI2.Pressed = false;
+            Hl2RpCivilDefenseI1.Pressed = false;
+            Hl2RpCivilDefenseOFC.Pressed = false;
+            Hl2RpRoleCityAdministrator.Pressed = false;
+            Hl2RpRoleAdministratorSecretary.Pressed = false;
+            Hl2RpRoleCwuHead.Pressed = false;
+            Hl2RpRoleCivilDefenseSectorCommander.Pressed = false;
+            Hl2RpRoleCivilDefenseDispatcher.Pressed = false;
+
+            if (string.IsNullOrWhiteSpace(selected))
+                return;
+
+            switch (selected)
+            {
+                case "Civilian":
+                    Hl2RpRoleCivilian.Pressed = true;
+                    break;
+                case "Loyalist":
+                    Hl2RpRoleLoyalist.Pressed = true;
+                    break;
+                case "CWUWorker":
+                    Hl2RpRoleCwuWorker.Pressed = true;
+                    break;
+                case "CityAdministrator":
+                    Hl2RpRoleCityAdministrator.Pressed = true;
+                    break;
+                case "AdministratorSecretary":
+                    Hl2RpRoleAdministratorSecretary.Pressed = true;
+                    break;
+                case "CWUHead":
+                    Hl2RpRoleCwuHead.Pressed = true;
+                    break;
+                case "CivilDefenseSectorCommander":
+                    Hl2RpRoleCivilDefenseSectorCommander.Pressed = true;
+                    break;
+                case "CivilDefenseDispatcher":
+                    Hl2RpRoleCivilDefenseDispatcher.Pressed = true;
+                    break;
+
+                // Civil Defense: we can't infer exact rank yet (future system),
+                // but we still highlight the group and show rank buttons.
+                case "CivilDefenseRecruit":
+                case "CivilDefenseOfficer":
+                case "CivilDefenseUnit":
+                    Hl2RpRoleCivilDefense.Pressed = true;
+                    Hl2RpCivilDefenseRanks.Visible = true;
+                    break;
+            }
+        }
+
+        private void SetupHl2RpTab()
+        {
+            Hl2RpRoleCivilDefense.OnPressed += _ =>
+            {
+                Hl2RpCivilDefenseRanks.Visible = !Hl2RpCivilDefenseRanks.Visible;
+            };
+
+            Hl2RpRoleCivilian.OnPressed += _ => Hl2RpSetRole("Civilian");
+            Hl2RpRoleLoyalist.OnPressed += _ => Hl2RpSetRole("Loyalist");
+            Hl2RpRoleCwuWorker.OnPressed += _ => Hl2RpSetRole("CWUWorker");
+
+            // GO ranks for future systems: currently all map to the same job preference.
+            Hl2RpCivilDefenseRCT.OnPressed += _ => Hl2RpSetRole("CivilDefenseRecruit");
+            Hl2RpCivilDefenseI5.OnPressed += _ => Hl2RpSetRole("CivilDefenseOfficer");
+            Hl2RpCivilDefenseI4.OnPressed += _ => Hl2RpSetRole("CivilDefenseOfficer");
+            Hl2RpCivilDefenseI3.OnPressed += _ => Hl2RpSetRole("CivilDefenseUnit");
+            Hl2RpCivilDefenseI2.OnPressed += _ => Hl2RpSetRole("CivilDefenseUnit");
+            Hl2RpCivilDefenseI1.OnPressed += _ => Hl2RpSetRole("CivilDefenseUnit");
+            Hl2RpCivilDefenseOFC.OnPressed += _ => Hl2RpSetRole("CivilDefenseOfficer");
+
+            Hl2RpRoleCityAdministrator.OnPressed += _ => Hl2RpSetRole("CityAdministrator");
+            Hl2RpRoleAdministratorSecretary.OnPressed += _ => Hl2RpSetRole("AdministratorSecretary");
+            Hl2RpRoleCwuHead.OnPressed += _ => Hl2RpSetRole("CWUHead");
+            Hl2RpRoleCivilDefenseSectorCommander.OnPressed += _ => Hl2RpSetRole("CivilDefenseSectorCommander");
+            Hl2RpRoleCivilDefenseDispatcher.OnPressed += _ => Hl2RpSetRole("CivilDefenseDispatcher");
         }
 
         private void SetDirty()
@@ -419,6 +550,7 @@ namespace Content.Client.Lobby.UI
             RefreshTraits();
             RefreshFlavorText();
             ReloadPreview();
+            UpdateHl2RpSelection();
 
             if (Profile != null)
             {

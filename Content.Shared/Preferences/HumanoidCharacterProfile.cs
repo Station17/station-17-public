@@ -358,22 +358,28 @@ namespace Content.Shared.Preferences
         public HumanoidCharacterProfile WithJobPriority(ProtoId<JobPrototype> jobId, JobPriority priority)
         {
             var dictionary = new Dictionary<ProtoId<JobPrototype>, JobPriority>(_jobPriorities);
-            // HL2RP CHANGE START single-role-job-preference
-            if (priority != JobPriority.High)
+            if (priority == JobPriority.Never)
             {
                 dictionary.Remove(jobId);
             }
             else
             {
-                var keys = dictionary.Keys.ToArray();
-                foreach (var key in keys)
-                {
-                    dictionary.Remove(key);
-                }
+                dictionary[jobId] = priority;
 
-                dictionary[jobId] = JobPriority.High;
+                // Only one job may be High. If we set a job to High, downgrade any other High to Medium.
+                if (priority == JobPriority.High)
+                {
+                    var keys = dictionary.Keys.ToArray();
+                    foreach (var key in keys)
+                    {
+                        if (key == jobId)
+                            continue;
+
+                        if (dictionary.TryGetValue(key, out var existing) && existing == JobPriority.High)
+                            dictionary[key] = JobPriority.Medium;
+                    }
+                }
             }
-            // HL2RP CHANGE END single-role-job-preference
 
             return new(this)
             {
@@ -603,23 +609,21 @@ namespace Content.Shared.Preferences
                 .Where(p => prototypeManager.TryIndex<JobPrototype>(p.Key, out var job) && job.SetPreference && p.Value switch
                 {
                     JobPriority.Never => false, // Drop never since that's assumed default.
-                    // HL2RP CHANGE START single-role-job-preference
-                    JobPriority.Low => false,
-                    JobPriority.Medium => false,
+                    JobPriority.Low => true,
+                    JobPriority.Medium => true,
                     JobPriority.High => true,
-                    // HL2RP CHANGE END single-role-job-preference
                     _ => false
                 }));
 
-            // HL2RP CHANGE START single-role-job-preference
             var highJobs = priorities.Where(x => x.Value == JobPriority.High).Select(x => x.Key).ToList();
             if (highJobs.Count > 1)
             {
                 var first = highJobs[0];
-                priorities.Clear();
-                priorities[first] = JobPriority.High;
+                for (var i = 1; i < highJobs.Count; i++)
+                {
+                    priorities[highJobs[i]] = JobPriority.Medium;
+                }
             }
-            // HL2RP CHANGE END single-role-job-preference
 
             var antags = AntagPreferences
                 .Where(id => prototypeManager.TryIndex(id, out var antag) && antag.SetPreference)

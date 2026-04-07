@@ -52,6 +52,49 @@
             <Control MinHeight="10" />
             <!-- tabContainer -->
             <TabContainer Name="TabContainer" VerticalExpand="True">
+                <!-- HL2RP -->
+                <BoxContainer Name="Hl2RpTab" Orientation="Vertical" Margin="10">
+                    <ScrollContainer VerticalExpand="True">
+                        <BoxContainer Orientation="Vertical" SeparationOverride="8">
+                            <Label Text="HL2RP" StyleClasses="LabelHeading" />
+
+                            <BoxContainer Orientation="Vertical" SeparationOverride="6">
+                                <Label Text="Обычные роли:" />
+                                <BoxContainer Orientation="Vertical" SeparationOverride="4">
+                                    <Button Name="Hl2RpRoleCivilian" Text="Гражданин" ToggleMode="True" />
+                                    <Button Name="Hl2RpRoleLoyalist" Text="Лоялист" ToggleMode="True" />
+
+                                    <Button Name="Hl2RpRoleCivilDefense" Text="Сотрудник ГО" ToggleMode="True" />
+                                    <BoxContainer Name="Hl2RpCivilDefenseRanks" Orientation="Vertical" SeparationOverride="4" Visible="False" Margin="12 0 0 0">
+                                        <Button Name="Hl2RpCivilDefenseRCT" Text="RCT" ToggleMode="True" />
+                                        <Button Name="Hl2RpCivilDefenseI5" Text="I5" ToggleMode="True" />
+                                        <Button Name="Hl2RpCivilDefenseI4" Text="I4" ToggleMode="True" />
+                                        <Button Name="Hl2RpCivilDefenseI3" Text="I3" ToggleMode="True" />
+                                        <Button Name="Hl2RpCivilDefenseI2" Text="I2" ToggleMode="True" />
+                                        <Button Name="Hl2RpCivilDefenseI1" Text="I1" ToggleMode="True" />
+                                        <Button Name="Hl2RpCivilDefenseOFC" Text="OFC" ToggleMode="True" />
+                                    </BoxContainer>
+
+                                    <Button Name="Hl2RpRoleCwuWorker" Text="Сотрудник ГСР" ToggleMode="True" />
+                                </BoxContainer>
+                            </BoxContainer>
+
+                            <Control MinHeight="6" />
+
+                            <BoxContainer Orientation="Vertical" SeparationOverride="6">
+                                <Label Text="Главнокомандующие роли:" />
+                                <BoxContainer Orientation="Vertical" SeparationOverride="4">
+                                    <Button Name="Hl2RpRoleCityAdministrator" Text="Городской Администратор" ToggleMode="True" />
+                                    <Button Name="Hl2RpRoleAdministratorSecretary" Text="Секретарь Администратора" ToggleMode="True" />
+                                    <Button Name="Hl2RpRoleCwuHead" Text="Глава ГСР" ToggleMode="True" />
+                                    <Button Name="Hl2RpRoleCivilDefenseSectorCommander" Text="Секторный Командир" ToggleMode="True" />
+                                    <Button Name="Hl2RpRoleCivilDefenseDispatcher" Text="Диспетчер" ToggleMode="True" />
+                                </BoxContainer>
+                            </BoxContainer>
+                        </BoxContainer>
+                    </ScrollContainer>
+                </BoxContainer>
+
                 <BoxContainer Orientation="Vertical">
                     <ScrollContainer VerticalExpand="True">
                         <!-- appearanceList -->

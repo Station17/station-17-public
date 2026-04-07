@@ -290,7 +290,9 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
     private void RestoreComponentStates(EntityUid item, SnapshotItemData data)
     {
-        if (!HasComp<SaveCompsComponent>(item) || data.ComponentStates.Count == 0)
+        // The marker component is used to decide whether we *save* component state.
+        // When restoring, the spawned prototype may not include that marker, so we must not gate on it.
+        if (data.ComponentStates.Count == 0)
             return;
 
         foreach (var componentData in data.ComponentStates)
@@ -299,7 +301,17 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
                 continue;
 
             if (!EntityManager.TryGetComponent(item, registration.Type, out var component))
-                continue;
+            {
+                // Component existed on the saved entity instance but isn't present on the prototype.
+                // Re-add it so we can restore its state.
+                if (_componentFactory.GetComponent(registration.Type) is not Component created)
+                    continue;
+
+                EntityManager.AddComponent(item, created);
+
+                if (!EntityManager.TryGetComponent(item, registration.Type, out component))
+                    continue;
+            }
 
             RestoreComponentFields(component, componentData.Fields);
         }

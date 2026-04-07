@@ -130,13 +130,12 @@ public sealed partial class HumanoidProfileEditor
 
         departments.Sort(DepartmentUIComparer.Instance);
 
+        // HL2RP: role selection is done in the separate "HL2RP" tab.
+        // Keep this tab as a read-only browser (preview + loadouts).
         var items = new[]
         {
-                ("humanoid-profile-editor-job-priority-never-button", (int) JobPriority.Never),
-                // HL2RP CHANGE START single-role-job-preference
-                ("humanoid-profile-editor-job-priority-high-button", (int) JobPriority.High),
-                // HL2RP CHANGE END single-role-job-preference
-            };
+            ("humanoid-profile-editor-job-priority-never-button", (int) JobPriority.Never),
+        };
 
         foreach (var department in departments)
         {
@@ -209,6 +208,8 @@ public sealed partial class HumanoidProfileEditor
                 var jobIcon = _prototypeManager.Index(job.Icon);
                 icon.Texture = _sprite.Frame0(jobIcon.Icon);
                 selector.Setup(items, job.LocalizedName, 200, job.LocalizedDescription, icon, job.Guides);
+                selector.Select((int) JobPriority.Never);
+                selector.LockRequirements("Выбор роли доступен во вкладке HL2RP.");
 
                 // HL2RP CHANGE START single-role-job-preference
                 // Validate role requirements against the profile currently being edited.
@@ -222,31 +223,7 @@ public sealed partial class HumanoidProfileEditor
                     selector.UnlockRequirements();
                 }
 
-                selector.OnSelected += selectedPrio =>
-                {
-                    var selectedJobId = (string) job.ID;
-                    var selectedJobPrio = (JobPriority)selectedPrio;
-                    Profile = Profile?.WithJobPriority(job.ID, selectedJobPrio);
-
-                    foreach (var (jobId, _) in _jobPriorities)
-                    {
-                        if (string.Equals(jobId, selectedJobId, StringComparison.Ordinal))
-                            continue;
-
-                        // HL2RP CHANGE START single-role-job-preference
-                        // Profile.WithJobPriority() already guarantees a single High choice.
-                        // Keep model and UI synced through UpdateJobPriorities() to avoid selector re-entrant events.
-                        if (selectedJobPrio == JobPriority.High)
-                            Profile = Profile?.WithJobPriority(jobId, JobPriority.Never);
-                        // HL2RP CHANGE END single-role-job-preference
-                    }
-
-                    // TODO: Only reload on high change (either to or from).
-                    ReloadPreview();
-
-                    UpdateJobPriorities();
-                    SetDirty();
-                };
+                selector.OnSelected += _ => { };
 
                 var loadoutWindowBtn = new Button()
                 {
