@@ -176,7 +176,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
         if (HasComp<SaveCompsComponent>(item))
         {
-            foreach (var component in EntityManager.GetComponents(item))
+            foreach (var component in AllComps(item))
             {
                 var componentName = _componentFactory.GetComponentName(component.GetType());
 
@@ -298,7 +298,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
             if (!_componentFactory.TryGetRegistration(componentData.Name, out var registration))
                 continue;
 
-            if (!TryComp(item, registration.Type, out var component))
+            if (!EntityManager.TryGetComponent(item, registration.Type, out var component))
                 continue;
 
             RestoreComponentFields(component, componentData.Fields);
