@@ -5,4 +5,5 @@ hl2rp-contracts-terminal-already-has-contract = У вас уже есть акт
 hl2rp-contracts-terminal-accepted = Контракт принят: { $title }.
 hl2rp-contracts-terminal-cancelled = Контракт отменён. Штраф применён.
 hl2rp-contracts-terminal-card-locked = Нельзя извлечь карту: терминал занят, доступно только владельцу карты.
-hl2rp-contracts-poster-complete = Контракт выполнен! Начислено +1 LP и +150 токенов на вашу CID карту.
+hl2rp-contracts-poster-complete = Контракт выполнен! Начислено +{ $lp } LP и +{ $tokens } токенов на вашу CID карту.
+hl2rp-contracts-cargo-complete = Контракт выполнен! Начислено +{ $lp } LP и +{ $tokens } токенов на вашу CID карту.

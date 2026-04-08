@@ -16,7 +16,6 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Content.Server.Stack;
 using Content.Shared.Stacks;
-using Content.Shared.HL2RP.CID.Components;
 
 namespace Content.Server.HL2RP.Contracts.Systems;
 
@@ -29,6 +28,7 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
     [Dependency] private readonly SharedHandsSystem _hands = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly StackSystem _stacks = default!;
+    [Dependency] private readonly CargoBoxContractSystem _cargoBox = default!;
 
     public override void Initialize()
     {
@@ -97,17 +97,27 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
         active.AcceptedAt = _timing.CurTime;
         Dirty(user, active);
 
-        EnsureComp<PosterPasteContractWorkerComponent>(user);
+        if (string.Equals(proto.ObjectiveType, "PosterPaste", StringComparison.Ordinal))
+            EnsureComp<PosterPasteContractWorkerComponent>(user);
 
-        // Give leaflets as a single stack (drops if no space).
-        var coords = Transform(user).Coordinates;
-        var leaflet = Spawn(proto.ItemToGive, coords);
-        var granted = EnsureComp<ContractGrantedItemComponent>(leaflet);
-        granted.ContractId = proto.ID;
-        granted.GrantedTo = GetNetEntity(user);
-        if (TryComp<StackComponent>(leaflet, out var stack))
-            _stacks.SetCount((leaflet, stack), proto.ItemCount);
-        _hands.PickupOrDrop(user, leaflet);
+        if (string.Equals(proto.ObjectiveType, "CargoBoxes", StringComparison.Ordinal))
+        {
+            EnsureComp<CargoBoxContractWorkerComponent>(user);
+            _cargoBox.UpdateBoxHighlights();
+        }
+
+        if (!string.IsNullOrWhiteSpace(proto.ItemToGive))
+        {
+            // Give contract item as a single stack (drops if no space).
+            var coords = Transform(user).Coordinates;
+            var item = Spawn(proto.ItemToGive, coords);
+            var granted = EnsureComp<ContractGrantedItemComponent>(item);
+            granted.ContractId = proto.ID;
+            granted.GrantedTo = GetNetEntity(user);
+            if (TryComp<StackComponent>(item, out var stack))
+                _stacks.SetCount((item, stack), proto.ItemCount);
+            _hands.PickupOrDrop(user, item);
+        }
 
         _popup.PopupEntity(Loc.GetString("hl2rp-contracts-terminal-accepted", ("title", proto.Title)), ent.Owner, user, PopupType.Medium);
         UpdateUi(ent.Owner, ent.Comp, user);
@@ -146,6 +156,8 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
             ApplyCidDelta(cidUid, -proto.CancelPenaltyLp, -proto.CancelPenaltyTokens);
 
         RemComp<PosterPasteContractWorkerComponent>(user);
+        RemComp<CargoBoxContractWorkerComponent>(user);
+        _cargoBox.UpdateBoxHighlights();
         RemComp(user, active);
 
         _popup.PopupEntity(Loc.GetString("hl2rp-contracts-terminal-cancelled"), ent.Owner, user, PopupType.Medium);

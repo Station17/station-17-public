@@ -9,6 +9,7 @@ using Content.Server.Popups;
 using Content.Server.Inventory;
 using Content.Server.Stack;
 using Content.Shared.HL2RP.CID.Components;
+using Content.Shared.HL2RP.Contracts.Prototypes;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
@@ -114,8 +115,10 @@ public sealed class PosterPasteSystem : EntitySystem
         if (args.Args.Target is not { } wallUid)
             return;
 
-        // Must have active contract.
-        if (!TryComp<ActiveBasicContractComponent>(args.Args.User, out var active))
+        // Must have active poster-paste contract.
+        if (!TryComp<ActiveBasicContractComponent>(args.Args.User, out var active) ||
+            !_prototypes.TryIndex<BasicContractPrototype>(active.ContractId, out var contractProto) ||
+            !string.Equals(contractProto.ObjectiveType, "PosterPaste", StringComparison.Ordinal))
             return;
 
         // Consume leaflet.
@@ -182,14 +185,16 @@ public sealed class PosterPasteSystem : EntitySystem
         {
             if (TryFindUsersCid(args.Args.User, out var cidUid, out var cid))
             {
-                cid.LPCount = Math.Clamp(cid.LPCount + 1, -9999, 9999);
-                cid.TokensCount = Math.Clamp(cid.TokensCount + 150, -999999, 999999);
+                cid.LPCount = Math.Clamp(cid.LPCount + contractProto.RewardLp, -9999, 9999);
+                cid.TokensCount = Math.Clamp(cid.TokensCount + contractProto.RewardTokens, -999999, 999999);
                 Dirty(cidUid, cid);
             }
 
             RemComp<PosterPasteContractWorkerComponent>(args.Args.User);
             RemComp(args.Args.User, active);
-            _popup.PopupEntity(Loc.GetString("hl2rp-contracts-poster-complete"), args.Args.User, args.Args.User, PopupType.Medium);
+            _popup.PopupEntity(Loc.GetString("hl2rp-contracts-poster-complete",
+                ("lp", contractProto.RewardLp),
+                ("tokens", contractProto.RewardTokens)), args.Args.User, args.Args.User, PopupType.Medium);
         }
 
         args.Handled = true;

@@ -10,3 +10,13 @@
   itemCount: 10
   objectiveType: PosterPaste
 
+- type: hl2rpBasicContract
+  id: HL2RPContractCargoBoxes
+  title: Перенос ящиков
+  requiredCount: 3
+  rewardLp: 3
+  rewardTokens: 550
+  cancelPenaltyLp: 1
+  cancelPenaltyTokens: 50
+  objectiveType: CargoBoxes
+

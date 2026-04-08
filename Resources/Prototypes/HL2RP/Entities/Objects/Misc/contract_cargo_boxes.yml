@@ -1,0 +1,47 @@
+- type: entity
+  parent: BaseItem
+  id: HL2RPContractCargoBox
+  suffix: HL2RP
+  name: контрактный ящик
+  description: Тяжёлый ящик для доставки по контракту.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/ParcelWrap/wrapped_parcel.rsi
+    state: icon
+  - type: Item
+    size: Ginormous
+  - type: Wieldable
+    freeHandsRequired: 1
+    unwieldOnUse: false
+  - type: SpeedModifiedOnWield
+    walkModifier: 0.7
+    sprintModifier: 0.7
+  - type: CargoBoxContractItem
+  - type: CargoBoxContractItemServer
+
+- type: entity
+  parent: BaseStructure
+  id: HL2RPContractCargoDeliveryPoint
+  suffix: HL2RP
+  name: приёмка ящиков
+  description: Сюда нужно сдавать контрактные ящики.
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: Structures/Storage/Crates/trashcart.rsi
+    state: base
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,0.45"
+        density: 200
+        mask:
+        - FullTileMask
+        layer:
+        - MachineLayer
+  - type: CargoBoxDeliveryPoint

@@ -5,4 +5,5 @@ hl2rp-contracts-terminal-already-has-contract = You already have an active contr
 hl2rp-contracts-terminal-accepted = Contract accepted: { $title }.
 hl2rp-contracts-terminal-cancelled = Contract cancelled. Penalty applied.
 hl2rp-contracts-terminal-card-locked = Can't eject the card while the terminal is in use (only the card owner can).
-hl2rp-contracts-poster-complete = Contract complete! +1 LP and +150 tokens were added to your CID card.
+hl2rp-contracts-poster-complete = Contract complete! +{ $lp } LP and +{ $tokens } tokens were added to your CID card.
+hl2rp-contracts-cargo-complete = Contract complete! +{ $lp } LP and +{ $tokens } tokens were added to your CID card.

@@ -27,7 +27,7 @@ public sealed partial class BasicContractPrototype : IPrototype
     [DataField]
     public int CancelPenaltyTokens = 50;
 
-    [DataField(customTypeSerializer: typeof(PrototypeIdSerializer<EntityPrototype>), required: true)]
+    [DataField(customTypeSerializer: typeof(PrototypeIdSerializer<EntityPrototype>))]
     public string ItemToGive = string.Empty;
 
     [DataField]

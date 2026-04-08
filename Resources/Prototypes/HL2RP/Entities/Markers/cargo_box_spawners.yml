@@ -1,0 +1,13 @@
+- type: entity
+  parent: MarkerBase
+  id: HL2RPContractCargoBoxSpawner
+  suffix: HL2RP
+  name: спавнер контрактного ящика
+  description: Спавнит контрактный ящик раз в минуту, если точка пуста.
+  components:
+  - type: Sprite
+    layers:
+    - state: green
+  - type: CargoBoxSpawner
+    boxPrototype: HL2RPContractCargoBox
+    spawnInterval: 00:01:00
