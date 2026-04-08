@@ -3,44 +3,57 @@
     xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
     xmlns:ui="clr-namespace:Content.Client.HL2RP.CID.UI"
     SetSize="840 620">
-    <PanelContainer ModulateSelfOverride="#101010">
+    <PanelContainer ModulateSelfOverride="#2A2A2A">
         <PanelContainer.PanelOverride>
-            <gfx:StyleBoxFlat BackgroundColor="#101010" BorderColor="#2A2A2A" BorderThickness="2" />
+            <gfx:StyleBoxFlat BackgroundColor="#2A2A2A" BorderColor="#4A4A4A" BorderThickness="2" />
         </PanelContainer.PanelOverride>
-        <BoxContainer Orientation="Vertical" Margin="8 8 8 8">
-            <BoxContainer Orientation="Horizontal" Margin="0 0 0 6">
-                <Label Text="CID ПЛАНШЕТ" HorizontalExpand="True" FontColorOverride="#EAEAEA"/>
-                <TextureButton Name="CloseButton" StyleClasses="windowCloseButton" Modulate="#C05050"/>
+        <TabContainer Name="Tabs" Margin="8 8 8 8" VerticalExpand="True" HorizontalExpand="True" TabFontColorOverride="#E6E6E6" TabFontColorInactiveOverride="#9C9C9C">
+            <BoxContainer Name="InfoTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="4">
+                <Label Name="InfoNameLabel" Text="Имя: -" FontColorOverride="#D8D8D8"/>
+                <Label Name="InfoSurnameLabel" Text="Фамилия: -" FontColorOverride="#D8D8D8"/>
+                <Label Name="InfoNumberLabel" Text="Номер гражданина: -" FontColorOverride="#D8D8D8"/>
+                <Label Name="InfoLpLabel" Text="LP: 0" FontColorOverride="#D8D8D8"/>
+                <Label Name="InfoJobLabel" Text="Должность: -" FontColorOverride="#D8D8D8"/>
             </BoxContainer>
 
-            <TabContainer Name="Tabs" VerticalExpand="True" HorizontalExpand="True" TabFontColorOverride="#F0F0F0" TabFontColorInactiveOverride="#9A9A9A">
-                <BoxContainer Name="InfoTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="4">
-                    <Label Name="InfoNameLabel" Text="Имя: -" FontColorOverride="#D6D6D6"/>
-                    <Label Name="InfoSurnameLabel" Text="Фамилия: -" FontColorOverride="#D6D6D6"/>
-                    <Label Name="InfoNumberLabel" Text="Номер гражданина: -" FontColorOverride="#D6D6D6"/>
-                    <Label Name="InfoLpLabel" Text="LP: 0" FontColorOverride="#D6D6D6"/>
-                    <Label Name="InfoJobLabel" Text="Должность: -" FontColorOverride="#D6D6D6"/>
-                </BoxContainer>
-
-                <BoxContainer Name="DatabaseTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
-                    <Label Text="Записи CID" FontColorOverride="#EAEAEA"/>
-                    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+            <BoxContainer Name="DatabaseTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
+                <Label Text="Записи CID" FontColorOverride="#E6E6E6"/>
+                <BoxContainer Orientation="Horizontal" VerticalExpand="True" SeparationOverride="6">
+                    <ScrollContainer HorizontalExpand="True" VerticalExpand="True" SizeFlagsStretchRatio="1.1">
                         <ItemList Name="RecordsList" VerticalExpand="True"/>
                     </ScrollContainer>
+                    <PanelContainer VerticalExpand="True" HorizontalExpand="True" SizeFlagsStretchRatio="1.0">
+                        <PanelContainer.PanelOverride>
+                            <gfx:StyleBoxFlat BackgroundColor="#343434" BorderColor="#5A5A5A" BorderThickness="1" />
+                        </PanelContainer.PanelOverride>
+                        <BoxContainer Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="4">
+                            <Label Name="SelectedNameLabel" Text="Имя: -" FontColorOverride="#D8D8D8"/>
+                            <Label Name="SelectedSurnameLabel" Text="Фамилия: -" FontColorOverride="#D8D8D8"/>
+                            <Label Name="SelectedNumberLabel" Text="Номер: -" FontColorOverride="#D8D8D8"/>
+                            <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                                <Label Text="LP:" FontColorOverride="#D8D8D8" VerticalAlignment="Center"/>
+                                <LineEdit Name="SelectedLpEdit" HorizontalExpand="True"/>
+                                <Button Name="ApplyLpButton" Text="Применить"/>
+                            </BoxContainer>
+                            <Label Name="SelectedLevelLabel" Text="LP уровень: -" FontColorOverride="#D8D8D8"/>
+                            <Label Name="SelectedTokensLabel" Text="Токены: -" FontColorOverride="#D8D8D8"/>
+                            <Label Name="SelectedJobLabel" Text="Должность: -" FontColorOverride="#D8D8D8"/>
+                            <Label Name="SelectedAccessLabel" Text="Доступ: -" FontColorOverride="#D8D8D8"/>
+                        </BoxContainer>
+                    </PanelContainer>
                 </BoxContainer>
+            </BoxContainer>
 
-                <BoxContainer Name="IssueTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
-                    <Label Name="IssueStatusLabel" Text="Вставьте пустую CID карту в слот выдачи" FontColorOverride="#CFCFCF"/>
-                    <LineEdit Name="IssueNameLine" PlaceHolder="Имя"/>
-                    <LineEdit Name="IssueSurnameLine" PlaceHolder="Фамилия"/>
-                    <BoxContainer Orientation="Horizontal" SeparationOverride="4">
-                        <LineEdit Name="IssueNumberLine" PlaceHolder="6-значный номер" HorizontalExpand="True"/>
-                        <Button Name="GenerateNumberButton" Text="Сгенерировать"/>
-                    </BoxContainer>
-                    <Button Name="WriteCardButton" Text="Записать карту"/>
+            <BoxContainer Name="IssueTab" Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
+                <Label Name="IssueStatusLabel" Text="Вставьте пустую CID карту в слот выдачи" FontColorOverride="#D0D0D0"/>
+                <LineEdit Name="IssueNameLine" PlaceHolder="Имя"/>
+                <LineEdit Name="IssueSurnameLine" PlaceHolder="Фамилия"/>
+                <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                    <LineEdit Name="IssueNumberLine" PlaceHolder="6-значный номер" HorizontalExpand="True"/>
+                    <Button Name="GenerateNumberButton" Text="Сгенерировать"/>
                 </BoxContainer>
-
-            </TabContainer>
-        </BoxContainer>
+                <Button Name="WriteCardButton" Text="Записать карту"/>
+            </BoxContainer>
+        </TabContainer>
     </PanelContainer>
 </ui:CIDTabletWindow>

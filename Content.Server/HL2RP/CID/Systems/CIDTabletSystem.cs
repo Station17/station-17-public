@@ -14,11 +14,13 @@ namespace Content.Server.HL2RP.CID.Systems;
 public sealed class CIDTabletSystem : SharedCIDTabletSystem
 {
     private static readonly Regex NumberRegex = new("^[0-9]{6}$", RegexOptions.Compiled);
+    private const float GlobalUiRefreshInterval = 1.0f;
 
     [Dependency] private readonly UserInterfaceSystem _ui = default!;
     private CIDNumberGenerator _numberGenerator = default!;
 
     private readonly Dictionary<EntityUid, EntityUid?> _selectedCards = new();
+    private float _globalUiRefreshAccumulator;
 
     public override void Initialize()
     {
@@ -31,6 +33,20 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         SubscribeLocalEvent<CIDTabletComponent, CIDWriteCardMessage>(OnWriteCard);
         SubscribeLocalEvent<CIDTabletComponent, CIDSelectRecordMessage>(OnSelectRecord);
         SubscribeLocalEvent<CIDTabletComponent, CIDUpdateSelectedLPMessage>(OnUpdateSelectedLp);
+        SubscribeLocalEvent<CIDTabletComponent, EntInsertedIntoContainerMessage>(OnTabletCardInserted);
+        SubscribeLocalEvent<CIDTabletComponent, EntRemovedFromContainerMessage>(OnTabletCardRemoved);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        _globalUiRefreshAccumulator += frameTime;
+        if (_globalUiRefreshAccumulator < GlobalUiRefreshInterval)
+            return;
+
+        _globalUiRefreshAccumulator = 0f;
+        RefreshAllOpenTabletUis();
     }
 
     private void OnUiOpened(Entity<CIDTabletComponent> ent, ref BoundUIOpenedEvent args)
@@ -41,6 +57,16 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
     private void OnGenerateNumber(Entity<CIDTabletComponent> ent, ref CIDGenerateNumberMessage args)
     {
         UpdateUi(ent.Owner, ent.Comp, _numberGenerator.GenerateUniqueNumber());
+    }
+    
+    private void OnTabletCardInserted(Entity<CIDTabletComponent> ent, ref EntInsertedIntoContainerMessage args)
+    {
+        UpdateUi(ent.Owner, ent.Comp);
+    }
+
+    private void OnTabletCardRemoved(Entity<CIDTabletComponent> ent, ref EntRemovedFromContainerMessage args)
+    {
+        UpdateUi(ent.Owner, ent.Comp);
     }
 
     private void OnSelectRecord(Entity<CIDTabletComponent> ent, ref CIDSelectRecordMessage args)
@@ -64,7 +90,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
 
         cid.LPCount = Math.Clamp(args.LPCount, -9999, 9999);
         Dirty(target, cid);
-        UpdateUi(ent.Owner, ent.Comp);
+        RefreshAllOpenTabletUis();
     }
 
     private void OnWriteCard(Entity<CIDTabletComponent> ent, ref CIDWriteCardMessage args)
@@ -108,7 +134,19 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             ItemSlots.TryEject(ent.Owner, ent.Comp.IssueCardSlot, null, out _, true);
 
         ent.Comp.IssueCard = null;
-        UpdateUi(ent.Owner, ent.Comp);
+        RefreshAllOpenTabletUis();
+    }
+
+    private void RefreshAllOpenTabletUis()
+    {
+        var query = EntityQueryEnumerator<CIDTabletComponent>();
+        while (query.MoveNext(out var uid, out var comp))
+        {
+            if (!_ui.IsUiOpen(uid, CIDTabletUiKey.Key))
+                continue;
+
+            UpdateUi(uid, comp);
+        }
     }
 
     private void UpdateUi(EntityUid uid, CIDTabletComponent comp, string? generatedNumber = null)
