@@ -11,5 +11,7 @@
     - state: paper
   - type: Item
     size: Tiny
+  - type: Stack
+    stackType: HL2RPContractLeaflet
   - type: ContractLeaflet
 

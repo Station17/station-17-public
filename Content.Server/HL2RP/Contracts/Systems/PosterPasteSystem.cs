@@ -7,6 +7,7 @@ using Content.Shared.EntityTable;
 using Content.Server.DoAfter;
 using Content.Server.Popups;
 using Content.Server.Inventory;
+using Content.Server.Stack;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
@@ -27,9 +28,12 @@ public sealed class PosterPasteSystem : EntitySystem
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly ServerInventorySystem _inventory = default!;
+    [Dependency] private readonly EntityLookupSystem _lookup = default!;
+    [Dependency] private readonly StackSystem _stacks = default!;
 
     // Track spawned poster -> marker for reactivation on deletion.
     private readonly Dictionary<EntityUid, EntityUid> _posterToMarker = new();
+    private readonly HashSet<Entity<PosterPasteMarkerComponent>> _nearbyMarkers = new();
 
     public override void Initialize()
     {
@@ -49,7 +53,27 @@ public sealed class PosterPasteSystem : EntitySystem
         if (!args.CanReach || args.Target is not { } target)
             return;
 
-        if (!TryComp<PosterPasteMarkerComponent>(target, out var marker) || !marker.Active)
+        // Only workers with an active contract can paste.
+        if (!HasComp<PosterPasteContractWorkerComponent>(args.User) ||
+            !HasComp<ActiveBasicContractComponent>(args.User))
+        {
+            return;
+        }
+
+        // You click a wall, not the hidden marker entity. Find an active marker near the click location.
+        _nearbyMarkers.Clear();
+        _lookup.GetEntitiesInRange(args.ClickLocation, 0.6f, _nearbyMarkers);
+        EntityUid? markerUid = null;
+        foreach (var markerEnt in _nearbyMarkers)
+        {
+            if (!markerEnt.Comp.Active)
+                continue;
+
+            markerUid = markerEnt.Owner;
+            break;
+        }
+
+        if (markerUid == null)
             return;
 
         args.Handled = true;
@@ -57,12 +81,13 @@ public sealed class PosterPasteSystem : EntitySystem
         var doAfter = new DoAfterArgs(EntityManager,
             args.User,
             ent.Comp.PasteDoAfter,
-            new PosterPasteDoAfterEvent(GetNetEntity(target)),
+            new PosterPasteDoAfterEvent(GetNetEntity(markerUid.Value)),
             ent.Owner,
             target: target,
             used: ent.Owner)
         {
             BreakOnMove = true,
+            MovementThreshold = 0.01f,
             BreakOnDamage = true,
             NeedHand = true,
             Hidden = false, // visible to everyone
@@ -78,10 +103,14 @@ public sealed class PosterPasteSystem : EntitySystem
         if (args.Handled || args.Cancelled)
             return;
 
-        if (args.Args.Target is not { } markerUid)
+        var markerUid = GetEntity(args.Marker);
+        if (markerUid == EntityUid.Invalid || !Exists(markerUid))
             return;
 
         if (!TryComp<PosterPasteMarkerComponent>(markerUid, out var marker) || !marker.Active)
+            return;
+
+        if (args.Args.Target is not { } wallUid)
             return;
 
         // Must have active contract.
@@ -94,18 +123,30 @@ public sealed class PosterPasteSystem : EntitySystem
             // If leaflet isn't from the active contract, don't allow progress.
             if (!string.Equals(granted.ContractId, active.ContractId, StringComparison.Ordinal))
                 return;
+
+            // Also ensure this leaflet belongs to this user (prevents using someone else's stack).
+            if (granted.GrantedTo != GetNetEntity(args.Args.User))
+                return;
         }
 
-        // Consume leaflet.
-        if (!Deleted(ent.Owner))
-            QueueDel(ent.Owner);
+        // Consume 1 leaflet (stack-aware).
+        if (TryComp<Content.Shared.Stacks.StackComponent>(ent.Owner, out var stack))
+        {
+            if (!_stacks.TryUse((ent.Owner, stack), 1))
+                return;
+        }
+        else
+        {
+            if (!Deleted(ent.Owner))
+                QueueDel(ent.Owner);
+        }
 
         // Deactivate marker.
         marker.Active = false;
         Dirty(markerUid, marker);
 
         // Spawn poster and schedule deletion + reactivation.
-        var poster = SpawnRandomPoster(Transform(markerUid).Coordinates);
+        var poster = SpawnRandomPoster(Transform(wallUid).Coordinates);
         if (poster != null && Exists(poster.Value))
         {
             Timer.Spawn(TimeSpan.FromMinutes(5), () =>
@@ -167,8 +208,11 @@ public sealed class PosterPasteSystem : EntitySystem
 
         var pickContraband = _random.Prob(0.5f);
         var table = pickContraband ? contraband : legit;
-        var spawns = _tables.GetSpawns(table);
-        var proto = spawns.FirstOrDefault();
+        var spawns = _tables.GetSpawns(table).ToList();
+        if (spawns.Count == 0)
+            return Spawn("PosterBroken", coords);
+
+        var proto = _random.Pick(spawns);
         if (string.IsNullOrWhiteSpace(proto))
             return Spawn("PosterBroken", coords);
 

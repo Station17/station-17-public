@@ -14,6 +14,8 @@ using Robust.Server.GameObjects;
 using Robust.Shared.Containers;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
+using Content.Server.Stack;
+using Content.Shared.Stacks;
 
 namespace Content.Server.HL2RP.Contracts.Systems;
 
@@ -25,6 +27,7 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
     [Dependency] private readonly ServerInventorySystem _inventory = default!;
     [Dependency] private readonly SharedHandsSystem _hands = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly StackSystem _stacks = default!;
 
     public override void Initialize()
     {
@@ -95,14 +98,15 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
 
         EnsureComp<PosterPasteContractWorkerComponent>(user);
 
-        // Give leaflets (drops if no space).
+        // Give leaflets as a single stack (drops if no space).
         var coords = Transform(user).Coordinates;
-        for (var i = 0; i < proto.ItemCount; i++)
-        {
-            var leaflet = Spawn(proto.ItemToGive, coords);
-            EnsureComp<ContractGrantedItemComponent>(leaflet).ContractId = proto.ID;
-            _hands.PickupOrDrop(user, leaflet);
-        }
+        var leaflet = Spawn(proto.ItemToGive, coords);
+        var granted = EnsureComp<ContractGrantedItemComponent>(leaflet);
+        granted.ContractId = proto.ID;
+        granted.GrantedTo = GetNetEntity(user);
+        if (TryComp<StackComponent>(leaflet, out var stack))
+            _stacks.SetCount((leaflet, stack), proto.ItemCount);
+        _hands.PickupOrDrop(user, leaflet);
 
         _popup.PopupEntity(Loc.GetString("hl2rp-contracts-terminal-accepted", ("title", proto.Title)), ent.Owner, user, PopupType.Medium);
         UpdateUi(ent.Owner, ent.Comp, user);
@@ -120,21 +124,25 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
             return;
         }
 
-        // Remove granted items for this contract (wherever they are in the user's inventory).
-        var grantedQuery = EntityQueryEnumerator<ContractGrantedItemComponent, TransformComponent>();
-        while (grantedQuery.MoveNext(out var itemUid, out var granted, out var xform))
+        // Remove granted items for this contract, anywhere (even if dropped).
+        var grantedQuery = EntityQueryEnumerator<ContractGrantedItemComponent>();
+        var userNet = GetNetEntity(user);
+        while (grantedQuery.MoveNext(out var itemUid, out var granted))
         {
             if (!string.Equals(granted.ContractId, proto.ID, StringComparison.Ordinal))
                 continue;
 
-            if (!IsInHierarchy(itemUid, user))
+            if (granted.GrantedTo != userNet)
                 continue;
 
             QueueDel(itemUid);
         }
 
-        // Apply cancel penalty to user's CID card (id-slot).
-        ApplyCidDelta(user, -proto.CancelPenaltyLp, -proto.CancelPenaltyTokens);
+        // Apply cancel penalty to the inserted CID card (fallback to id-slot if needed).
+        if (ent.Comp.InsertedCard is { } inserted)
+            ApplyCidDelta(inserted, -proto.CancelPenaltyLp, -proto.CancelPenaltyTokens);
+        else
+            ApplyCidDeltaToWornId(user, -proto.CancelPenaltyLp, -proto.CancelPenaltyTokens);
 
         RemComp<PosterPasteContractWorkerComponent>(user);
         RemComp(user, active);
@@ -249,17 +257,22 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
         return string.Equals(cardId.FullName, userId.FullName, StringComparison.OrdinalIgnoreCase);
     }
 
-    private void ApplyCidDelta(EntityUid user, int deltaLp, int deltaTokens)
+    private void ApplyCidDelta(EntityUid cidCardUid, int deltaLp, int deltaTokens)
     {
-        if (!_inventory.TryGetSlotEntity(user, "id", out var idUid) || idUid is not { } id)
-            return;
-
-        if (!TryComp<CIDCardComponent>(id, out var cid))
+        if (!TryComp<CIDCardComponent>(cidCardUid, out var cid))
             return;
 
         cid.LPCount = Math.Clamp(cid.LPCount + deltaLp, -9999, 9999);
         cid.TokensCount = Math.Clamp(cid.TokensCount + deltaTokens, -999999, 999999);
-        Dirty(id, cid);
+        Dirty(cidCardUid, cid);
+    }
+
+    private void ApplyCidDeltaToWornId(EntityUid user, int deltaLp, int deltaTokens)
+    {
+        if (!_inventory.TryGetSlotEntity(user, "id", out var idUid) || idUid is not { } id)
+            return;
+
+        ApplyCidDelta(id, deltaLp, deltaTokens);
     }
 
     private bool IsInHierarchy(EntityUid child, EntityUid potentialParent)

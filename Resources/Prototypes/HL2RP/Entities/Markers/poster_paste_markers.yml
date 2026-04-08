@@ -6,7 +6,8 @@
   description: Невидимая метка для расклейки листовок.
   components:
   - type: Sprite
-    visible: false
+    layers:
+    - state: blue
   - type: PosterPasteMarker
 
 - type: entity

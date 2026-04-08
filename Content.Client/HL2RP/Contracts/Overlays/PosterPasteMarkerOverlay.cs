@@ -14,6 +14,7 @@ public sealed class PosterPasteMarkerOverlay : Overlay
 {
     private static readonly SpriteSpecifier.Rsi PaperRsi = new(new ResPath("/Textures/Objects/Misc/bureaucracy.rsi"), "paper");
     private static readonly ProtoId<ShaderPrototype> UnshadedShader = "unshaded";
+    private const float MarkerScale = 1.75f;
 
     [Dependency] private readonly IEntityManager _entMan = default!;
     [Dependency] private readonly IPlayerManager _players = default!;
@@ -51,7 +52,7 @@ public sealed class PosterPasteMarkerOverlay : Overlay
         var markerQuery = _entMan.AllEntityQueryEnumerator<PosterPasteMarkerComponent, TransformComponent>();
         var curTime = _timing.RealTime;
         var texture = _sprite.GetFrame(PaperRsi, curTime);
-        var half = new Vector2(texture.Width / 2f, texture.Height / 2f);
+        var half = new Vector2(texture.Width / 2f, texture.Height / 2f) * MarkerScale;
 
         while (markerQuery.MoveNext(out var uid, out var marker, out var xform))
         {
@@ -63,7 +64,7 @@ public sealed class PosterPasteMarkerOverlay : Overlay
 
             var world = _transform.GetWorldPosition(xform, xformQuery);
             var screen = Vector2.Transform(world, matrix);
-            handle.DrawTexture(texture, screen - half);
+            handle.DrawTextureRect(texture, new UIBox2(screen - half, screen + half));
         }
 
         handle.UseShader(null);

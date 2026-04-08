@@ -1,0 +1,7 @@
+- type: stack
+  id: HL2RPContractLeaflet
+  name: листовки
+  icon: Objects/Misc/bureaucracy.rsi/paper.png
+  spawn: HL2RPContractLeaflet
+  maxCount: 10
+
