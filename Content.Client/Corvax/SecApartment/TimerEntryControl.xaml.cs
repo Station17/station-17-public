@@ -34,8 +34,8 @@ public sealed partial class TimerEntryControl : PanelContainer
     {
         PanelOverride = new StyleBoxFlat
         {
-            BackgroundColor = Color.FromHex("#202020"),
-            BorderColor = Color.FromHex("#7b7b7b"),
+            BackgroundColor = Color.FromHex("#2a0a0a"),
+            BorderColor = Color.FromHex("#ff4444"),
             BorderThickness = new Thickness(1),
             ContentMarginBottomOverride = 6,
             ContentMarginLeftOverride = 8,
@@ -72,18 +72,18 @@ public sealed partial class TimerEntryControl : PanelContainer
         {
             var overdue = -remaining;
             TimeLabel.Text = $"-{FormatTimeSpan(overdue)}";
-            TimeLabel.FontColorOverride = Color.FromHex("#d0d0d0");
+            TimeLabel.FontColorOverride = Color.FromHex("#ff0000");
         }
         else
         {
             TimeLabel.Text = FormatTimeSpan(remaining);
 
             if (remaining.TotalSeconds < 30)
-                TimeLabel.FontColorOverride = Color.FromHex("#d0d0d0");
+                TimeLabel.FontColorOverride = Color.FromHex("#ff3333");
             else if (remaining.TotalSeconds < 60)
-                TimeLabel.FontColorOverride = Color.FromHex("#b0b0b0");
+                TimeLabel.FontColorOverride = Color.FromHex("#ff9933");
             else
-                TimeLabel.FontColorOverride = Color.FromHex("#8f8f8f");
+                TimeLabel.FontColorOverride = Color.FromHex("#ff6666");
         }
     }
 

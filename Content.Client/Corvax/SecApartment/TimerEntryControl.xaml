@@ -13,13 +13,13 @@
 
             <Label Name="TimerLabel"
                    HorizontalExpand="True"
-                   FontColorOverride="#c2c2c2"
+                   FontColorOverride="#ff9999"
                    Margin="0 0 10 0" />
 
             <Label Name="TimeLabel"
                    MinWidth="80"
                    HorizontalAlignment="Right"
-                   FontColorOverride="#8f8f8f" />
+                   FontColorOverride="#ff6666" />
 
             <Button Name="RemoveButton"
                     Text="{Loc 'sec-apartment-ui-timers-remove'}"
@@ -34,18 +34,18 @@
                       VerticalAlignment="Center">
 
             <Label Text="{Loc 'sec-apartment-ui-timers-total-time'}"
-                   FontColorOverride="#a9a9a9"
+                   FontColorOverride="#ff8888"
                    Margin="0 0 5 0" />
 
             <Label Name="TotalTimeLabel"
                    HorizontalExpand="True"
-                   FontColorOverride="#d0d0d0" />
+                   FontColorOverride="#ffaaaa" />
 
         </BoxContainer>
 
         <PanelContainer StyleClasses="LowDivider" HorizontalExpand="True" Margin="0 2 0 2" SetHeight="1">
             <PanelContainer.PanelOverride>
-                <gfx:StyleBoxFlat BackgroundColor="#666666" />
+                <gfx:StyleBoxFlat BackgroundColor="#ff4444" />
             </PanelContainer.PanelOverride>
         </PanelContainer>
 

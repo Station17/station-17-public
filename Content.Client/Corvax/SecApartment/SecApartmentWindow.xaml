@@ -5,55 +5,56 @@
     xmlns:gfx="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
     SetSize="1000 650" MouseFilter="Stop">
 
-    <PanelContainer Name="Background" StyleClasses="PdaBackgroundRect" ModulateSelfOverride="#111111"/>
-    <PanelContainer Name="Border" StyleClasses="PdaBorderRect" Modulate="#4a4a4a"/>
+    <PanelContainer Name="Background" StyleClasses="PdaBackgroundRect" ModulateSelfOverride="#121212"/>
+    <PanelContainer Name="Border" StyleClasses="PdaBorderRect" Modulate="#303030"/>
 
     <BoxContainer Orientation="Vertical" HorizontalExpand="True">
 
         <BoxContainer SetHeight="40" Margin="20 10 10 5" Orientation="Horizontal" HorizontalExpand="True">
+            <TextureRect TexturePath="/Textures/Interface/Nano/ntlogo.svg.png" SetSize="32 32" Margin="0 0 10 0"/>
             <Label Text="{Loc 'sec-apartment-ui-sec-apartment'}" StyleClasses="ConsoleHeadingBig"
                    HorizontalExpand="True"/>
             <TextureButton Name="CloseButton" StyleClasses="windowCloseButton"
-                           Modulate="#a6a6a6" VerticalAlignment="Center"/>
+                           Modulate="#ff4444" VerticalAlignment="Center"/>
         </BoxContainer>
 
         <Control Margin="15 0" RectClipContent="True" VerticalExpand="true"
                  HorizontalExpand="True">
-            <PanelContainer Name="ContentBorder" StyleClasses="PdaBackground" Modulate="#1b1b1b"/>
+            <PanelContainer Name="ContentBorder" StyleClasses="PdaBackground" Modulate="#440000"/>
             <Control Name="ContentsContainer" Margin="3 3" Modulate="#FFFFFF">
 
-                <PanelContainer Name="ContentBackground" StyleClasses="PdaContentBackground" Modulate="#262626"/>
+                <PanelContainer Name="ContentBackground" StyleClasses="PdaContentBackground" Modulate="#BB2222"/>
 
                 <BoxContainer Orientation="Vertical">
 
                     <BoxContainer Orientation="Horizontal" Margin="10 5 10 0">
-                        <Label Text="{Loc 'sec-apartment-ui-station'}" StyleClasses="ConsoleSubHeading" FontColorOverride="#a9a9a9"/>
-                        <Label Name="StationLabel" StyleClasses="ConsoleHeading" FontColorOverride="#d2d2d2"
+                        <Label Text="{Loc 'sec-apartment-ui-station'}" StyleClasses="ConsoleSubHeading" FontColorOverride="#ff8888"/>
+                        <Label Name="StationLabel" StyleClasses="ConsoleHeading" FontColorOverride="#ff4444"
                                HorizontalExpand="True" HorizontalAlignment="Right"/>
                     </BoxContainer>
 
                     <PanelContainer StyleClasses="LowDivider" HorizontalExpand="True" Margin="10 5 10 5" SetHeight="2">
                         <PanelContainer.PanelOverride>
-                            <gfx:StyleBoxFlat BackgroundColor="#666666" />
+                            <gfx:StyleBoxFlat BackgroundColor="#ff4444" />
                         </PanelContainer.PanelOverride>
                     </PanelContainer>
 
                     <TabContainer Name="Tabs" Margin="10 0 10 0" VerticalExpand="True" HorizontalExpand="True"
-                                    TabFontColorOverride="#d2d2d2" TabFontColorInactiveOverride="#9a9a9a">
+                                    TabFontColorOverride="#ff4444" TabFontColorInactiveOverride="#ff8888">
 
                         <BoxContainer Orientation="Horizontal" VerticalExpand="True" HorizontalExpand="True" Margin="10">
 
                             <BoxContainer Orientation="Vertical" MinWidth="400" Margin="0 0 15 0">
 
                                 <BoxContainer Orientation="Horizontal" Margin="0 0 0 5">
-                                    <Label Text="{Loc 'sec-apartment-ui-no-squads-crew'}" StyleClasses="ConsoleSubHeading" FontColorOverride="#a9a9a9"/>
+                                    <Label Text="{Loc 'sec-apartment-ui-no-squads-crew'}" StyleClasses="ConsoleSubHeading" FontColorOverride="#ff8888"/>
                                     <Label Name="UnassignedCountLabel" StyleClasses="ConsoleText"
-                                        FontColorOverride="#d2d2d2" HorizontalExpand="True" HorizontalAlignment="Right"/>
+                                        FontColorOverride="#ff4444" HorizontalExpand="True" HorizontalAlignment="Right"/>
                                 </BoxContainer>
 
                                 <PanelContainer StyleClasses="AngleRect" VerticalExpand="True" HorizontalExpand="True" Modulate="#FFFFFF">
                                     <PanelContainer.PanelOverride>
-                                        <gfx:StyleBoxFlat BackgroundColor="#1e1e1e" BorderColor="#7b7b7b" BorderThickness="2" />
+                                        <gfx:StyleBoxFlat BackgroundColor="#330000" BorderColor="#ff4444" BorderThickness="2" />
                                     </PanelContainer.PanelOverride>
 
                                     <ScrollContainer VerticalExpand="True" HorizontalExpand="True">
@@ -71,7 +72,7 @@
 
                                 <PanelContainer StyleClasses="AngleRect" Margin="0 0 0 10">
                                     <PanelContainer.PanelOverride>
-                                        <gfx:StyleBoxFlat BackgroundColor="#252525" BorderColor="#7b7b7b" BorderThickness="2" />
+                                        <gfx:StyleBoxFlat BackgroundColor="#552222" BorderColor="#ff4444" BorderThickness="2" />
                                     </PanelContainer.PanelOverride>
 
                                     <BoxContainer Orientation="Horizontal" Margin="8">
@@ -86,14 +87,14 @@
                                 </PanelContainer>
 
                                 <BoxContainer Orientation="Horizontal" Margin="0 0 0 5">
-                                    <Label Text="{Loc 'sec-apartment-ui-squads'}" StyleClasses="ConsoleSubHeading" FontColorOverride="#a9a9a9"/>
+                                    <Label Text="{Loc 'sec-apartment-ui-squads'}" StyleClasses="ConsoleSubHeading" FontColorOverride="#ff8888"/>
                                     <Label Name="SquadsCountLabel" StyleClasses="ConsoleText"
-                                        FontColorOverride="#d2d2d2" HorizontalExpand="True" HorizontalAlignment="Right"/>
+                                        FontColorOverride="#ff4444" HorizontalExpand="True" HorizontalAlignment="Right"/>
                                 </BoxContainer>
 
                                 <PanelContainer StyleClasses="AngleRect" VerticalExpand="True" HorizontalExpand="True" Modulate="#FFFFFF">
                                     <PanelContainer.PanelOverride>
-                                        <gfx:StyleBoxFlat BackgroundColor="#1e1e1e" BorderColor="#7b7b7b" BorderThickness="2" />
+                                        <gfx:StyleBoxFlat BackgroundColor="#330000" BorderColor="#ff4444" BorderThickness="2" />
                                     </PanelContainer.PanelOverride>
 
                                     <ScrollContainer VerticalExpand="True" HorizontalExpand="True" HScrollEnabled="False">
@@ -112,14 +113,14 @@
                         <BoxContainer Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True" Margin="10">
 
                             <BoxContainer Orientation="Horizontal" Margin="0 0 0 5">
-                                <Label Text="{Loc 'sec-apartment-ui-timers'}" StyleClasses="ConsoleSubHeading" FontColorOverride="#a9a9a9"/>
+                                <Label Text="{Loc 'sec-apartment-ui-timers'}" StyleClasses="ConsoleSubHeading" FontColorOverride="#ff8888"/>
                                 <Label Name="TimersCountLabel" StyleClasses="ConsoleText"
-                                    FontColorOverride="#d2d2d2" HorizontalExpand="True" HorizontalAlignment="Right"/>
+                                    FontColorOverride="#ff4444" HorizontalExpand="True" HorizontalAlignment="Right"/>
                             </BoxContainer>
 
                             <PanelContainer StyleClasses="AngleRect" VerticalExpand="True" HorizontalExpand="True" Modulate="#FFFFFF">
                                 <PanelContainer.PanelOverride>
-                                    <gfx:StyleBoxFlat BackgroundColor="#1e1e1e" BorderColor="#7b7b7b" BorderThickness="2" />
+                                    <gfx:StyleBoxFlat BackgroundColor="#330000" BorderColor="#ff4444" BorderThickness="2" />
                                 </PanelContainer.PanelOverride>
 
                                 <ScrollContainer VerticalExpand="True" HorizontalExpand="True" HScrollEnabled="False">
@@ -134,7 +135,7 @@
                             <BoxContainer Orientation="Horizontal" Margin="10 5 10 0">
                                 <Label Text="{Loc 'sec-apartment-ui-timers-info'}"
                                     StyleClasses="LabelSubText"
-                                    FontColorOverride="#9f9f9f"
+                                    FontColorOverride="#ff8888"
                                     HorizontalExpand="True"
                                     HorizontalAlignment="Center"/>
                             </BoxContainer>
@@ -155,7 +156,7 @@
 
         <BoxContainer Orientation="Horizontal" SetHeight="30" Margin="0 5 0 0">
             <Label Name="Footer" Text="{Loc 'sec-apartment-ui-footer'}"
-                   StyleClasses="ConsoleSubText" FontColorOverride="#9a9a9a"
+                   StyleClasses="ConsoleSubText" FontColorOverride="#ff8888"
                    HorizontalExpand="True" HorizontalAlignment="Right" Margin="10 0"/>
         </BoxContainer>
 

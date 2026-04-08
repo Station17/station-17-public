@@ -64,7 +64,7 @@
                               VerticalAlignment="Center"
                               HorizontalExpand="False">
                     <Label Text="{Loc 'sec-apartment-ui-squads-status'}"
-                           FontColorOverride="#a9a9a9"
+                           FontColorOverride="#ff8888"
                            Margin="0 0 5 0" />
 
                     <OptionButton Name="StatusDropdown" StyleClasses="SecApartmentOptionButton"
@@ -113,17 +113,17 @@
                       VerticalAlignment="Center"
                       Margin="0 5 0 0">
             <Label Text="{Loc 'sec-apartment-ui-squads-location'}"
-                   FontColorOverride="#a9a9a9"
+                   FontColorOverride="#ff8888"
                    Margin="0 0 5 0" />
 
             <Label Name="SquadLocationLabel"
                    HorizontalExpand="True"
-                   FontColorOverride="#c2c2c2" />
+                   FontColorOverride="#ff9999" />
         </BoxContainer>
 
         <PanelContainer StyleClasses="LowDivider" HorizontalExpand="True" Margin="0 5 0 5" SetHeight="2">
             <PanelContainer.PanelOverride>
-                <gfx:StyleBoxFlat BackgroundColor="#666666" />
+                <gfx:StyleBoxFlat BackgroundColor="#ff4444" />
             </PanelContainer.PanelOverride>
         </PanelContainer>
 

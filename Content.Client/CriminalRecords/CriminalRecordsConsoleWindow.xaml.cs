@@ -54,7 +54,6 @@ public sealed partial class CriminalRecordsConsoleWindow : FancyWindow
     private StationRecordFilterType _currentFilterType;
 
     private SecurityStatus _currentCrewListFilter;
-    private bool _isPopulating;
 
     public CriminalRecordsConsoleWindow(EntityUid console, uint maxLength, IPlayerManager playerManager, IPrototypeManager prototypeManager, IRobustRandom robustRandom, AccessReaderSystem accessReader)
     {
@@ -95,9 +94,6 @@ public sealed partial class CriminalRecordsConsoleWindow : FancyWindow
 
         RecordListing.OnItemSelected += args =>
         {
-            if (_isPopulating)
-                return;
-
             if (RecordListing[args.ItemIndex].Metadata is not uint cast)
                 return;
 
@@ -106,9 +102,6 @@ public sealed partial class CriminalRecordsConsoleWindow : FancyWindow
 
         RecordListing.OnItemDeselected += _ =>
         {
-            if (_isPopulating)
-                return;
-
             OnKeySelected?.Invoke(null);
         };
 
@@ -153,8 +146,6 @@ public sealed partial class CriminalRecordsConsoleWindow : FancyWindow
                 OnHistoryUpdated?.Invoke(record, _access, true);
         };
     }
-
-    protected override DragMode GetDragModeFor(Vector2 relativeMousePos) => DragMode.Move;
 
     public void StatusFilterPressed(SecurityStatus statusSelected)
     {
@@ -217,14 +208,9 @@ public sealed partial class CriminalRecordsConsoleWindow : FancyWindow
     {
         if (listing == null)
         {
-            _isPopulating = true;
             RecordListing.Clear();
-            RecordListing.ClearSelected();
-            _isPopulating = false;
             return;
         }
-
-        _isPopulating = true;
 
         var entries = listing.Select(i => new ItemList.Item(RecordListing) {
                 Text = i.Value,
@@ -232,24 +218,6 @@ public sealed partial class CriminalRecordsConsoleWindow : FancyWindow
         }).ToList();
         entries.Sort((a, b) => string.Compare(a.Text, b.Text, StringComparison.Ordinal));
         RecordListing.SetItems(entries, (a,b) => string.Compare(a.Text, b.Text));
-
-        if (_selectedKey is { } selectedKey)
-        {
-            for (var i = 0; i < RecordListing.Count; i++)
-            {
-                if (RecordListing[i].Metadata is uint key && key == selectedKey)
-                {
-                    RecordListing.Select(i);
-                    break;
-                }
-            }
-        }
-        else
-        {
-            RecordListing.ClearSelected();
-        }
-
-        _isPopulating = false;
     }
 
     private void PopulateRecordContainer(GeneralStationRecord stationRecord, CriminalRecord criminalRecord)

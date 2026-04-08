@@ -10,13 +10,13 @@ public sealed class SecApartmentStyles
 {
     private readonly IResourceCache _resCache;
 
-    public static Color TabActiveColor => Color.FromHex("#c6c6c6");
-    public static Color TabInactiveColor => Color.FromHex("#909090");
-    public static Color HeadingColor => Color.FromHex("#dddddd");
-    public static Color SubHeadingColor => Color.FromHex("#b0b0b0");
-    public static Color TextColor => Color.FromHex("#c2c2c2");
-    public static Color SubTextColor => Color.FromHex("#9a9a9a");
-    public static Color PlaceholderColor => Color.FromHex("#7c7c7c");
+    public static Color TabActiveColor => Color.FromHex("#ff4444");
+    public static Color TabInactiveColor => Color.FromHex("#ff8888");
+    public static Color HeadingColor => Color.FromHex("#ff4444");
+    public static Color SubHeadingColor => Color.FromHex("#ff8888");
+    public static Color TextColor => Color.FromHex("#ff9999");
+    public static Color SubTextColor => Color.FromHex("#ff8888");
+    public static Color PlaceholderColor => Color.FromHex("#ff6666");
 
     public const string StyleClassButtonRed = "ButtonRed";
     public const string StyleClassConsoleLineEdit = "ConsoleLineEdit";
@@ -50,36 +50,36 @@ public sealed class SecApartmentStyles
     }
 
     public StyleBox GetTabActiveStyle() => CreateStyleBox(
-        Color.FromHex("#2a2a2a"),
+        Color.FromHex("#440000"),
         TabActiveColor,
         new Thickness(2, 2, 2, 0),
         new Thickness(10, 5, 10, 5)
     );
 
     public StyleBox GetTabInactiveStyle() => CreateStyleBox(
-        Color.FromHex("#1f1f1f"),
+        Color.FromHex("#220000"),
         TabInactiveColor,
         new Thickness(2, 2, 2, 0),
         new Thickness(10, 5, 10, 5)
     );
 
     public StyleBox GetPanelStyle() => CreateStyleBox(
-        Color.FromHex("#171717"),
+        Color.FromHex("#110000"),
         TabActiveColor,
         new Thickness(2),
         new Thickness(5, 5, 5, 5)
     );
 
     public StyleBox GetButtonRedStyle() => CreateStyleBox(
-        Color.FromHex("#343434"),
-        Color.FromHex("#a0a0a0"),
+        Color.FromHex("#660000"),
+        Color.FromHex("#ff4444"),
         new Thickness(1),
         new Thickness(8, 4, 8, 4)
     );
 
     public StyleBox GetLineEditStyle() => CreateStyleBox(
-        Color.FromHex("#1a1a1a"),
-        Color.FromHex("#8c8c8c"),
+        Color.FromHex("#110000"),
+        Color.FromHex("#ff4444"),
         new Thickness(1),
         new Thickness(4, 2, 4, 2)
     );
@@ -129,7 +129,7 @@ public sealed class SecApartmentStyles
     }
 
     public StyleBox GetOptionButtonStyle() => CreateStyleBox(
-        Color.FromHex("#252525"),
+        Color.FromHex("#330000"),
         TabActiveColor,
         new Thickness(1),
         new Thickness(6, 3, 6, 3)
@@ -156,7 +156,7 @@ public sealed class SecApartmentStyles
             {
                 new StyleProperty(PanelContainer.StylePropertyPanel, new StyleBoxFlat
                 {
-                    BackgroundColor = Color.FromHex("#252525"),
+                    BackgroundColor = Color.FromHex("#330000"),
                     BorderColor = TabActiveColor,
                     BorderThickness = new Thickness(1)
                 })
