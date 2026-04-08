@@ -51,6 +51,7 @@ public sealed partial class CIDTabletWindow : DefaultWindow
         InfoSurnameLabel.Text = $"Фамилия: {state.Surname}";
         InfoNumberLabel.Text = $"Номер гражданина: {state.CNumber}";
         InfoLpLabel.Text = $"LP: {state.LPCount}";
+        InfoTokensLabel.Text = $"Токены: {state.TokensCount}";
         InfoJobLabel.Text = $"Должность: {state.Job}";
 
         Tabs.SetTabVisible(2, state.CanIssue);

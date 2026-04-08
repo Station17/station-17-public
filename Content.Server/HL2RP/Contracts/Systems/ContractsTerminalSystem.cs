@@ -16,6 +16,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Content.Server.Stack;
 using Content.Shared.Stacks;
+using Content.Shared.HL2RP.CID.Components;
 
 namespace Content.Server.HL2RP.Contracts.Systems;
 
@@ -141,8 +142,8 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
         // Apply cancel penalty to the inserted CID card (fallback to id-slot if needed).
         if (ent.Comp.InsertedCard is { } inserted)
             ApplyCidDelta(inserted, -proto.CancelPenaltyLp, -proto.CancelPenaltyTokens);
-        else
-            ApplyCidDeltaToWornId(user, -proto.CancelPenaltyLp, -proto.CancelPenaltyTokens);
+        else if (TryFindUsersCid(user, out var cidUid))
+            ApplyCidDelta(cidUid, -proto.CancelPenaltyLp, -proto.CancelPenaltyTokens);
 
         RemComp<PosterPasteContractWorkerComponent>(user);
         RemComp(user, active);
@@ -267,12 +268,35 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
         Dirty(cidCardUid, cid);
     }
 
-    private void ApplyCidDeltaToWornId(EntityUid user, int deltaLp, int deltaTokens)
+    private bool TryFindUsersCid(EntityUid user, out EntityUid cidUid)
     {
-        if (!_inventory.TryGetSlotEntity(user, "id", out var idUid) || idUid is not { } id)
-            return;
+        // Prefer CID inserted into a tablet the user is carrying.
+        var tabletQuery = EntityQueryEnumerator<CIDTabletComponent>();
+        while (tabletQuery.MoveNext(out var tabletUid, out var tablet))
+        {
+            if (!IsInHierarchy(tabletUid, user))
+                continue;
 
-        ApplyCidDelta(id, deltaLp, deltaTokens);
+            if (tablet.MainCard is { } main && HasComp<CIDCardComponent>(main))
+            {
+                cidUid = main;
+                return true;
+            }
+        }
+
+        // Otherwise, any CID card in the user's hierarchy.
+        var cidQuery = EntityQueryEnumerator<CIDCardComponent>();
+        while (cidQuery.MoveNext(out var foundUid, out _))
+        {
+            if (!IsInHierarchy(foundUid, user))
+                continue;
+
+            cidUid = foundUid;
+            return true;
+        }
+
+        cidUid = default;
+        return false;
     }
 
     private bool IsInHierarchy(EntityUid child, EntityUid potentialParent)

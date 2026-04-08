@@ -8,6 +8,7 @@ using Content.Server.DoAfter;
 using Content.Server.Popups;
 using Content.Server.Inventory;
 using Content.Server.Stack;
+using Content.Shared.HL2RP.CID.Components;
 using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
@@ -179,13 +180,11 @@ public sealed class PosterPasteSystem : EntitySystem
 
         if (active.Progress >= active.RequiredCount)
         {
-            if (_inventory.TryGetSlotEntity(args.Args.User, "id", out var idUid) &&
-                idUid is { } idCardUid &&
-                TryComp<Content.Shared.HL2RP.CID.Components.CIDCardComponent>(idCardUid, out var cid))
+            if (TryFindUsersCid(args.Args.User, out var cidUid, out var cid))
             {
                 cid.LPCount = Math.Clamp(cid.LPCount + 1, -9999, 9999);
                 cid.TokensCount = Math.Clamp(cid.TokensCount + 150, -999999, 999999);
-                Dirty(idCardUid, cid);
+                Dirty(cidUid, cid);
             }
 
             RemComp<PosterPasteContractWorkerComponent>(args.Args.User);
@@ -194,6 +193,52 @@ public sealed class PosterPasteSystem : EntitySystem
         }
 
         args.Handled = true;
+    }
+
+    private bool TryFindUsersCid(EntityUid user, out EntityUid cidUid, out CIDCardComponent cid)
+    {
+        // Prefer CID inserted into any CID tablet the user is carrying/wearing.
+        var tabletQuery = EntityQueryEnumerator<CIDTabletComponent>();
+        while (tabletQuery.MoveNext(out var tabletUid, out var tablet))
+        {
+            if (!IsInHierarchy(tabletUid, user))
+                continue;
+
+        if (tablet.MainCard is { } main && TryComp<CIDCardComponent>(main, out var found))
+            {
+                cidUid = main;
+            cid = found;
+                return true;
+            }
+        }
+
+        // Otherwise, any CID card in the user's hierarchy.
+        var cidQuery = EntityQueryEnumerator<CIDCardComponent>();
+        while (cidQuery.MoveNext(out var foundUid, out var found))
+        {
+            if (!IsInHierarchy(foundUid, user))
+                continue;
+
+            cidUid = foundUid;
+            cid = found;
+            return true;
+        }
+
+        cidUid = default;
+        cid = default!;
+        return false;
+    }
+
+    private bool IsInHierarchy(EntityUid child, EntityUid potentialParent)
+    {
+        var xform = Transform(child);
+        while (xform.ParentUid.IsValid())
+        {
+            if (xform.ParentUid == potentialParent)
+                return true;
+            xform = Transform(xform.ParentUid);
+        }
+        return false;
     }
 
     private EntityUid? SpawnRandomPoster(EntityCoordinates coords)

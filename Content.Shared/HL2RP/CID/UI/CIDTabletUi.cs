@@ -43,6 +43,7 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
     public string CNumber { get; }
     public int LPCount { get; }
     public int LPLevel { get; }
+    public int TokensCount { get; }
     public string Job { get; }
     public bool CanIssue { get; }
     public bool CanViewDetails { get; }
@@ -57,6 +58,7 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
         string cNumber,
         int lpCount,
         int lpLevel,
+        int tokensCount,
         string job,
         bool canIssue,
         bool canViewDetails,
@@ -70,6 +72,7 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
         CNumber = cNumber;
         LPCount = lpCount;
         LPLevel = lpLevel;
+        TokensCount = tokensCount;
         Job = job;
         CanIssue = canIssue;
         CanViewDetails = canViewDetails;

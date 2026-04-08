@@ -10,6 +10,7 @@
                 <Label Name="InfoSurnameLabel" Text="Фамилия: -"/>
                 <Label Name="InfoNumberLabel" Text="Номер гражданина: -"/>
                 <Label Name="InfoLpLabel" Text="LP: 0"/>
+                <Label Name="InfoTokensLabel" Text="Токены: 0"/>
                 <Label Name="InfoJobLabel" Text="Должность: -"/>
             </BoxContainer>
 

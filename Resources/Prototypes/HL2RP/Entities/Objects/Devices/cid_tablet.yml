@@ -13,6 +13,10 @@
     state: pda-boxer
   - type: Item
     size: Small
+  - type: Clothing
+    slots:
+    - idcard
+    sprite: Objects/Devices/pda.rsi
   - type: ActivatableUI
     key: enum.CIDTabletUiKey.Key
     singleUser: true

@@ -206,6 +206,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         var infoNumber = "-";
         var lpCount = 0;
         var lpLevel = 0;
+        var tokensCount = 0;
         var job = "-";
 
         if (comp.MainCard is { } mainCardUid &&
@@ -216,6 +217,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             infoNumber = string.IsNullOrWhiteSpace(mainCid.CNumber) ? "-" : mainCid.CNumber;
             lpCount = mainCid.LPCount;
             lpLevel = mainCid.LPLevel;
+            tokensCount = mainCid.TokensCount;
             job = string.IsNullOrWhiteSpace(mainCid.Job) ? "-" : mainCid.Job;
 
             if (TryComp<IdCardComponent>(mainCardUid, out var idComp))
@@ -269,6 +271,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             infoNumber,
             lpCount,
             lpLevel,
+            tokensCount,
             job,
             canIssue,
             canViewDetails,
