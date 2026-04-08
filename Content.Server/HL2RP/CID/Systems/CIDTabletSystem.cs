@@ -32,6 +32,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         SubscribeLocalEvent<CIDTabletComponent, CIDGenerateNumberMessage>(OnGenerateNumber);
         SubscribeLocalEvent<CIDTabletComponent, CIDWriteCardMessage>(OnWriteCard);
         SubscribeLocalEvent<CIDTabletComponent, CIDSelectRecordMessage>(OnSelectRecord);
+        SubscribeLocalEvent<CIDTabletComponent, CIDClearSelectedRecordMessage>(OnClearSelectedRecord);
         SubscribeLocalEvent<CIDTabletComponent, CIDUpdateSelectedLPMessage>(OnUpdateSelectedLp);
     }
 
@@ -61,6 +62,12 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
     {
         var uid = GetEntity(args.CardUid);
         _selectedCards[ent.Owner] = uid;
+        UpdateUi(ent.Owner, ent.Comp);
+    }
+
+    private void OnClearSelectedRecord(Entity<CIDTabletComponent> ent, ref CIDClearSelectedRecordMessage args)
+    {
+        _selectedCards[ent.Owner] = null;
         UpdateUi(ent.Owner, ent.Comp);
     }
 

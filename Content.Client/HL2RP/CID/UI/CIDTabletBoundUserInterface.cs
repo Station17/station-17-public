@@ -21,6 +21,7 @@ public sealed class CIDTabletBoundUserInterface : BoundUserInterface
         _window.OnGenerateNumber += () => SendMessage(new CIDGenerateNumberMessage());
         _window.OnWriteCard += (name, surname, cNumber) => SendMessage(new CIDWriteCardMessage(name, surname, cNumber));
         _window.OnSelectRecord += uid => SendMessage(new CIDSelectRecordMessage(uid));
+        _window.OnBackToRecords += () => SendMessage(new CIDClearSelectedRecordMessage());
         _window.OnChangeRecordLp += (uid, lp) => SendMessage(new CIDUpdateSelectedLPMessage(uid, lp));
         _window.OnClose += Close;
         _window.OpenCentered();

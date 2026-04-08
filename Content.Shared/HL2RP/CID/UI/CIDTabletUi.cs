@@ -92,6 +92,11 @@ public sealed class CIDSelectRecordMessage : BoundUserInterfaceMessage
 }
 
 [Serializable, NetSerializable]
+public sealed class CIDClearSelectedRecordMessage : BoundUserInterfaceMessage
+{
+}
+
+[Serializable, NetSerializable]
 public sealed class CIDUpdateSelectedLPMessage : BoundUserInterfaceMessage
 {
     public NetEntity CardUid { get; }

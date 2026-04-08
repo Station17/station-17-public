@@ -16,6 +16,7 @@ public sealed partial class CIDTabletWindow : BaseWindow
     public Action? OnGenerateNumber;
     public Action<string, string, string>? OnWriteCard;
     public Action<NetEntity>? OnSelectRecord;
+    public Action? OnBackToRecords;
     public Action<NetEntity, int>? OnChangeRecordLp;
 
     public CIDTabletWindow()
@@ -30,6 +31,7 @@ public sealed partial class CIDTabletWindow : BaseWindow
         WriteCardButton.OnPressed += _ =>
             OnWriteCard?.Invoke(IssueNameLine.Text, IssueSurnameLine.Text, IssueNumberLine.Text);
         ApplyLpButton.OnPressed += _ => TryApplySelectedLp();
+        BackToRecordsButton.OnPressed += _ => OnBackToRecords?.Invoke();
 
         RecordsList.OnItemSelected += args =>
         {
@@ -81,6 +83,8 @@ public sealed partial class CIDTabletWindow : BaseWindow
     private void UpdateSelectedRecord(CIDRecordDetails? details, bool canViewDetails)
     {
         _selectedRecord = details;
+        DatabaseListView.Visible = details == null;
+        DatabaseDetailsView.Visible = details != null;
 
         SelectedNameLabel.Text = $"Имя: {details?.Name ?? "-"}";
         SelectedSurnameLabel.Text = $"Фамилия: {details?.Surname ?? "-"}";
