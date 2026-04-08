@@ -1,12 +1,16 @@
 using System.Text.RegularExpressions;
 using Content.Server.HL2RP.CID.Services;
+using Content.Server.Popups;
 using Content.Shared.Access.Components;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.HL2RP.CID.Components;
 using Content.Shared.HL2RP.CID.Systems;
 using Content.Shared.HL2RP.CID.UI;
+using Content.Shared.Popups;
 using Content.Shared.UserInterface;
 using Robust.Server.GameObjects;
+using Robust.Shared.Audio;
+using Robust.Shared.Audio.Systems;
 using Robust.Shared.Utility;
 
 namespace Content.Server.HL2RP.CID.Systems;
@@ -15,11 +19,15 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
 {
     private static readonly Regex NumberRegex = new("^[0-9]{6}$", RegexOptions.Compiled);
     private const float GlobalUiRefreshInterval = 1.0f;
+    private static readonly SoundSpecifier NotifyBeep = new SoundPathSpecifier("/Audio/Machines/scan_finish.ogg");
 
     [Dependency] private readonly UserInterfaceSystem _ui = default!;
+    [Dependency] private readonly PopupSystem _popup = default!;
+    [Dependency] private readonly SharedAudioSystem _audio = default!;
     private CIDNumberGenerator _numberGenerator = default!;
 
     private readonly Dictionary<EntityUid, EntityUid?> _selectedCards = new();
+    private readonly Dictionary<EntityUid, TrackedMainCardState> _trackedMainCards = new();
     private float _globalUiRefreshAccumulator;
 
     public override void Initialize()
@@ -45,6 +53,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             return;
 
         _globalUiRefreshAccumulator = 0f;
+        ProcessInsertedMainCardChanges();
         RefreshAllOpenTabletUis();
     }
 
@@ -144,6 +153,47 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         }
     }
 
+    private void ProcessInsertedMainCardChanges()
+    {
+        var query = EntityQueryEnumerator<CIDTabletComponent>();
+        while (query.MoveNext(out var tabletUid, out var tablet))
+        {
+            if (tablet.MainCard is not { } cardUid || !TryComp<CIDCardComponent>(cardUid, out var card))
+            {
+                _trackedMainCards.Remove(tabletUid);
+                continue;
+            }
+
+            if (!_trackedMainCards.TryGetValue(tabletUid, out var tracked) || tracked.CardUid != cardUid)
+            {
+                _trackedMainCards[tabletUid] = new TrackedMainCardState(cardUid, card.LPCount, card.TokensCount);
+                continue;
+            }
+
+            if (tracked.LPCount != card.LPCount)
+            {
+                var delta = card.LPCount - tracked.LPCount;
+                _popup.PopupEntity(
+                    $"Ваши очки лояльности были изменены на {card.LPCount} ({FormatDelta(delta)})",
+                    tabletUid,
+                    PopupType.Medium);
+                _audio.PlayPvs(NotifyBeep, tabletUid);
+            }
+
+            if (tracked.TokensCount != card.TokensCount)
+            {
+                var delta = card.TokensCount - tracked.TokensCount;
+                _popup.PopupEntity(
+                    $"Ваш баланс токенов был изменен на {card.TokensCount} ({FormatDelta(delta)})",
+                    tabletUid,
+                    PopupType.Medium);
+                _audio.PlayPvs(NotifyBeep, tabletUid);
+            }
+
+            _trackedMainCards[tabletUid] = new TrackedMainCardState(cardUid, card.LPCount, card.TokensCount);
+        }
+    }
+
     private void UpdateUi(EntityUid uid, CIDTabletComponent comp, string? generatedNumber = null)
     {
         if (!_ui.HasUi(uid, CIDTabletUiKey.Key))
@@ -183,6 +233,9 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         var query = EntityQueryEnumerator<CIDCardComponent>();
         while (query.MoveNext(out var cardUid, out var cid))
         {
+            if (cid.IsBlank)
+                continue;
+
             TryComp<IdCardComponent>(cardUid, out var id);
             var (name, surname) = SplitName(id?.FullName);
             records.Add(new CIDDatabaseRecord(GetNetEntity(cardUid), name, surname, cid.CNumber));
@@ -249,4 +302,11 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
 
         return sanitized;
     }
+
+    private static string FormatDelta(int delta)
+    {
+        return delta >= 0 ? $"+{delta}" : delta.ToString();
+    }
+
+    private readonly record struct TrackedMainCardState(EntityUid CardUid, int LPCount, int TokensCount);
 }

@@ -7,7 +7,7 @@ using Robust.Client.UserInterface.XAML;
 namespace Content.Client.HL2RP.CID.UI;
 
 [GenerateTypedNameReferences]
-public sealed partial class CIDTabletWindow : BaseWindow
+public sealed partial class CIDTabletWindow : DefaultWindow
 {
     private List<CIDDatabaseRecord> _records = new();
     private CIDRecordDetails? _selectedRecord;

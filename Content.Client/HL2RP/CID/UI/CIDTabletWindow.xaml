@@ -1,6 +1,7 @@
 <ui:CIDTabletWindow
     xmlns="https://spacestation14.io"
     xmlns:ui="clr-namespace:Content.Client.HL2RP.CID.UI"
+    Title="CID планшет"
     SetSize="840 620">
     <PanelContainer>
         <TabContainer Name="Tabs" Margin="8 8 8 8" VerticalExpand="True" HorizontalExpand="True">
