@@ -79,7 +79,7 @@ public sealed partial class SquadEntry : PanelContainer
     {
         PanelOverride = new StyleBoxFlat
         {
-            BackgroundColor = Color.FromHex("#4a1a1a"),
+            BackgroundColor = Color.FromHex("#202020"),
             BorderColor = SecApartmentStyles.TabActiveColor,
             BorderThickness = new Thickness(2),
             ContentMarginBottomOverride = 8,
@@ -188,13 +188,13 @@ public sealed partial class SquadEntry : PanelContainer
 
         if (member.SensorStatus == null || !member.SensorStatus.IsAlive)
         {
-            backgroundColor = Color.FromHex("#1a0a0a");
-            borderColor = Color.FromHex("#990000");
+            backgroundColor = Color.FromHex("#171717");
+            borderColor = Color.FromHex("#5f5f5f");
         }
         else
         {
-            backgroundColor = Color.FromHex("#3a0f0f");
-            borderColor = Color.FromHex("#ff6666");
+            backgroundColor = Color.FromHex("#252525");
+            borderColor = Color.FromHex("#8a8a8a");
         }
 
         var panel = new PanelContainer
@@ -361,13 +361,13 @@ public sealed partial class SquadEntry : PanelContainer
 
         if (status == null || !status.IsAlive)
         {
-            backgroundColor = Color.FromHex("#1a0a0a");
-            borderColor = Color.FromHex("#990000");
+            backgroundColor = Color.FromHex("#171717");
+            borderColor = Color.FromHex("#5f5f5f");
         }
         else
         {
-            backgroundColor = Color.FromHex("#3a0f0f");
-            borderColor = Color.FromHex("#ff6666");
+            backgroundColor = Color.FromHex("#252525");
+            borderColor = Color.FromHex("#8a8a8a");
         }
 
         if (panel.PanelOverride is StyleBoxFlat styleBox)
