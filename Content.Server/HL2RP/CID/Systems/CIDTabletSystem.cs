@@ -7,7 +7,6 @@ using Content.Shared.HL2RP.CID.Systems;
 using Content.Shared.HL2RP.CID.UI;
 using Content.Shared.UserInterface;
 using Robust.Server.GameObjects;
-using Robust.Shared.Containers;
 using Robust.Shared.Utility;
 
 namespace Content.Server.HL2RP.CID.Systems;
@@ -34,8 +33,6 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         SubscribeLocalEvent<CIDTabletComponent, CIDWriteCardMessage>(OnWriteCard);
         SubscribeLocalEvent<CIDTabletComponent, CIDSelectRecordMessage>(OnSelectRecord);
         SubscribeLocalEvent<CIDTabletComponent, CIDUpdateSelectedLPMessage>(OnUpdateSelectedLp);
-        SubscribeLocalEvent<CIDTabletComponent, EntInsertedIntoContainerMessage>(OnTabletCardInserted);
-        SubscribeLocalEvent<CIDTabletComponent, EntRemovedFromContainerMessage>(OnTabletCardRemoved);
     }
 
     public override void Update(float frameTime)
@@ -60,16 +57,6 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         UpdateUi(ent.Owner, ent.Comp, _numberGenerator.GenerateUniqueNumber());
     }
     
-    private void OnTabletCardInserted(Entity<CIDTabletComponent> ent, ref EntInsertedIntoContainerMessage args)
-    {
-        UpdateUi(ent.Owner, ent.Comp);
-    }
-
-    private void OnTabletCardRemoved(Entity<CIDTabletComponent> ent, ref EntRemovedFromContainerMessage args)
-    {
-        UpdateUi(ent.Owner, ent.Comp);
-    }
-
     private void OnSelectRecord(Entity<CIDTabletComponent> ent, ref CIDSelectRecordMessage args)
     {
         var uid = GetEntity(args.CardUid);
