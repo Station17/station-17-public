@@ -7,6 +7,7 @@ using Content.Shared.HL2RP.CID.Systems;
 using Content.Shared.HL2RP.CID.UI;
 using Content.Shared.UserInterface;
 using Robust.Server.GameObjects;
+using Robust.Shared.Containers;
 using Robust.Shared.Utility;
 
 namespace Content.Server.HL2RP.CID.Systems;

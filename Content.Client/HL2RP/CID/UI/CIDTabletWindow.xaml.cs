@@ -25,7 +25,6 @@ public sealed partial class CIDTabletWindow : BaseWindow
         Tabs.SetTabTitle(0, "Информация");
         Tabs.SetTabTitle(1, "База данных");
         Tabs.SetTabTitle(2, "Выдача");
-        Title = "CID планшет";
 
         GenerateNumberButton.OnPressed += _ => OnGenerateNumber?.Invoke();
         WriteCardButton.OnPressed += _ =>
@@ -69,18 +68,12 @@ public sealed partial class CIDTabletWindow : BaseWindow
         _records = records;
         _suppressSelectionEvents = true;
         RecordsList.Clear();
-        var selectedIndex = -1;
         for (var i = 0; i < records.Count; i++)
         {
             var record = records[i];
-            RecordsList.AddItem($"{record.Name} {record.Surname} [{record.CNumber}]");
-
-            if (_selectedRecord != null && _selectedRecord.CardUid == record.CardUid)
-                selectedIndex = i;
+            var item = RecordsList.AddItem($"{record.Name} {record.Surname} [{record.CNumber}]");
+            item.Selected = _selectedRecord != null && _selectedRecord.CardUid == record.CardUid;
         }
-
-        if (selectedIndex >= 0)
-            RecordsList.Select(selectedIndex);
 
         _suppressSelectionEvents = false;
     }
