@@ -31,8 +31,6 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
         base.Initialize();
 
         SubscribeLocalEvent<ContractsTerminalComponent, BoundUIOpenedEvent>(OnUiOpened);
-        SubscribeLocalEvent<ContractsTerminalComponent, EntInsertedIntoContainerMessage>(OnContainerInserted);
-        SubscribeLocalEvent<ContractsTerminalComponent, EntRemovedFromContainerMessage>(OnContainerRemoved);
 
         Subs.BuiEvents<ContractsTerminalComponent>(ContractsTerminalUiKey.Key, subs =>
         {
@@ -48,16 +46,20 @@ public sealed class ContractsTerminalSystem : SharedContractsTerminalSystem
         UpdateUi(ent.Owner, ent.Comp, args.Actor);
     }
 
-    private void OnContainerInserted(Entity<ContractsTerminalComponent> ent, ref EntInsertedIntoContainerMessage args)
+    protected override void OnInserted(EntityUid uid, ContractsTerminalComponent comp, EntInsertedIntoContainerMessage args)
     {
-        if (_ui.IsUiOpen(ent.Owner, ContractsTerminalUiKey.Key))
-            UpdateUi(ent.Owner, ent.Comp);
+        base.OnInserted(uid, comp, args);
+
+        if (_ui.IsUiOpen(uid, ContractsTerminalUiKey.Key))
+            UpdateUi(uid, comp);
     }
 
-    private void OnContainerRemoved(Entity<ContractsTerminalComponent> ent, ref EntRemovedFromContainerMessage args)
+    protected override void OnRemoved(EntityUid uid, ContractsTerminalComponent comp, EntRemovedFromContainerMessage args)
     {
-        if (_ui.IsUiOpen(ent.Owner, ContractsTerminalUiKey.Key))
-            UpdateUi(ent.Owner, ent.Comp);
+        base.OnRemoved(uid, comp, args);
+
+        if (_ui.IsUiOpen(uid, ContractsTerminalUiKey.Key))
+            UpdateUi(uid, comp);
     }
 
     private void OnAccept(Entity<ContractsTerminalComponent> ent, ref ContractsAcceptMessage args)

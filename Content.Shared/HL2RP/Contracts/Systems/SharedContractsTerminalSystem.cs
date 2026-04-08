@@ -29,13 +29,13 @@ public abstract class SharedContractsTerminalSystem : EntitySystem
         ItemSlots.RemoveItemSlot(uid, comp.CardSlot);
     }
 
-    private void OnInserted(EntityUid uid, ContractsTerminalComponent comp, EntInsertedIntoContainerMessage args)
+    protected virtual void OnInserted(EntityUid uid, ContractsTerminalComponent comp, EntInsertedIntoContainerMessage args)
     {
         if (args.Container.ID == ContractsTerminalComponent.CardSlotId)
             comp.InsertedCard = args.Entity;
     }
 
-    private void OnRemoved(EntityUid uid, ContractsTerminalComponent comp, EntRemovedFromContainerMessage args)
+    protected virtual void OnRemoved(EntityUid uid, ContractsTerminalComponent comp, EntRemovedFromContainerMessage args)
     {
         if (args.Container.ID == ContractsTerminalComponent.CardSlotId)
             comp.InsertedCard = null;
