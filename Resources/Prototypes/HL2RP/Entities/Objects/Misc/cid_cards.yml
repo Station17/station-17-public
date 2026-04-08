@@ -1,6 +1,7 @@
 - type: entity
   parent: IDCardStandard
   id: CIDCard
+  suffix: HL2RP
   name: CID card
   description: Civil identification card used by City administration systems.
   components:

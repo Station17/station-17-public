@@ -1,0 +1,26 @@
+---
+description: Enforce HL2RP suffix on new HL2RP prototypes
+globs: Resources/Prototypes/HL2RP/**/*.yml
+alwaysApply: false
+---
+
+# HL2RP Prototype Suffix
+
+- Every new prototype created in `Resources/Prototypes/HL2RP/` must include `suffix: HL2RP`.
+- Place `suffix: HL2RP` near the top-level prototype fields for readability and consistency.
+- If a file contains multiple new prototypes, each one must have this suffix.
+
+## Example
+
+```yaml
+# ❌ BAD
+- type: entity
+  id: CIDCard
+  name: CID card
+
+# ✅ GOOD
+- type: entity
+  id: CIDCard
+  suffix: HL2RP
+  name: CID card
+```

@@ -1,6 +1,7 @@
 - type: entity
   parent: BaseItem
   id: CIDTablet
+  suffix: HL2RP
   name: CID tablet
   description: Administrative tablet for viewing and issuing CID cards.
   components:

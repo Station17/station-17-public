@@ -1,0 +1,12 @@
+- type: hl2rpBasicContract
+  id: HL2RPContractPosterPaste
+  title: Расклейка плакатов
+  requiredCount: 10
+  rewardLp: 1
+  rewardTokens: 150
+  cancelPenaltyLp: 1
+  cancelPenaltyTokens: 50
+  itemToGive: HL2RPContractLeaflet
+  itemCount: 10
+  objectiveType: PosterPaste
+

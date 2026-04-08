@@ -1,0 +1,42 @@
+- type: entity
+  parent: BaseComputer
+  id: HL2RPContractsTerminal
+  suffix: HL2RP
+  name: Терминал базовых контрактов
+  description: Терминал для получения базовых контрактов.
+  components:
+  - type: Sprite
+    noRot: true
+    sprite: Structures/Machines/computers.rsi
+    layers:
+    - map: ["computerLayerBody"]
+      state: computer
+    - map: ["computerLayerKeyboard"]
+      state: generic_keyboard
+    - map: ["computerLayerScreen"]
+      state: generic
+    - map: ["computerLayerKeys"]
+      state: generic_keys
+  - type: ActivatableUI
+    key: enum.ContractsTerminalUiKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.ContractsTerminalUiKey.Key:
+        type: ContractsTerminalBoundUserInterface
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+  - type: ContainerContainer
+    containers:
+      board: !type:Container
+        ents: []
+      contracts-main-card: !type:ContainerSlot { }
+  - type: ItemSlots
+    slots:
+      contracts-main-card:
+        name: CID-карта
+        whitelist:
+          components:
+          - CIDCard
+  - type: ContractsTerminal
+

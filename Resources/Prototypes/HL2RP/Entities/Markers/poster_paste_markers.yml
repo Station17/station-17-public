@@ -1,0 +1,28 @@
+- type: entity
+  parent: MarkerBase
+  id: HL2RPPosterPasteMarker
+  suffix: HL2RP
+  name: метка расклейки
+  description: Невидимая метка для расклейки листовок.
+  components:
+  - type: Sprite
+    visible: false
+  - type: PosterPasteMarker
+
+- type: entity
+  parent: MarkerBase
+  id: HL2RPPosterPasteMarkerSpawner
+  suffix: HL2RP
+  name: спавнер метки расклейки
+  description: Спавнит метку для расклейки.
+  components:
+  - type: Sprite
+    layers:
+    - state: blue
+  - type: EntityTableSpawner
+    deleteSpawnerAfterSpawn: true
+    offset: 0
+    table: !type:GroupSelector
+      children:
+      - id: HL2RPPosterPasteMarker
+

@@ -1,0 +1,15 @@
+- type: entity
+  parent: BasePaper
+  id: HL2RPContractLeaflet
+  suffix: HL2RP
+  name: листовка
+  description: Обычная листовка.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/bureaucracy.rsi
+    layers:
+    - state: paper
+  - type: Item
+    size: Tiny
+  - type: ContractLeaflet
+

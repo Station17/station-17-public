@@ -1,0 +1,35 @@
+<ui:ContractsTerminalWindow
+    xmlns="https://spacestation14.io"
+    xmlns:ui="clr-namespace:Content.Client.HL2RP.Contracts.UI"
+    Title="Терминал базовых контрактов"
+    SetSize="520 520">
+    <PanelContainer>
+        <BoxContainer Orientation="Vertical" Margin="10 10 10 10" SeparationOverride="8" VerticalExpand="True">
+            <BoxContainer Orientation="Vertical" SeparationOverride="4">
+                <Label Name="InsertCardHint" Text="Вставьте CID карту" />
+                <BoxContainer Name="CardInfoBox" Orientation="Horizontal" SeparationOverride="10" Visible="False">
+                    <Label Name="LpLabel" Text="LP: 0" />
+                    <Label Name="TokensLabel" Text="Токены: 0" />
+                </BoxContainer>
+            </BoxContainer>
+
+            <BoxContainer Orientation="Vertical" SeparationOverride="4" VerticalExpand="True">
+                <Label Text="Контракты" />
+                <PanelContainer VerticalExpand="True">
+                    <ScrollContainer VerticalExpand="True">
+                        <ItemList Name="ContractsList" VerticalExpand="True" />
+                    </ScrollContainer>
+                </PanelContainer>
+                <Button Name="AcceptButton" Text="Принять" />
+            </BoxContainer>
+
+            <BoxContainer Name="ActiveBox" Orientation="Vertical" SeparationOverride="4" Visible="False">
+                <Label Name="ActiveTitleLabel" Text="Активный контракт: -" />
+                <Label Name="ActiveProgressLabel" Text="Прогресс: 0/0" />
+                <Label Name="CancelWarningLabel" Text="Отмена контракта до выполнения влечет штраф." />
+                <Button Name="CancelButton" Text="Отменить (штраф)" />
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</ui:ContractsTerminalWindow>
+

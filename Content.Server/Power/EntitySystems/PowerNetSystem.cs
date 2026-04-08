@@ -323,10 +323,9 @@ namespace Content.Server.Power.EntitySystems
 
         private bool IsPoweredCalculate(ApcPowerReceiverComponent comp)
         {
-            return !comp.PowerDisabled
-                   && (!comp.NeedsPower
-                       || MathHelper.CloseToPercent(comp.NetworkLoad.ReceivingPower,
-                           comp.Load));
+            // HL2RP: Treat the entire station as always powered.
+            // Respect PowerDisabled so explicit shutdowns can still work if used by other systems.
+            return !comp.PowerDisabled;
         }
 
         public override bool IsPoweredCalculate(SharedApcPowerReceiverComponent comp)
