@@ -3,6 +3,7 @@ using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.Player;
 using Robust.Shared.Prototypes;
+using System.Linq;
 
 namespace Content.Client.HL2RP.Contracts.Overlays;
 
@@ -38,8 +39,11 @@ public sealed class CargoBoxHighlightSystem : EntitySystem
         var canSeeHighlights = viewer != null && HasComp<CargoBoxContractWorkerComponent>(viewer.Value);
         var outlinePrototype = _prototypes.Index(OutlineShaderProto);
 
-        foreach (var (uid, shader) in _activeOutlines.ToArray())
+        foreach (var entry in _activeOutlines.ToArray())
         {
+            var uid = entry.Key;
+            var shader = entry.Value;
+
             if (!TryComp<SpriteComponent>(uid, out var sprite))
             {
                 _activeOutlines.Remove(uid);
