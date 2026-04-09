@@ -11,10 +11,9 @@
   - type: Item
     sprite: Objects/Storage/boxes.rsi
     size: Ginormous
-  - type: Wieldable
-    freeHandsRequired: 1
-    unwieldOnUse: false
-  - type: SpeedModifiedOnWield
+  - type: MultiHandedItem
+    handsNeeded: 2
+  - type: HeldSpeedModifier
     walkModifier: 0.7
     sprintModifier: 0.7
   - type: CargoBoxContractItem
