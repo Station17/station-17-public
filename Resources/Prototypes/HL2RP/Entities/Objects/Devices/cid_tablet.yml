@@ -5,18 +5,25 @@
   name: CID tablet
   description: Administrative tablet for viewing and issuing CID cards.
   components:
+  - type: Appearance
   - type: Sprite
-    sprite: Objects/Devices/pda.rsi
-    state: pda-boxer
+    sprite: HL2RP/Objects/Devices/cid_tablet.rsi
+    layers:
+    - map: [ "enum.PdaVisualLayers.Base" ]
+      state: no-cid
+    - map: [ "enum.PdaVisualLayers.IdLight" ]
+      state: with-cid
+      visible: false
   - type: Icon
-    sprite: Objects/Devices/pda.rsi
-    state: pda-boxer
+    sprite: HL2RP/Objects/Devices/cid_tablet.rsi
+    state: no-cid
+  - type: PdaVisuals
   - type: Item
     size: Small
   - type: Clothing
     slots:
     - idcard
-    sprite: Objects/Devices/pda.rsi
+    sprite: HL2RP/Objects/Devices/cid_tablet.rsi
   - type: ActivatableUI
     key: enum.CIDTabletUiKey.Key
     singleUser: true

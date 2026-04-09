@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Sprited by discord: 6756_",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "poster1"
+    },
+    {
+      "name": "poster2"
+    },
+    {
+      "name": "poster3"
+    },
+    {
+      "name": "poster4"
+    },
+    {
+      "name": "poster5"
+    }
+  ]
+}

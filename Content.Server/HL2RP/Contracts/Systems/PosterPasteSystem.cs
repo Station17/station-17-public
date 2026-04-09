@@ -20,8 +20,7 @@ namespace Content.Server.HL2RP.Contracts.Systems;
 
 public sealed class PosterPasteSystem : EntitySystem
 {
-    private static readonly ProtoId<EntityTablePrototype> ContrabandTable = "ContrabandPosterTable";
-    private static readonly ProtoId<EntityTablePrototype> LegitTable = "LegitPosterTable";
+    private static readonly ProtoId<EntityTablePrototype> ContractPosterTable = "HL2RPPosterPasteTable";
 
     [Dependency] private readonly DoAfterSystem _doAfter = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
@@ -248,16 +247,9 @@ public sealed class PosterPasteSystem : EntitySystem
 
     private EntityUid? SpawnRandomPoster(EntityCoordinates coords)
     {
-        // Mimic RandomPosterAny loosely: small chance for broken, otherwise pick between legit/contraband.
-        if (_random.Prob(0.05f))
+        if (!_prototypes.TryIndex(ContractPosterTable, out var table))
             return Spawn("PosterBroken", coords);
 
-        if (!_prototypes.TryIndex(ContrabandTable, out var contraband) ||
-            !_prototypes.TryIndex(LegitTable, out var legit))
-            return Spawn("PosterBroken", coords);
-
-        var pickContraband = _random.Prob(0.5f);
-        var table = pickContraband ? contraband : legit;
         var spawns = _tables.GetSpawns(table).ToList();
         if (spawns.Count == 0)
             return Spawn("PosterBroken", coords);

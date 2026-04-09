@@ -6,10 +6,10 @@
   description: Тяжёлый ящик для доставки по контракту.
   components:
   - type: Sprite
-    sprite: Objects/Storage/boxes.rsi
-    state: boxwidetoy
+    sprite: HL2RP/Objects/Storage/contract_cargo_box.rsi
+    state: icon
   - type: Item
-    sprite: Objects/Storage/boxes.rsi
+    sprite: HL2RP/Objects/Storage/contract_cargo_box.rsi
     size: Ginormous
   - type: MultiHandedItem
     handsNeeded: 2

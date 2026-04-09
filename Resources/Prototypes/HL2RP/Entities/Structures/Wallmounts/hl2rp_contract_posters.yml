@@ -1,0 +1,64 @@
+- type: entity
+  parent: PosterBase
+  id: HL2RPPosterCityWatchSeesAll
+  suffix: HL2RP
+  name: Директива 7130: Идентификационный Протокол
+  description: Гражданин, твое уникальное биометрическое обозначение — ключ к порядку. Наблюдай и будь наблюдаемым. Уклонение от сканирования карается немедленной переклассификацией. C1.7 — Твой Сектор. Служи усердно.
+  components:
+  - type: Sprite
+    sprite: HL2RP/Structures/Wallmounts/hl2rp_contract_posters.rsi
+    state: poster1
+
+- type: entity
+  parent: PosterBase
+  id: HL2RPPosterCleanCityBrightFuture
+  suffix: HL2RP
+  name: Объединенный Альянс: Наше Общее Будущее
+  description: Помни свои корни, но обнимай Альянс. Земля — наш общий дом под мудрым руководством Администратора. Служи усердно, и получишь привилегии. Сопротивление — путь в никуда. Вступай в ряды лоялистов O.A.N.
+  components:
+  - type: Sprite
+    sprite: HL2RP/Structures/Wallmounts/hl2rp_contract_posters.rsi
+    state: poster2
+
+- type: entity
+  parent: PosterBase
+  id: HL2RPPosterLoyaltyIsStrength
+  suffix: HL2RP
+  name: Стерильный Сектор 12: Памятка по Рационированию Популяции
+  description: Временная директива Альянса: Отказ от репродукции. Сбереги драгоценную биомассу для нужд Альянса. Нарушение наказывается немедленной стерилизацией или полной ассимиляцией. Следи за своим гормональным уровнем.
+  components:
+  - type: Sprite
+    sprite: HL2RP/Structures/Wallmounts/hl2rp_contract_posters.rsi
+    state: poster3
+
+- type: entity
+  parent: PosterBase
+  id: HL2RPPosterReportAndProsper
+  suffix: HL2RP
+  name: Панорама Сити-17: Маяк Прогресса
+  description: Сердце цивилизации. Узри величие технологии Альянса. Цитадель — наш путь к звездам и порядку. Дым из труб — дыхание прогресса. Не отвлекайся от работы, смотри вперед.
+  components:
+  - type: Sprite
+    sprite: HL2RP/Structures/Wallmounts/hl2rp_contract_posters.rsi
+    state: poster4
+
+- type: entity
+  parent: PosterBase
+  id: HL2RPPosterCivilDutyNeverSleeps
+  suffix: HL2RP
+  name: Сити-17: Спи Спокойно, Мы Наблюдаем
+  description: В каждом окне, в каждом переулке — Альянс видит все. Твоя безопасность гарантирована только твоим послушанием. Сообщай о любых подозрительных действиях. Наблюдение не прекращается. Никогда.
+  components:
+  - type: Sprite
+    sprite: HL2RP/Structures/Wallmounts/hl2rp_contract_posters.rsi
+    state: poster5
+
+- type: entityTable
+  id: HL2RPPosterPasteTable
+  table: !type:GroupSelector
+    children:
+    - id: HL2RPPosterCityWatchSeesAll
+    - id: HL2RPPosterCleanCityBrightFuture
+    - id: HL2RPPosterLoyaltyIsStrength
+    - id: HL2RPPosterReportAndProsper
+    - id: HL2RPPosterCivilDutyNeverSleeps

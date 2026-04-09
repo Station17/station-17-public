@@ -6,12 +6,10 @@
   description: Civil identification card used by City administration systems.
   components:
   - type: Sprite
-    layers:
-    - state: silver
-    - state: stripe_top
-      color: "#2f7f6f"
-    - state: stripe_bottom
-      color: "#20554b"
+    sprite: HL2RP/Objects/Cards/cid_card.rsi
+    state: icon
+  - type: Item
+    sprite: HL2RP/Objects/Cards/cid_card.rsi
   - type: CIDCard
     lpCount: 0
     lpLevel: 0

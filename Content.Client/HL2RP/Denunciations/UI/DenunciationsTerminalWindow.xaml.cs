@@ -77,14 +77,11 @@ public sealed partial class DenunciationsTerminalWindow : DefaultWindow
     private void EnsureReasonAndButtons()
     {
         var reason = Rope.Collapse(ReasonTextEdit.TextRope);
-        if (reason.Length > MaxReasonLength)
-        {
-            reason = reason[..MaxReasonLength];
-            ReasonTextEdit.TextRope = new Rope.Leaf(reason);
-        }
-
-        ReasonLengthLabel.Text = $"{reason.Length} / {MaxReasonLength}";
-        SubmitButton.Disabled = _selectedCitizen == null || string.IsNullOrWhiteSpace(reason);
+        var visualLength = Math.Min(reason.Length, MaxReasonLength);
+        ReasonLengthLabel.Text = $"{visualLength} / {MaxReasonLength}";
+        SubmitButton.Disabled = _selectedCitizen == null ||
+                                string.IsNullOrWhiteSpace(reason) ||
+                                reason.Length > MaxReasonLength;
     }
 
     private int GetSeverity()
@@ -100,6 +97,9 @@ public sealed partial class DenunciationsTerminalWindow : DefaultWindow
         var reason = Rope.Collapse(ReasonTextEdit.TextRope).Trim();
         if (string.IsNullOrWhiteSpace(reason))
             return;
+
+        if (reason.Length > MaxReasonLength)
+            reason = reason[..MaxReasonLength];
 
         OnSubmitDenunciation?.Invoke(_selectedCitizen.CardUid, reason, GetSeverity());
         ReasonTextEdit.TextRope = Rope.Leaf.Empty;
