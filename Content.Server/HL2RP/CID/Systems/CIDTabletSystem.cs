@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Content.Server.HL2RP.CID.Services;
+using Content.Server.HL2RP.Denunciations.Systems;
 using Content.Server.Popups;
 using Content.Shared.Access.Components;
 using Content.Shared.Containers.ItemSlots;
@@ -24,9 +25,11 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
     [Dependency] private readonly UserInterfaceSystem _ui = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
+    [Dependency] private readonly DenunciationsSystem _denunciations = default!;
     private CIDNumberGenerator _numberGenerator = default!;
 
     private readonly Dictionary<EntityUid, EntityUid?> _selectedCards = new();
+    private readonly Dictionary<EntityUid, int?> _selectedDenunciations = new();
     private readonly Dictionary<EntityUid, TrackedMainCardState> _trackedMainCards = new();
     private float _globalUiRefreshAccumulator;
 
@@ -42,6 +45,13 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         SubscribeLocalEvent<CIDTabletComponent, CIDSelectRecordMessage>(OnSelectRecord);
         SubscribeLocalEvent<CIDTabletComponent, CIDClearSelectedRecordMessage>(OnClearSelectedRecord);
         SubscribeLocalEvent<CIDTabletComponent, CIDUpdateSelectedLPMessage>(OnUpdateSelectedLp);
+        SubscribeLocalEvent<CIDTabletComponent, CIDSelectDenunciationMessage>(OnSelectDenunciation);
+        SubscribeLocalEvent<CIDTabletComponent, CIDClearSelectedDenunciationMessage>(OnClearSelectedDenunciation);
+        SubscribeLocalEvent<CIDTabletComponent, CIDTakeDenunciationMessage>(OnTakeDenunciation);
+        SubscribeLocalEvent<CIDTabletComponent, CIDCancelDenunciationResolutionMessage>(OnCancelDenunciationResolution);
+        SubscribeLocalEvent<CIDTabletComponent, CIDAcceptDenunciationMessage>(OnAcceptDenunciation);
+        SubscribeLocalEvent<CIDTabletComponent, CIDRejectDenunciationMessage>(OnRejectDenunciation);
+        _denunciations.ReportsChanged += RefreshAllOpenTabletUis;
     }
 
     public override void Update(float frameTime)
@@ -95,6 +105,54 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         cid.LPCount = Math.Clamp(args.LPCount, -9999, 9999);
         Dirty(target, cid);
         RefreshAllOpenTabletUis();
+    }
+
+    private void OnSelectDenunciation(Entity<CIDTabletComponent> ent, ref CIDSelectDenunciationMessage args)
+    {
+        _selectedDenunciations[ent.Owner] = args.DenunciationId;
+        UpdateUi(ent.Owner, ent.Comp);
+    }
+
+    private void OnClearSelectedDenunciation(Entity<CIDTabletComponent> ent, ref CIDClearSelectedDenunciationMessage args)
+    {
+        _selectedDenunciations[ent.Owner] = null;
+        UpdateUi(ent.Owner, ent.Comp);
+    }
+
+    private void OnTakeDenunciation(Entity<CIDTabletComponent> ent, ref CIDTakeDenunciationMessage args)
+    {
+        if (!TryGetResolverCid(ent, out var resolverCid))
+            return;
+
+        _denunciations.TryTake(args.DenunciationId, resolverCid);
+        UpdateUi(ent.Owner, ent.Comp);
+    }
+
+    private void OnCancelDenunciationResolution(Entity<CIDTabletComponent> ent, ref CIDCancelDenunciationResolutionMessage args)
+    {
+        if (!TryGetResolverCid(ent, out var resolverCid))
+            return;
+
+        _denunciations.TryCancel(args.DenunciationId, resolverCid);
+        UpdateUi(ent.Owner, ent.Comp);
+    }
+
+    private void OnAcceptDenunciation(Entity<CIDTabletComponent> ent, ref CIDAcceptDenunciationMessage args)
+    {
+        if (!TryGetResolverCid(ent, out var resolverCid))
+            return;
+
+        _denunciations.TryAccept(args.DenunciationId, resolverCid);
+        UpdateUi(ent.Owner, ent.Comp);
+    }
+
+    private void OnRejectDenunciation(Entity<CIDTabletComponent> ent, ref CIDRejectDenunciationMessage args)
+    {
+        if (!TryGetResolverCid(ent, out var resolverCid))
+            return;
+
+        _denunciations.TryReject(args.DenunciationId, resolverCid);
+        UpdateUi(ent.Owner, ent.Comp);
     }
 
     private void OnWriteCard(Entity<CIDTabletComponent> ent, ref CIDWriteCardMessage args)
@@ -265,6 +323,49 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             generatedNumber = issueCid.CNumber;
         }
 
+        var denunciations = new List<CIDDenunciationListEntry>();
+        CIDDenunciationDetails? selectedDenunciation = null;
+        var selectedDenunciationId = _selectedDenunciations.GetValueOrDefault(uid);
+        if (canViewDetails)
+        {
+            foreach (var denunciation in _denunciations.GetEntriesSortedBySeverity())
+            {
+                var (targetName, targetSurname, targetCode) = GetCidIdentity(denunciation.TargetCard);
+                denunciations.Add(new CIDDenunciationListEntry(
+                    denunciation.Id,
+                    targetName,
+                    targetSurname,
+                    targetCode,
+                    denunciation.Severity));
+
+                if (selectedDenunciationId != denunciation.Id)
+                    continue;
+
+                var (reporterName, reporterSurname, reporterCode) = GetCidIdentity(denunciation.ReporterCard);
+                var (resolverName, resolverSurname, resolverCode) = denunciation.ResolverCard is { } resolver
+                    ? GetCidIdentity(resolver)
+                    : ("-", "-", "-");
+                var canTake = denunciation.ResolverCard == null;
+                var canControl = comp.MainCard != null && denunciation.ResolverCard == comp.MainCard;
+
+                selectedDenunciation = new CIDDenunciationDetails(
+                    denunciation.Id,
+                    targetName,
+                    targetSurname,
+                    targetCode,
+                    reporterName,
+                    reporterSurname,
+                    reporterCode,
+                    denunciation.Reason,
+                    denunciation.Severity,
+                    denunciation.ResolverCard == null ? null : resolverName,
+                    denunciation.ResolverCard == null ? null : resolverSurname,
+                    denunciation.ResolverCard == null ? null : resolverCode,
+                    canTake,
+                    canControl);
+            }
+        }
+
         var state = new CIDTabletBoundUiState(
             infoName,
             infoSurname,
@@ -278,7 +379,10 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             comp.IssueCard != null,
             generatedNumber,
             records,
-            selectedDetails);
+            selectedDetails,
+            canViewDetails,
+            denunciations,
+            selectedDenunciation);
 
         _ui.SetUiState(uid, CIDTabletUiKey.Key, state);
     }
@@ -312,4 +416,29 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
     }
 
     private readonly record struct TrackedMainCardState(EntityUid CardUid, int LPCount, int TokensCount);
+
+    private bool TryGetResolverCid(Entity<CIDTabletComponent> ent, out EntityUid resolverCid)
+    {
+        if (ent.Comp.MainCard is { } cardUid &&
+            TryComp<CIDCardComponent>(cardUid, out var cid) &&
+            cid.Access > 2)
+        {
+            resolverCid = cardUid;
+            return true;
+        }
+
+        resolverCid = default;
+        return false;
+    }
+
+    private (string name, string surname, string cNumber) GetCidIdentity(EntityUid cardUid)
+    {
+        if (!TryComp<CIDCardComponent>(cardUid, out var cid))
+            return ("-", "-", "-");
+
+        TryComp<IdCardComponent>(cardUid, out var idComp);
+        var (name, surname) = SplitName(idComp?.FullName);
+        var cNumber = string.IsNullOrWhiteSpace(cid.CNumber) ? "-" : cid.CNumber;
+        return (name, surname, cNumber);
+    }
 }

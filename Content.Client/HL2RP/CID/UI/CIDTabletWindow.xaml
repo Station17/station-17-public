@@ -56,6 +56,38 @@
                 </BoxContainer>
                 <Button Name="WriteCardButton" Text="Записать карту"/>
             </BoxContainer>
+
+            <PanelContainer Name="ReportsTab">
+                <BoxContainer Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
+                    <BoxContainer Name="ReportsListView" Orientation="Vertical" VerticalExpand="True" SeparationOverride="6">
+                        <Label Text="Доносы"/>
+                        <PanelContainer HorizontalExpand="True" VerticalExpand="True">
+                            <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                                <ItemList Name="DenunciationsList" VerticalExpand="True"/>
+                            </ScrollContainer>
+                        </PanelContainer>
+                    </BoxContainer>
+                    <BoxContainer Name="ReportsDetailsView" Orientation="Vertical" VerticalExpand="True" SeparationOverride="6" Visible="False">
+                        <Button Name="BackToDenunciationsButton" Text="Назад к списку" />
+                        <PanelContainer VerticalExpand="True" HorizontalExpand="True">
+                            <BoxContainer Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="4">
+                                <Label Name="ReportTargetLabel" Text="На кого: -"/>
+                                <Label Name="ReportReporterLabel" Text="Кто подал: -"/>
+                                <Label Name="ReportSeverityLabel" Text="Тяжесть: -"/>
+                                <Label Name="ReportResolverLabel" Text="Разбирает: -"/>
+                                <Label Text="Причина:"/>
+                                <RichTextLabel Name="ReportReasonLabel" VerticalExpand="True"/>
+                                <Button Name="TakeReportButton" Text="Разобрать обращение" />
+                                <BoxContainer Name="ReportControlButtons" Orientation="Horizontal" SeparationOverride="6">
+                                    <Button Name="CancelResolutionButton" Text="Отменить разбор"/>
+                                    <Button Name="AcceptReportButton" Text="Принять обращение"/>
+                                    <Button Name="RejectReportButton" Text="Отклонить обращение"/>
+                                </BoxContainer>
+                            </BoxContainer>
+                        </PanelContainer>
+                    </BoxContainer>
+                </BoxContainer>
+            </PanelContainer>
         </TabContainer>
     </PanelContainer>
 </ui:CIDTabletWindow>

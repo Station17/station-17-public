@@ -1,0 +1,29 @@
+- type: entity
+  parent: BaseComputer
+  id: HL2RPDenunciationsTerminal
+  suffix: HL2RP
+  name: Терминал доносов
+  description: Терминал для отправки обращений о нарушениях.
+  components:
+  - type: Sprite
+    noRot: true
+    sprite: Structures/Machines/computers.rsi
+    layers:
+    - map: ["computerLayerBody"]
+      state: computer
+    - map: ["computerLayerKeyboard"]
+      state: generic_keyboard
+    - map: ["computerLayerScreen"]
+      state: generic
+    - map: ["computerLayerKeys"]
+      state: generic_keys
+  - type: ActivatableUI
+    key: enum.DenunciationsTerminalUiKey.Key
+    singleUser: true
+  - type: UserInterface
+    interfaces:
+      enum.DenunciationsTerminalUiKey.Key:
+        type: DenunciationsTerminalBoundUserInterface
+      enum.WiresUiKey.Key:
+        type: WiresBoundUserInterface
+  - type: DenunciationsTerminal

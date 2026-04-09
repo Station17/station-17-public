@@ -1,0 +1,34 @@
+<ui:DenunciationsTerminalWindow
+    xmlns="https://spacestation14.io"
+    xmlns:ui="clr-namespace:Content.Client.HL2RP.Denunciations.UI"
+    Title="Терминал доносов"
+    SetSize="760 560">
+    <PanelContainer>
+        <BoxContainer Orientation="Vertical" Margin="8 8 8 8" SeparationOverride="6">
+            <Label Name="ReporterLabel" Text="CID отправителя: -"/>
+            <Label Name="NoCidHintLabel" Text="CID карта не найдена. Отправка недоступна." Visible="False"/>
+
+            <BoxContainer Name="ListView" Orientation="Vertical" VerticalExpand="True" SeparationOverride="4">
+                <Label Text="База граждан"/>
+                <PanelContainer HorizontalExpand="True" VerticalExpand="True">
+                    <ScrollContainer HorizontalExpand="True" VerticalExpand="True">
+                        <ItemList Name="CitizensList" VerticalExpand="True"/>
+                    </ScrollContainer>
+                </PanelContainer>
+            </BoxContainer>
+
+            <BoxContainer Name="DetailsView" Orientation="Vertical" VerticalExpand="True" SeparationOverride="6" Visible="False">
+                <Button Name="BackToListButton" Text="Назад к базе"/>
+                <Label Name="TargetNameLabel" Text="Имя: -"/>
+                <Label Name="TargetSurnameLabel" Text="Фамилия: -"/>
+                <Label Name="TargetCodeLabel" Text="Код гражданина: -"/>
+                <Label Text="Причина доноса"/>
+                <TextEdit Name="ReasonTextEdit" VerticalExpand="True"/>
+                <Label Name="ReasonLengthLabel" Text="0 / 512"/>
+                <Label Name="SeverityLabel" Text="Тяжесть: 1"/>
+                <Slider Name="SeveritySlider" MinValue="1" MaxValue="5" Value="1"/>
+                <Button Name="SubmitButton" Text="Отправить донос" Disabled="True"/>
+            </BoxContainer>
+        </BoxContainer>
+    </PanelContainer>
+</ui:DenunciationsTerminalWindow>

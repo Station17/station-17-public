@@ -13,7 +13,8 @@ public enum CIDTabletTab : byte
 {
     Info,
     Database,
-    Issue
+    Issue,
+    Reports
 }
 
 [Serializable, NetSerializable]
@@ -36,6 +37,31 @@ public sealed record CIDRecordDetails(
     string Job);
 
 [Serializable, NetSerializable]
+public sealed record CIDDenunciationListEntry(
+    int Id,
+    string TargetName,
+    string TargetSurname,
+    string TargetCNumber,
+    int Severity);
+
+[Serializable, NetSerializable]
+public sealed record CIDDenunciationDetails(
+    int Id,
+    string TargetName,
+    string TargetSurname,
+    string TargetCNumber,
+    string ReporterName,
+    string ReporterSurname,
+    string ReporterCNumber,
+    string Reason,
+    int Severity,
+    string? ResolverName,
+    string? ResolverSurname,
+    string? ResolverCNumber,
+    bool CanTake,
+    bool CanControlResolution);
+
+[Serializable, NetSerializable]
 public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
 {
     public string Name { get; }
@@ -51,6 +77,9 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
     public string? GeneratedNumber { get; }
     public List<CIDDatabaseRecord> Records { get; }
     public CIDRecordDetails? SelectedRecord { get; }
+    public bool CanViewDenunciations { get; }
+    public List<CIDDenunciationListEntry> Denunciations { get; }
+    public CIDDenunciationDetails? SelectedDenunciation { get; }
 
     public CIDTabletBoundUiState(
         string name,
@@ -65,7 +94,10 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
         bool hasIssueCard,
         string? generatedNumber,
         List<CIDDatabaseRecord> records,
-        CIDRecordDetails? selectedRecord)
+        CIDRecordDetails? selectedRecord,
+        bool canViewDenunciations,
+        List<CIDDenunciationListEntry> denunciations,
+        CIDDenunciationDetails? selectedDenunciation)
     {
         Name = name;
         Surname = surname;
@@ -80,6 +112,9 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
         GeneratedNumber = generatedNumber;
         Records = records;
         SelectedRecord = selectedRecord;
+        CanViewDenunciations = canViewDenunciations;
+        Denunciations = denunciations;
+        SelectedDenunciation = selectedDenunciation;
     }
 }
 
@@ -129,5 +164,65 @@ public sealed class CIDWriteCardMessage : BoundUserInterfaceMessage
         Name = name;
         Surname = surname;
         CNumber = cNumber;
+    }
+}
+
+[Serializable, NetSerializable]
+public sealed class CIDSelectDenunciationMessage : BoundUserInterfaceMessage
+{
+    public int DenunciationId { get; }
+
+    public CIDSelectDenunciationMessage(int denunciationId)
+    {
+        DenunciationId = denunciationId;
+    }
+}
+
+[Serializable, NetSerializable]
+public sealed class CIDClearSelectedDenunciationMessage : BoundUserInterfaceMessage
+{
+}
+
+[Serializable, NetSerializable]
+public sealed class CIDTakeDenunciationMessage : BoundUserInterfaceMessage
+{
+    public int DenunciationId { get; }
+
+    public CIDTakeDenunciationMessage(int denunciationId)
+    {
+        DenunciationId = denunciationId;
+    }
+}
+
+[Serializable, NetSerializable]
+public sealed class CIDCancelDenunciationResolutionMessage : BoundUserInterfaceMessage
+{
+    public int DenunciationId { get; }
+
+    public CIDCancelDenunciationResolutionMessage(int denunciationId)
+    {
+        DenunciationId = denunciationId;
+    }
+}
+
+[Serializable, NetSerializable]
+public sealed class CIDAcceptDenunciationMessage : BoundUserInterfaceMessage
+{
+    public int DenunciationId { get; }
+
+    public CIDAcceptDenunciationMessage(int denunciationId)
+    {
+        DenunciationId = denunciationId;
+    }
+}
+
+[Serializable, NetSerializable]
+public sealed class CIDRejectDenunciationMessage : BoundUserInterfaceMessage
+{
+    public int DenunciationId { get; }
+
+    public CIDRejectDenunciationMessage(int denunciationId)
+    {
+        DenunciationId = denunciationId;
     }
 }

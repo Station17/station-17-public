@@ -23,6 +23,12 @@ public sealed class CIDTabletBoundUserInterface : BoundUserInterface
         _window.OnSelectRecord += uid => SendMessage(new CIDSelectRecordMessage(uid));
         _window.OnBackToRecords += () => SendMessage(new CIDClearSelectedRecordMessage());
         _window.OnChangeRecordLp += (uid, lp) => SendMessage(new CIDUpdateSelectedLPMessage(uid, lp));
+        _window.OnSelectDenunciation += id => SendMessage(new CIDSelectDenunciationMessage(id));
+        _window.OnBackToDenunciations += () => SendMessage(new CIDClearSelectedDenunciationMessage());
+        _window.OnTakeDenunciation += id => SendMessage(new CIDTakeDenunciationMessage(id));
+        _window.OnCancelDenunciationResolution += id => SendMessage(new CIDCancelDenunciationResolutionMessage(id));
+        _window.OnAcceptDenunciation += id => SendMessage(new CIDAcceptDenunciationMessage(id));
+        _window.OnRejectDenunciation += id => SendMessage(new CIDRejectDenunciationMessage(id));
         _window.OnClose += Close;
         _window.OpenCentered();
     }

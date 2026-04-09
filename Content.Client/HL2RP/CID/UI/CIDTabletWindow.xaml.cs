@@ -10,14 +10,23 @@ namespace Content.Client.HL2RP.CID.UI;
 public sealed partial class CIDTabletWindow : DefaultWindow
 {
     private List<CIDDatabaseRecord> _records = new();
+    private List<CIDDenunciationListEntry> _denunciations = new();
     private CIDRecordDetails? _selectedRecord;
+    private CIDDenunciationDetails? _selectedDenunciation;
     private bool _suppressSelectionEvents;
+    private bool _suppressDenunciationSelectionEvents;
 
     public Action? OnGenerateNumber;
     public Action<string, string, string>? OnWriteCard;
     public Action<NetEntity>? OnSelectRecord;
     public Action? OnBackToRecords;
     public Action<NetEntity, int>? OnChangeRecordLp;
+    public Action<int>? OnSelectDenunciation;
+    public Action? OnBackToDenunciations;
+    public Action<int>? OnTakeDenunciation;
+    public Action<int>? OnCancelDenunciationResolution;
+    public Action<int>? OnAcceptDenunciation;
+    public Action<int>? OnRejectDenunciation;
 
     public CIDTabletWindow()
     {
@@ -26,12 +35,18 @@ public sealed partial class CIDTabletWindow : DefaultWindow
         Tabs.SetTabTitle(0, "Информация");
         Tabs.SetTabTitle(1, "База данных");
         Tabs.SetTabTitle(2, "Выдача");
+        Tabs.SetTabTitle(3, "Доносы");
 
         GenerateNumberButton.OnPressed += _ => OnGenerateNumber?.Invoke();
         WriteCardButton.OnPressed += _ =>
             OnWriteCard?.Invoke(IssueNameLine.Text, IssueSurnameLine.Text, IssueNumberLine.Text);
         ApplyLpButton.OnPressed += _ => TryApplySelectedLp();
         BackToRecordsButton.OnPressed += _ => OnBackToRecords?.Invoke();
+        BackToDenunciationsButton.OnPressed += _ => OnBackToDenunciations?.Invoke();
+        TakeReportButton.OnPressed += _ => TryTakeDenunciation();
+        CancelResolutionButton.OnPressed += _ => TryCancelResolution();
+        AcceptReportButton.OnPressed += _ => TryAcceptDenunciation();
+        RejectReportButton.OnPressed += _ => TryRejectDenunciation();
 
         RecordsList.OnItemSelected += args =>
         {
@@ -42,6 +57,17 @@ public sealed partial class CIDTabletWindow : DefaultWindow
                 return;
 
             OnSelectRecord?.Invoke(_records[args.ItemIndex].CardUid);
+        };
+
+        DenunciationsList.OnItemSelected += args =>
+        {
+            if (_suppressDenunciationSelectionEvents)
+                return;
+
+            if (args.ItemIndex < 0 || args.ItemIndex >= _denunciations.Count)
+                return;
+
+            OnSelectDenunciation?.Invoke(_denunciations[args.ItemIndex].Id);
         };
     }
 
@@ -55,6 +81,7 @@ public sealed partial class CIDTabletWindow : DefaultWindow
         InfoJobLabel.Text = $"Должность: {state.Job}";
 
         Tabs.SetTabVisible(2, state.CanIssue);
+        Tabs.SetTabVisible(3, state.CanViewDenunciations);
         IssueStatusLabel.Text = state.HasIssueCard
             ? "Карта для выдачи вставлена"
             : "Вставьте пустую CID карту в слот выдачи";
@@ -64,6 +91,8 @@ public sealed partial class CIDTabletWindow : DefaultWindow
 
         UpdateRecords(state.Records);
         UpdateSelectedRecord(state.SelectedRecord, state.CanViewDetails);
+        UpdateDenunciations(state.Denunciations);
+        UpdateSelectedDenunciation(state.SelectedDenunciation);
     }
 
     private void UpdateRecords(List<CIDDatabaseRecord> records)
@@ -117,5 +146,83 @@ public sealed partial class CIDTabletWindow : DefaultWindow
 
         if (int.TryParse(SelectedLpEdit.Text, out var lp))
             OnChangeRecordLp?.Invoke(_selectedRecord.CardUid, lp);
+    }
+
+    private void UpdateDenunciations(List<CIDDenunciationListEntry> denunciations)
+    {
+        _denunciations = denunciations;
+        _suppressDenunciationSelectionEvents = true;
+        DenunciationsList.Clear();
+        for (var i = 0; i < denunciations.Count; i++)
+        {
+            var report = denunciations[i];
+            var item = DenunciationsList.AddItem(
+                $"{report.TargetName} {report.TargetSurname} [{report.TargetCNumber}] ({report.Severity} степень)");
+            item.Selected = _selectedDenunciation != null && _selectedDenunciation.Id == report.Id;
+        }
+
+        _suppressDenunciationSelectionEvents = false;
+    }
+
+    private void UpdateSelectedDenunciation(CIDDenunciationDetails? details)
+    {
+        _selectedDenunciation = details;
+        ReportsListView.Visible = details == null;
+        ReportsDetailsView.Visible = details != null;
+
+        if (details == null)
+        {
+            ReportTargetLabel.Text = "На кого: -";
+            ReportReporterLabel.Text = "Кто подал: -";
+            ReportSeverityLabel.Text = "Тяжесть: -";
+            ReportResolverLabel.Text = "Разбирает: -";
+            ReportReasonLabel.SetMessage(string.Empty);
+            TakeReportButton.Disabled = true;
+            ReportControlButtons.Visible = false;
+            return;
+        }
+
+        ReportTargetLabel.Text = $"На кого: {details.TargetName} {details.TargetSurname} [{details.TargetCNumber}]";
+        ReportReporterLabel.Text = $"Кто подал: {details.ReporterName} {details.ReporterSurname} [{details.ReporterCNumber}]";
+        ReportSeverityLabel.Text = $"Тяжесть: {details.Severity} степень";
+        ReportResolverLabel.Text = details.ResolverName == null
+            ? "Разбирает: никто"
+            : $"Разбирает: {details.ResolverName} {details.ResolverSurname} [{details.ResolverCNumber}]";
+        ReportReasonLabel.SetMessage(details.Reason);
+
+        TakeReportButton.Disabled = !details.CanTake;
+        ReportControlButtons.Visible = details.CanControlResolution;
+    }
+
+    private void TryTakeDenunciation()
+    {
+        if (_selectedDenunciation == null)
+            return;
+
+        OnTakeDenunciation?.Invoke(_selectedDenunciation.Id);
+    }
+
+    private void TryCancelResolution()
+    {
+        if (_selectedDenunciation == null)
+            return;
+
+        OnCancelDenunciationResolution?.Invoke(_selectedDenunciation.Id);
+    }
+
+    private void TryAcceptDenunciation()
+    {
+        if (_selectedDenunciation == null)
+            return;
+
+        OnAcceptDenunciation?.Invoke(_selectedDenunciation.Id);
+    }
+
+    private void TryRejectDenunciation()
+    {
+        if (_selectedDenunciation == null)
+            return;
+
+        OnRejectDenunciation?.Invoke(_selectedDenunciation.Id);
     }
 }
