@@ -1,5 +1,4 @@
 using Content.Server.DoAfter;
-using Content.Server.Inventory;
 using Content.Server.Popups;
 using Content.Server.HL2RP.Contracts.Components;
 using Content.Shared.DoAfter;
@@ -26,7 +25,6 @@ public sealed class CargoBoxContractSystem : EntitySystem
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly IPrototypeManager _prototypes = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
-    [Dependency] private readonly ServerInventorySystem _inventory = default!;
 
     private readonly HashSet<Entity<CargoBoxContractItemComponent>> _nearbyBoxes = new();
 
@@ -55,8 +53,7 @@ public sealed class CargoBoxContractSystem : EntitySystem
             if (spawner.NextSpawnAt > now)
                 continue;
 
-            spawner.NextSpawnAt = now + spawner.SpawnInterval;
-            Dirty(spawnerUid, spawner);
+            spawner.NextSpawnAt = now + TimeSpan.FromSeconds(spawner.SpawnIntervalSeconds);
 
             if (HasBoxOnSpawner(spawnerUid))
                 continue;
@@ -79,7 +76,6 @@ public sealed class CargoBoxContractSystem : EntitySystem
             if (!IsOnFloor(boxUid) || IsAtSpawner(boxUid, boxComp))
             {
                 serverComp.DeleteAt = null;
-                Dirty(boxUid, serverComp);
                 continue;
             }
 
@@ -104,7 +100,6 @@ public sealed class CargoBoxContractSystem : EntitySystem
     private void OnSpawnerMapInit(Entity<CargoBoxSpawnerComponent> ent, ref MapInitEvent args)
     {
         ent.Comp.NextSpawnAt = _timing.CurTime;
-        Dirty(ent);
     }
 
     private void OnBoxMapInit(Entity<CargoBoxContractItemComponent> ent, ref MapInitEvent args)
@@ -113,7 +108,6 @@ public sealed class CargoBoxContractSystem : EntitySystem
         if (TryComp<CargoBoxContractItemServerComponent>(ent.Owner, out var serverComp))
         {
             serverComp.DeleteAt = null;
-            Dirty(ent.Owner, serverComp);
         }
     }
 
@@ -123,7 +117,6 @@ public sealed class CargoBoxContractSystem : EntitySystem
             return;
 
         serverComp.DeleteAt = IsAtSpawner(ent.Owner, ent.Comp) ? null : _timing.CurTime + TimeSpan.FromMinutes(1);
-        Dirty(ent.Owner, serverComp);
     }
 
     private void OnBoxEquippedHand(Entity<CargoBoxContractItemComponent> ent, ref GotEquippedHandEvent args)
@@ -132,7 +125,6 @@ public sealed class CargoBoxContractSystem : EntitySystem
             return;
 
         serverComp.DeleteAt = null;
-        Dirty(ent.Owner, serverComp);
     }
 
     private void OnBoxInsertedContainer(Entity<CargoBoxContractItemComponent> ent, ref EntInsertedIntoContainerMessage args)
@@ -141,7 +133,6 @@ public sealed class CargoBoxContractSystem : EntitySystem
             return;
 
         serverComp.DeleteAt = null;
-        Dirty(ent.Owner, serverComp);
     }
 
     private void OnAfterInteractUsing(Entity<CargoBoxDeliveryPointComponent> ent, ref AfterInteractUsingEvent args)

@@ -10,4 +10,4 @@
     - state: green
   - type: CargoBoxSpawner
     boxPrototype: HL2RPContractCargoBox
-    spawnInterval: 00:01:00
+    spawnIntervalSeconds: 60

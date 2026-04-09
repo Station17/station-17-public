@@ -10,7 +10,7 @@ public sealed partial class CargoBoxSpawnerComponent : Component
     public string BoxPrototype = "HL2RPContractCargoBox";
 
     [DataField]
-    public TimeSpan SpawnInterval = TimeSpan.FromMinutes(1);
+    public float SpawnIntervalSeconds = 60f;
 
     [DataField]
     public TimeSpan NextSpawnAt;
