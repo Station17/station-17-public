@@ -11,12 +11,10 @@
       "name": "icon"
     },
     {
-      "name": "inhand-left",
-      "directions": 4
+      "name": "inhand-left"
     },
     {
-      "name": "inhand-right",
-      "directions": 4
+      "name": "inhand-right"
     }
   ]
 }
