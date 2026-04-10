@@ -2,6 +2,7 @@ using Content.Shared.Preferences;
 using Content.Shared.HL2RP.CharacterPersistence;
 using Content.Shared.Roles;
 using Robust.Client.UserInterface.Controls;
+using Robust.Shared.Map;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 
@@ -63,6 +64,17 @@ public sealed partial class ProfilePreviewSpriteView : SpriteView
     {
         EntMan.DeleteEntity(PreviewDummy);
         PreviewDummy = EntityUid.Invalid;
+    }
+
+    public void LoadEntityPreview(EntProtoId prototypeId, string? displayName = null)
+    {
+        EntMan.DeleteEntity(PreviewDummy);
+        PreviewDummy = EntityUid.Invalid;
+
+        PreviewDummy = EntMan.SpawnEntity(prototypeId, MapCoordinates.Nullspace);
+        SetEntity(PreviewDummy);
+        if (!string.IsNullOrWhiteSpace(displayName))
+            SetName(displayName);
     }
 
     protected override void ExitedTree()

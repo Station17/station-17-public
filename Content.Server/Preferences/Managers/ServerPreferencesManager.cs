@@ -328,6 +328,34 @@ namespace Content.Server.Preferences.Managers
                 await _db.SaveConstructionFavoritesAsync(userId, favorites);
         }
 
+        public async Task RefreshPreferences(NetUserId userId)
+        {
+            if (!_cachedPlayerPrefs.TryGetValue(userId, out var prefsData) || !prefsData.PrefsLoaded)
+                return;
+
+            if (!_playerManager.TryGetSessionById(userId, out var session))
+                return;
+
+            var prefs = await GetOrCreatePreferencesAsync(userId, CancellationToken.None);
+            var converted = ConvertPreferences(prefs);
+            var historyRows = await _db.GetCharacterHistorySnapshotsAsync(userId);
+            var history = BuildCharacterHistory(historyRows);
+            prefsData.Prefs = new PlayerPreferences(converted.Characters, converted.SelectedCharacterIndex, converted.AdminOOCColor, converted.ConstructionFavorites, history);
+            prefsData.Prefs = SanitizePreferences(session, prefsData.Prefs, _dependencies);
+            prefsData.LockedSlots = GetLockedSlots(prefs);
+
+            var msg = new MsgPreferencesAndSettings
+            {
+                Preferences = prefsData.Prefs,
+                Settings = new GameSettings
+                {
+                    MaxCharacterSlots = GetMaxUserCharacterSlots(userId)
+                }
+            };
+            _netManager.ServerSendMessage(msg, session.Channel);
+            await SendCharacterInventoryPreviewAsync(session, prefsData.Prefs.SelectedCharacterIndex);
+        }
+
         private async void HandleDeleteCharacterMessage(MsgDeleteCharacter message)
         {
             var slot = message.Slot;

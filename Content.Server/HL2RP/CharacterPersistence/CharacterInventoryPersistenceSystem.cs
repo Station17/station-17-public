@@ -135,9 +135,13 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         await _db.AppendCharacterHistorySnapshotAsync(userId, slot, roundId, roundEndedAt, name, surname, snapshot);
 
         if (selected.IsPermanentlyDead)
+        {
+            await _preferences.RefreshPreferences(userId);
             return;
+        }
 
         await _preferences.SetProfile(userId, slot, selected.WithPermanentDeath(true), bypassLock: true);
+        await _preferences.RefreshPreferences(userId);
     }
 
     private async Task RestoreSnapshot(NetUserId userId, EntityUid mob)

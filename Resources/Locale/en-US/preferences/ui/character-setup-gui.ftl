@@ -1,7 +1,7 @@
 character-setup-gui-character-setup-label = Character setup
 character-setup-gui-character-setup-adminremarks-button = Admin Remarks
 character-setup-gui-character-setup-stats-button = Stats
-character-setup-gui-character-setup-history-button = Character History
+character-setup-gui-character-setup-history-button = Character Necrology
 character-setup-gui-character-setup-rules-button = Rules
 character-setup-gui-character-setup-close-button = Close
 character-setup-gui-create-new-character-button = Create new slot...
@@ -15,7 +15,7 @@ character-setup-gui-save-panel-save = Save
 character-setup-gui-save-panel-nosave = Don't save
 character-setup-gui-save-panel-cancel = Cancel
 
-character-history-window-title = Character History
+character-history-window-title = Character Necrology
 character-history-window-empty = No history entries yet.
 character-history-window-round = Round
 character-history-window-date = Date

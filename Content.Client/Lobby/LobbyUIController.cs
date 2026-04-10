@@ -192,10 +192,20 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         if (character is not HumanoidCharacterProfile humanoid)
         {
             PreviewPanel.ProfilePreviewSpriteView.ClearPreview();
+            PreviewPanel.SetDeadStatusVisible(false);
             PreviewPanel.SetSummaryText(string.Empty);
             return;
         }
 
+        if (humanoid.IsPermanentlyDead)
+        {
+            PreviewPanel.ProfilePreviewSpriteView.LoadEntityPreview("MobObserver", humanoid.Name);
+            PreviewPanel.SetDeadStatusVisible(true);
+            PreviewPanel.SetSummaryText(humanoid.Summary);
+            return;
+        }
+
+        PreviewPanel.SetDeadStatusVisible(false);
         PreviewPanel.ProfilePreviewSpriteView.LoadPreview(humanoid, inventoryPreview: _preferencesManager.SelectedCharacterInventoryPreview);
         PreviewPanel.SetSummaryText(humanoid.Summary);
     }

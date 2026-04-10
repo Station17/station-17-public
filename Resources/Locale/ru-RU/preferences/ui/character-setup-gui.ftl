@@ -1,7 +1,7 @@
 character-setup-gui-character-setup-label = Настройки персонажа
 character-setup-gui-character-setup-adminremarks-button = Админ заметки
 character-setup-gui-character-setup-stats-button = Статистика
-character-setup-gui-character-setup-history-button = История персонажей
+character-setup-gui-character-setup-history-button = Некролог персонажей
 character-setup-gui-character-setup-rules-button = Правила
 character-setup-gui-character-setup-close-button = Закрыть
 character-setup-gui-create-new-character-button = Создать нового персонажа...
@@ -15,7 +15,7 @@ character-setup-gui-save-panel-save = Сохранить
 character-setup-gui-save-panel-nosave = Не сохранять
 character-setup-gui-save-panel-cancel = Отмена
 
-character-history-window-title = История персонажей
+character-history-window-title = Некролог персонажей
 character-history-window-empty = История пока пуста.
 character-history-window-round = Раунд
 character-history-window-date = Дата

@@ -30,4 +30,9 @@ public sealed partial class LobbyCharacterPreviewPanel : Control
     {
         Summary.Text = value;
     }
+
+    public void SetDeadStatusVisible(bool value)
+    {
+        DeadStatus.Visible = value;
+    }
 }

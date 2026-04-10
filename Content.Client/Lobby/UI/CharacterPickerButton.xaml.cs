@@ -54,7 +54,7 @@ public sealed partial class CharacterPickerButton : ContainerButton
         if (profile.IsPermanentlyDead)
         {
             ToolTip = Loc.GetString("game-ticker-character-permanently-dead");
-            description = $"{description}\n{Loc.GetString("character-picker-button-dead-label")}";
+            description = $"{description}\n{Loc.GetString("character-setup-gui-character-picker-button-dead-label")}";
             Disabled = true;
             ToggleMode = false;
             DeleteButton.Disabled = true;
