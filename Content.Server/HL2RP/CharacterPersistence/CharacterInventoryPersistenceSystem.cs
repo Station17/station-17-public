@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Content.Server.Database;
@@ -67,7 +68,15 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
     {
         // Save is intentionally spread over multiple ticks to avoid hard frame stalls at round end.
         var roundEndedAt = DateTime.UtcNow;
-        foreach (var (userId, mob) in _spawnedMobs)
+        var roundEndMobs = new Dictionary<NetUserId, EntityUid>(_spawnedMobs);
+
+        foreach (var session in _players.Sessions)
+        {
+            if (session.AttachedEntity is { Valid: true } attached)
+                roundEndMobs[session.UserId] = attached;
+        }
+
+        foreach (var (userId, mob) in roundEndMobs)
         {
             if (!Exists(mob))
                 continue;
@@ -103,6 +112,16 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
         var slot = prefs.SelectedCharacterIndex;
         if (!prefs.Characters.TryGetValue(slot, out var selected))
+        {
+            var fallback = prefs.Characters.FirstOrDefault();
+            if (fallback.Value == null)
+                return;
+
+            slot = fallback.Key;
+            selected = fallback.Value;
+        }
+
+        if (selected == null)
             return;
 
         var snapshot = JsonSerializer.SerializeToDocument(BuildSnapshot(mob));
