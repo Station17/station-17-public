@@ -56,7 +56,6 @@ public sealed partial class CharacterPickerButton : ContainerButton
             ToolTip = Loc.GetString("game-ticker-character-permanently-dead");
             description = $"{description}\n{Loc.GetString("character-setup-gui-character-picker-button-dead-label")}";
             Disabled = true;
-            ToggleMode = false;
             DeleteButton.Disabled = true;
         }
 
