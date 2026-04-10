@@ -118,7 +118,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         if (selected.IsPermanentlyDead)
             return;
 
-        await _preferences.SetProfile(userId, slot, selected.WithPermanentDeath(true));
+        await _preferences.SetProfile(userId, slot, selected.WithPermanentDeath(true), bypassLock: true);
     }
 
     private async Task RestoreSnapshot(NetUserId userId, EntityUid mob)

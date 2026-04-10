@@ -23,7 +23,7 @@ namespace Content.Server.Preferences.Managers
         IEnumerable<KeyValuePair<NetUserId, HumanoidCharacterProfile>> GetSelectedProfilesForPlayers(List<NetUserId> userIds);
         bool HavePreferencesLoaded(ICommonSession session);
 
-        Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile);
+        Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile, bool bypassLock = false);
         Task SetConstructionFavorites(NetUserId userId, List<ProtoId<ConstructionPrototype>> favorites);
     }
 }

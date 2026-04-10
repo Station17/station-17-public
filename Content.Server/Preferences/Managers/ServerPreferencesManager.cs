@@ -262,7 +262,7 @@ namespace Content.Server.Preferences.Managers
                 await SetProfile(userId, message.Slot, message.Profile);
         }
 
-        public async Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile)
+        public async Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile, bool bypassLock = false)
         {
             if (!_cachedPlayerPrefs.TryGetValue(userId, out var prefsData) || !prefsData.PrefsLoaded)
             {
@@ -277,7 +277,7 @@ namespace Content.Server.Preferences.Managers
             var session = _playerManager.GetSessionById(userId);
 
             // HL2RP CHANGE START profile-lock
-            if (prefsData.LockedSlots.Contains(slot))
+            if (!bypassLock && prefsData.LockedSlots.Contains(slot))
             {
                 _sawmill.Warning($"User {userId} attempted to edit locked character slot {slot}.");
                 return;
