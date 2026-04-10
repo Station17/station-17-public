@@ -73,7 +73,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         foreach (var session in _players.Sessions)
         {
             if (session.AttachedEntity is { Valid: true } attached)
-                roundEndMobs[session.UserId] = attached;
+                roundEndMobs.TryAdd(session.UserId, attached);
         }
 
         foreach (var (userId, mob) in roundEndMobs)
