@@ -25,6 +25,7 @@ game-ticker-get-info-preround-text = Привет и добро пожалова
     >[color=yellow]{ $desc }[/color]
 game-ticker-no-map-selected = [color=red]Карта ещё не выбрана![/color]
 game-ticker-player-no-jobs-available-when-joining = При попытке присоединиться к игре ни одной роли не было доступно.
+game-ticker-character-permanently-dead = Этот персонаж погиб окончательно и больше не может участвовать в раундах.
 
 # Displayed in chat to admins when a player joins
 player-join-message = Игрок { $name } зашёл!

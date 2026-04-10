@@ -49,7 +49,14 @@ public sealed partial class CharacterPickerButton : ContainerButton
         }
 
         Pressed = isSelected;
+        DeadLabel.Visible = profile.IsPermanentlyDead;
         DeleteButton.Visible = !isSelected;
+        if (profile.IsPermanentlyDead)
+        {
+            Disabled = true;
+            ToggleMode = false;
+            DeleteButton.Disabled = true;
+        }
 
         DescriptionLabel.Text = description;
 

@@ -779,24 +779,84 @@ namespace Content.Server.Database.Migrations.Postgres
                     b.ToTable("ban_template", (string)null);
                 });
 
-            // HL2RP CHANGE START character-inventory-snapshot
-            modelBuilder.Entity("Content.Server.Database.CharacterInventorySnapshot", b =>
+            modelBuilder.Entity("Content.Server.Database.Blacklist", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("UserId")
+                        .HasName("PK_blacklist");
+
+                    b.ToTable("blacklist", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.CharacterHistorySnapshot", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasColumnName("id");
+                        .HasColumnName("character_history_snapshot_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime>("RoundEndedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("round_ended_at");
+
+                    b.Property<int>("RoundId")
+                        .HasColumnType("integer")
+                        .HasColumnName("round_id");
+
+                    b.Property<int>("Slot")
+                        .HasColumnType("integer")
+                        .HasColumnName("slot");
 
                     b.Property<string>("Snapshot")
                         .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("snapshot");
 
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("surname");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("PK_character_history_snapshot");
+
+                    b.HasIndex("UserId", "Slot", "RoundId");
+
+                    b.ToTable("character_history_snapshot", (string)null);
+                });
+
+            modelBuilder.Entity("Content.Server.Database.CharacterInventorySnapshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("character_inventory_snapshot_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
                     b.Property<int>("Slot")
                         .HasColumnType("integer")
                         .HasColumnName("slot");
+
+                    b.Property<string>("Snapshot")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("snapshot");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -810,24 +870,9 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasName("PK_character_inventory_snapshot");
 
                     b.HasIndex("UserId", "Slot")
-                        .IsUnique()
-                        .HasDatabaseName("IX_character_inventory_snapshot_user_id_slot");
+                        .IsUnique();
 
                     b.ToTable("character_inventory_snapshot", (string)null);
-                });
-            // HL2RP CHANGE END character-inventory-snapshot
-
-            modelBuilder.Entity("Content.Server.Database.Blacklist", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("UserId")
-                        .HasName("PK_blacklist");
-
-                    b.ToTable("blacklist", (string)null);
                 });
 
             modelBuilder.Entity("Content.Server.Database.ConnectionLog", b =>
@@ -1124,6 +1169,14 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("text")
                         .HasColumnName("hair_name");
 
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
+
+                    b.Property<bool>("IsPermanentlyDead")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_permanently_dead");
+
                     b.Property<JsonDocument>("Markings")
                         .HasColumnType("jsonb")
                         .HasColumnName("markings");
@@ -1163,18 +1216,10 @@ namespace Content.Server.Database.Migrations.Postgres
                         .HasColumnType("text")
                         .HasColumnName("species");
 
-                    // HL2RP CHANGE START profile-lock
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_locked");
-                    // HL2RP CHANGE END profile-lock
-
-                    // Corvax-TTS-Start
                     b.Property<string>("Voice")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("voice");
-                    // Corvax-TTS-End
 
                     b.HasKey("Id")
                         .HasName("PK_profile");

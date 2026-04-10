@@ -89,9 +89,12 @@ namespace Content.Client.Lobby.UI
         private void UpdateProfileLockState()
         {
             var locked = IsProfileLocked();
+            var dead = Profile?.IsPermanentlyDead == true;
             ProfileLockNoticeLabel.Visible = locked;
             ProfileLockNoticeLabel.SetMarkup(locked
-                ? "[color=gray]Этот персонаж уже сохранен и заблокирован: редактирование и смена роли отключены.[/color]"
+                ? dead
+                    ? "[color=red]Этот персонаж мертв и недоступен для игры.[/color]\n[color=gray]Редактирование и смена роли отключены.[/color]"
+                    : "[color=gray]Этот персонаж уже сохранен и заблокирован: редактирование и смена роли отключены.[/color]"
                 : string.Empty);
 
             NameEdit.Editable = !locked;

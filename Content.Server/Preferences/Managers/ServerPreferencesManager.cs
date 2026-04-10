@@ -206,7 +206,8 @@ namespace Content.Server.Preferences.Managers
                 (PreferenceUnavailableMode) profile.PreferenceUnavailable,
                 antags.ToHashSet(),
                 traits.ToHashSet(),
-                loadouts
+                loadouts,
+                profile.IsPermanentlyDead
             );
         }
 
@@ -234,7 +235,13 @@ namespace Content.Server.Preferences.Managers
                 return;
             }
 
-            prefsData.Prefs = new PlayerPreferences(curPrefs.Characters, index, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
+            if (curPrefs.Characters[index].IsPermanentlyDead)
+            {
+                _sawmill.Warning($"User {userId} attempted to select permanently dead slot {index}.");
+                return;
+            }
+
+            prefsData.Prefs = new PlayerPreferences(curPrefs.Characters, index, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites, new Dictionary<int, List<CharacterHistoryEntry>>(curPrefs.CharacterHistory));
 
             if (ShouldStorePrefs(message.MsgChannel.AuthType))
             {
@@ -294,7 +301,7 @@ namespace Content.Server.Preferences.Managers
             var selectedSlot = profiles.ContainsKey(curPrefs.SelectedCharacterIndex)
                 ? curPrefs.SelectedCharacterIndex
                 : slot;
-            prefsData.Prefs = new PlayerPreferences(profiles, selectedSlot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
+            prefsData.Prefs = new PlayerPreferences(profiles, selectedSlot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites, new Dictionary<int, List<CharacterHistoryEntry>>(curPrefs.CharacterHistory));
             // HL2RP CHANGE END selected-character-safety
 
             // HL2RP CHANGE START profile-lock
@@ -314,7 +321,7 @@ namespace Content.Server.Preferences.Managers
             }
 
             var curPrefs = prefsData.Prefs!;
-            prefsData.Prefs = new PlayerPreferences(curPrefs.Characters, curPrefs.SelectedCharacterIndex, curPrefs.AdminOOCColor, favorites);
+            prefsData.Prefs = new PlayerPreferences(curPrefs.Characters, curPrefs.SelectedCharacterIndex, curPrefs.AdminOOCColor, favorites, new Dictionary<int, List<CharacterHistoryEntry>>(curPrefs.CharacterHistory));
 
             var session = _playerManager.GetSessionById(userId);
             if (ShouldStorePrefs(session.Channel.AuthType))
@@ -362,7 +369,7 @@ namespace Content.Server.Preferences.Managers
             prefsData.LockedSlots.Remove(slot);
             // HL2RP CHANGE END profile-lock
 
-            prefsData.Prefs = new PlayerPreferences(arr, nextSlot ?? curPrefs.SelectedCharacterIndex, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites);
+            prefsData.Prefs = new PlayerPreferences(arr, nextSlot ?? curPrefs.SelectedCharacterIndex, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites, new Dictionary<int, List<CharacterHistoryEntry>>(curPrefs.CharacterHistory));
 
             if (ShouldStorePrefs(message.MsgChannel.AuthType))
             {
@@ -415,7 +422,7 @@ namespace Content.Server.Preferences.Managers
             }
 
             var curPrefs = prefsData.Prefs!;
-            prefsData.Prefs = new PlayerPreferences(curPrefs.Characters, curPrefs.SelectedCharacterIndex, curPrefs.AdminOOCColor, validatedList);
+            prefsData.Prefs = new PlayerPreferences(curPrefs.Characters, curPrefs.SelectedCharacterIndex, curPrefs.AdminOOCColor, validatedList, new Dictionary<int, List<CharacterHistoryEntry>>(curPrefs.CharacterHistory));
 
             if (ShouldStorePrefs(message.MsgChannel.AuthType))
             {
@@ -450,7 +457,10 @@ namespace Content.Server.Preferences.Managers
                 async Task LoadPrefs()
                 {
                     var prefs = await GetOrCreatePreferencesAsync(session.UserId, cancel);
-                    prefsData.Prefs = ConvertPreferences(prefs);
+                    var converted = ConvertPreferences(prefs);
+                    var historyRows = await _db.GetCharacterHistorySnapshotsAsync(session.UserId);
+                    var history = BuildCharacterHistory(historyRows);
+                    prefsData.Prefs = new PlayerPreferences(converted.Characters, converted.SelectedCharacterIndex, converted.AdminOOCColor, converted.ConstructionFavorites, history);
                     // HL2RP CHANGE START profile-lock
                     prefsData.LockedSlots = GetLockedSlots(prefs);
                     // HL2RP CHANGE END profile-lock
@@ -659,7 +669,32 @@ namespace Content.Server.Preferences.Managers
             return new PlayerPreferences(prefs.Characters.Select(p =>
             {
                 return new KeyValuePair<int, HumanoidCharacterProfile>(p.Key, p.Value.Validated(session, collection, sponsorPrototypes));// Corvax-Sponsors
-            }), prefs.SelectedCharacterIndex, prefs.AdminOOCColor, prefs.ConstructionFavorites);
+            }), prefs.SelectedCharacterIndex, prefs.AdminOOCColor, prefs.ConstructionFavorites, new Dictionary<int, List<CharacterHistoryEntry>>(prefs.CharacterHistory));
+        }
+
+        private static Dictionary<int, List<CharacterHistoryEntry>> BuildCharacterHistory(List<CharacterHistorySnapshot> rows)
+        {
+            var result = new Dictionary<int, List<CharacterHistoryEntry>>();
+            foreach (var row in rows.OrderByDescending(r => r.RoundEndedAt))
+            {
+                var preview = TryBuildPreviewFromSnapshot(JsonDocument.Parse(row.Snapshot), out var parsed) ? parsed : null;
+                if (!result.TryGetValue(row.Slot, out var list))
+                {
+                    list = new List<CharacterHistoryEntry>();
+                    result[row.Slot] = list;
+                }
+
+                list.Add(new CharacterHistoryEntry
+                {
+                    RoundId = row.RoundId,
+                    RoundEndedAt = row.RoundEndedAt,
+                    Name = row.Name,
+                    Surname = row.Surname,
+                    Preview = preview
+                });
+            }
+
+            return result;
         }
 
         public IEnumerable<KeyValuePair<NetUserId, HumanoidCharacterProfile>> GetSelectedProfilesForPlayers(

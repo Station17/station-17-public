@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Content.Server.Database;
@@ -10,6 +11,8 @@ using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.HL2RP.CharacterPersistence.Components;
 using Content.Shared.Inventory;
+using Content.Shared.Mobs.Systems;
+using Content.Shared.Preferences;
 using Robust.Server.Player;
 using Robust.Shared.Containers;
 using Robust.Shared.Enums;
@@ -32,6 +35,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
     [Dependency] private readonly StackSystem _stack = default!;
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly IComponentFactory _componentFactory = default!;
+    [Dependency] private readonly MobStateSystem _mobState = default!;
 
     private readonly Dictionary<NetUserId, EntityUid> _spawnedMobs = new();
 
@@ -62,6 +66,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
     private async void OnRoundEnded(RoundEndedEvent ev)
     {
         // Save is intentionally spread over multiple ticks to avoid hard frame stalls at round end.
+        var roundEndedAt = DateTime.UtcNow;
         foreach (var (userId, mob) in _spawnedMobs)
         {
             if (!Exists(mob))
@@ -69,6 +74,7 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
             await Task.Yield();
             await SaveSnapshot(userId, mob);
+            await SaveHistoryAndPermadeath(userId, mob, ev.RoundId, roundEndedAt);
         }
     }
 
@@ -87,6 +93,32 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         var data = BuildSnapshot(mob);
         var json = JsonSerializer.SerializeToDocument(data);
         await _db.SaveCharacterInventorySnapshotAsync(userId, prefs.SelectedCharacterIndex, json);
+    }
+
+    private async Task SaveHistoryAndPermadeath(NetUserId userId, EntityUid mob, int roundId, DateTime roundEndedAt)
+    {
+        var prefs = _preferences.GetPreferencesOrNull(userId);
+        if (prefs == null)
+            return;
+
+        var slot = prefs.SelectedCharacterIndex;
+        if (!prefs.Characters.TryGetValue(slot, out var selected))
+            return;
+
+        var snapshot = JsonSerializer.SerializeToDocument(BuildSnapshot(mob));
+        var (name, surname) = SplitName(selected.Name);
+        await _db.AppendCharacterHistorySnapshotAsync(userId, slot, roundId, roundEndedAt, name, surname, snapshot);
+
+        if (selected.Species != HumanoidCharacterProfile.DefaultSpecies)
+            return;
+
+        if (!_mobState.IsDead(mob))
+            return;
+
+        if (selected.IsPermanentlyDead)
+            return;
+
+        await _preferences.SetProfile(userId, slot, selected.WithPermanentDeath(true));
     }
 
     private async Task RestoreSnapshot(NetUserId userId, EntityUid mob)
@@ -157,6 +189,19 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         }
 
         return data;
+    }
+
+    private static (string Name, string Surname) SplitName(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            return (string.Empty, string.Empty);
+
+        var trimmed = fullName.Trim();
+        var split = trimmed.LastIndexOf(' ');
+        if (split <= 0 || split >= trimmed.Length - 1)
+            return (trimmed, string.Empty);
+
+        return (trimmed[..split], trimmed[(split + 1)..]);
     }
 
     private SnapshotItemData? SerializeItem(EntityUid item)

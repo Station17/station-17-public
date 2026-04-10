@@ -250,6 +250,37 @@ namespace Content.Server.Database
                 .Where(x => x.UserId == userId.UserId && x.Slot == slot)
                 .ExecuteDeleteAsync();
         }
+
+        public async Task AppendCharacterHistorySnapshotAsync(NetUserId userId, int slot, int roundId, DateTime roundEndedAt, string name, string surname, JsonDocument snapshot)
+        {
+            var serialized = snapshot.RootElement.GetRawText();
+            await using var db = await GetDb();
+            db.DbContext.CharacterHistorySnapshot.Add(new CharacterHistorySnapshot
+            {
+                UserId = userId.UserId,
+                Slot = slot,
+                RoundId = roundId,
+                RoundEndedAt = roundEndedAt,
+                Name = name,
+                Surname = surname,
+                Snapshot = serialized
+            });
+            await db.DbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<CharacterHistorySnapshot>> GetCharacterHistorySnapshotsAsync(NetUserId userId, int maxEntriesPerSlot = 10)
+        {
+            await using var db = await GetDb();
+            var rows = await db.DbContext.CharacterHistorySnapshot
+                .Where(x => x.UserId == userId.UserId)
+                .OrderByDescending(x => x.RoundEndedAt)
+                .ToListAsync();
+
+            return rows
+                .GroupBy(x => x.Slot)
+                .SelectMany(g => g.Take(maxEntriesPerSlot))
+                .ToList();
+        }
         // HL2RP CHANGE END character-inventory-snapshot
 
         private static async Task SetSelectedCharacterSlotAsync(NetUserId userId, int newSlot, ServerDbContext db)
@@ -295,6 +326,7 @@ namespace Content.Server.Database
 
             profile.Slot = slot;
             profile.PreferenceUnavailable = (DbPreferenceUnavailableMode) humanoid.PreferenceUnavailable;
+            profile.IsPermanentlyDead = humanoid.IsPermanentlyDead;
 
             profile.Jobs.Clear();
             profile.Jobs.AddRange(

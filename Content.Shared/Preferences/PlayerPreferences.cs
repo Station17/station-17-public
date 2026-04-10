@@ -1,4 +1,6 @@
+using System;
 using Content.Shared.Construction.Prototypes;
+using Content.Shared.HL2RP.CharacterPersistence;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 using Robust.Shared.Utility;
@@ -14,10 +16,17 @@ namespace Content.Shared.Preferences
     public sealed class PlayerPreferences
     {
         private Dictionary<int, HumanoidCharacterProfile> _characters;
+        private readonly Dictionary<int, List<CharacterHistoryEntry>> _characterHistory;
 
-        public PlayerPreferences(IEnumerable<KeyValuePair<int, HumanoidCharacterProfile>> characters, int selectedCharacterIndex, Color adminOOCColor, List<ProtoId<ConstructionPrototype>> constructionFavorites)
+        public PlayerPreferences(
+            IEnumerable<KeyValuePair<int, HumanoidCharacterProfile>> characters,
+            int selectedCharacterIndex,
+            Color adminOOCColor,
+            List<ProtoId<ConstructionPrototype>> constructionFavorites,
+            Dictionary<int, List<CharacterHistoryEntry>>? characterHistory = null)
         {
             _characters = new Dictionary<int, HumanoidCharacterProfile>(characters);
+            _characterHistory = characterHistory ?? new Dictionary<int, List<CharacterHistoryEntry>>();
             SelectedCharacterIndex = selectedCharacterIndex;
             AdminOOCColor = adminOOCColor;
             ConstructionFavorites = constructionFavorites;
@@ -27,6 +36,8 @@ namespace Content.Shared.Preferences
         ///     All player characters.
         /// </summary>
         public IReadOnlyDictionary<int, HumanoidCharacterProfile> Characters => _characters;
+
+        public IReadOnlyDictionary<int, List<CharacterHistoryEntry>> CharacterHistory => _characterHistory;
 
         public HumanoidCharacterProfile GetProfile(int index)
         {
@@ -59,5 +70,16 @@ namespace Content.Shared.Preferences
         {
             return (index = IndexOfCharacter(profile)) != -1;
         }
+    }
+
+    [Serializable]
+    [NetSerializable]
+    public sealed class CharacterHistoryEntry
+    {
+        public int RoundId { get; init; }
+        public DateTime RoundEndedAt { get; init; }
+        public string Name { get; init; } = string.Empty;
+        public string Surname { get; init; } = string.Empty;
+        public CharacterInventoryPreviewData? Preview { get; init; }
     }
 }

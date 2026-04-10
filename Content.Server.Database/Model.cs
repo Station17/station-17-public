@@ -21,6 +21,7 @@ namespace Content.Server.Database
         public DbSet<Preference> Preference { get; set; } = null!;
         public DbSet<Profile> Profile { get; set; } = null!;
         public DbSet<CharacterInventorySnapshot> CharacterInventorySnapshot { get; set; } = null!;
+        public DbSet<CharacterHistorySnapshot> CharacterHistorySnapshot { get; set; } = null!;
         public DbSet<AssignedUserId> AssignedUserId { get; set; } = null!;
         public DbSet<Player> Player { get; set; } = default!;
         public DbSet<Admin> Admin { get; set; } = null!;
@@ -65,6 +66,9 @@ namespace Content.Server.Database
             modelBuilder.Entity<CharacterInventorySnapshot>()
                 .HasIndex(s => new { s.UserId, s.Slot })
                 .IsUnique();
+
+            modelBuilder.Entity<CharacterHistorySnapshot>()
+                .HasIndex(s => new { s.UserId, s.Slot, s.RoundId });
             // HL2RP CHANGE END character-inventory-snapshot
 
             modelBuilder.Entity<Antag>()
@@ -360,6 +364,7 @@ namespace Content.Server.Database
         public Preference Preference { get; set; } = null!;
         // HL2RP CHANGE START profile-lock
         public bool IsLocked { get; set; }
+        public bool IsPermanentlyDead { get; set; }
         // HL2RP CHANGE END profile-lock
     }
 
@@ -371,6 +376,18 @@ namespace Content.Server.Database
         public int Slot { get; set; }
         [Column(TypeName = "jsonb")] public string Snapshot { get; set; } = string.Empty;
         public DateTime UpdatedAt { get; set; }
+    }
+
+    public class CharacterHistorySnapshot
+    {
+        public int Id { get; set; }
+        public Guid UserId { get; set; }
+        public int Slot { get; set; }
+        public int RoundId { get; set; }
+        public DateTime RoundEndedAt { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Surname { get; set; } = string.Empty;
+        [Column(TypeName = "jsonb")] public string Snapshot { get; set; } = string.Empty;
     }
     // HL2RP CHANGE END character-inventory-snapshot
 

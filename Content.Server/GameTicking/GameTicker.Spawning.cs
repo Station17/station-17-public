@@ -139,6 +139,11 @@ namespace Content.Server.GameTicking
             bool silent = false)
         {
             var character = GetPlayerProfile(player);
+            if (character.IsPermanentlyDead)
+            {
+                _chatManager.DispatchServerMessage(player, Loc.GetString("game-ticker-character-permanently-dead"));
+                return;
+            }
 
             var jobBans = _banManager.GetJobBans(player.UserId);
             if (jobBans == null || jobId != null && jobBans.Contains(jobId)) //TODO: use IsRoleBanned directly?
@@ -163,6 +168,12 @@ namespace Content.Server.GameTicking
             bool lateJoin = true,
             bool silent = false)
         {
+            if (character.IsPermanentlyDead)
+            {
+                _chatManager.DispatchServerMessage(player, Loc.GetString("game-ticker-character-permanently-dead"));
+                return;
+            }
+
             // Can't spawn players with a dummy ticker!
             if (DummyTicker)
                 return;

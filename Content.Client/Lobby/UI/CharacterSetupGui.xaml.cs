@@ -32,6 +32,7 @@ namespace Content.Client.Lobby.UI
 
         public event Action<int>? SelectCharacter;
         public event Action<int>? DeleteCharacter;
+        public event Action? HistoryRequested;
         // HL2RP CHANGE START create-character-flow
         public event Action? CreateCharacterRequested;
         // HL2RP CHANGE END create-character-flow
@@ -68,6 +69,7 @@ namespace Content.Client.Lobby.UI
             RulesButton.OnPressed += _ => new RulesAndInfoWindow().Open();
 
             StatsButton.OnPressed += _ => new PlaytimeStatsWindow().OpenCentered();
+            HistoryButton.OnPressed += _ => HistoryRequested?.Invoke();
 
             _cfg.OnValueChanged(CCVars.SeeOwnNotes, p => AdminRemarksButton.Visible = p, true);
             // Corvax-Sponsors-Start

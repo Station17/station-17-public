@@ -57,6 +57,8 @@ namespace Content.Server.Database
         Task SaveCharacterInventorySnapshotAsync(NetUserId userId, int slot, JsonDocument snapshot);
         Task<JsonDocument?> GetCharacterInventorySnapshotAsync(NetUserId userId, int slot);
         Task DeleteCharacterInventorySnapshotAsync(NetUserId userId, int slot);
+        Task AppendCharacterHistorySnapshotAsync(NetUserId userId, int slot, int roundId, DateTime roundEndedAt, string name, string surname, JsonDocument snapshot);
+        Task<List<CharacterHistorySnapshot>> GetCharacterHistorySnapshotsAsync(NetUserId userId, int maxEntriesPerSlot = 10);
         // HL2RP CHANGE END character-inventory-snapshot
         #endregion
 
@@ -499,6 +501,18 @@ namespace Content.Server.Database
         {
             DbWriteOpsMetric.Inc();
             return RunDbCommand(() => _db.DeleteCharacterInventorySnapshotAsync(userId, slot));
+        }
+
+        public Task AppendCharacterHistorySnapshotAsync(NetUserId userId, int slot, int roundId, DateTime roundEndedAt, string name, string surname, JsonDocument snapshot)
+        {
+            DbWriteOpsMetric.Inc();
+            return RunDbCommand(() => _db.AppendCharacterHistorySnapshotAsync(userId, slot, roundId, roundEndedAt, name, surname, snapshot));
+        }
+
+        public Task<List<CharacterHistorySnapshot>> GetCharacterHistorySnapshotsAsync(NetUserId userId, int maxEntriesPerSlot = 10)
+        {
+            DbReadOpsMetric.Inc();
+            return RunDbCommand(() => _db.GetCharacterHistorySnapshotsAsync(userId, maxEntriesPerSlot));
         }
         // HL2RP CHANGE END character-inventory-snapshot
 

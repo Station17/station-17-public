@@ -106,6 +106,9 @@ namespace Content.Shared.Preferences
         [DataField]
         public SpawnPriorityPreference SpawnPriority { get; private set; } = SpawnPriorityPreference.None;
 
+        [DataField]
+        public bool IsPermanentlyDead { get; private set; }
+
         /// <summary>
         /// <see cref="_jobPriorities"/>
         /// </summary>
@@ -142,7 +145,8 @@ namespace Content.Shared.Preferences
             PreferenceUnavailableMode preferenceUnavailable,
             HashSet<ProtoId<AntagPrototype>> antagPreferences,
             HashSet<ProtoId<TraitPrototype>> traitPreferences,
-            Dictionary<string, RoleLoadout> loadouts)
+            Dictionary<string, RoleLoadout> loadouts,
+            bool isPermanentlyDead = false)
         {
             Name = name;
             FlavorText = flavortext;
@@ -158,6 +162,7 @@ namespace Content.Shared.Preferences
             _antagPreferences = antagPreferences;
             _traitPreferences = traitPreferences;
             _loadouts = loadouts;
+            IsPermanentlyDead = isPermanentlyDead;
 
             var hasHighPrority = false;
             foreach (var (key, value) in _jobPriorities)
@@ -189,7 +194,8 @@ namespace Content.Shared.Preferences
                 other.PreferenceUnavailable,
                 new HashSet<ProtoId<AntagPrototype>>(other.AntagPreferences),
                 new HashSet<ProtoId<TraitPrototype>>(other.TraitPreferences),
-                new Dictionary<string, RoleLoadout>(other.Loadouts))
+                new Dictionary<string, RoleLoadout>(other.Loadouts),
+                other.IsPermanentlyDead)
         {
         }
 
@@ -329,6 +335,11 @@ namespace Content.Shared.Preferences
         public HumanoidCharacterProfile WithSpawnPriorityPreference(SpawnPriorityPreference spawnPriority)
         {
             return new(this) { SpawnPriority = spawnPriority };
+        }
+
+        public HumanoidCharacterProfile WithPermanentDeath(bool dead)
+        {
+            return new(this) { IsPermanentlyDead = dead };
         }
 
         public HumanoidCharacterProfile WithJobPriorities(IEnumerable<KeyValuePair<ProtoId<JobPrototype>, JobPriority>> jobPriorities)
@@ -500,6 +511,7 @@ namespace Content.Shared.Preferences
             if (!_traitPreferences.SequenceEqual(other._traitPreferences)) return false;
             if (!Loadouts.SequenceEqual(other.Loadouts)) return false;
             if (FlavorText != other.FlavorText) return false;
+            if (IsPermanentlyDead != other.IsPermanentlyDead) return false;
             return Appearance.Equals(other.Appearance);
         }
 
@@ -771,6 +783,7 @@ namespace Content.Shared.Preferences
             hashCode.Add(Appearance);
             hashCode.Add((int)SpawnPriority);
             hashCode.Add((int)PreferenceUnavailable);
+            hashCode.Add(IsPermanentlyDead);
             return hashCode.ToHashCode();
         }
 

@@ -410,6 +410,13 @@ namespace Content.Server.GameTicking
                         new HashSet<string>(_cfg.GetCVar(CCVars.ICNewAccountSpeciesBlacklist).Split(","));
                     profile = HumanoidCharacterProfile.Random(speciesToBlacklist);
                 }
+
+                if (profile.IsPermanentlyDead)
+                {
+                    _chatManager.DispatchServerMessage(session, Loc.GetString("game-ticker-character-permanently-dead"));
+                    continue;
+                }
+
                 readyPlayerProfiles.Add(userId, profile);
             }
 

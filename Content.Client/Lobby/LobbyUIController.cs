@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Linq;
 using Content.Client.Guidebook;
 using Content.Client.Corvax.TTS;
 using Content.Client.Humanoid;
+using Content.Client.HL2RP.CharacterHistory.UI;
 using Content.Client.Inventory;
 using Content.Client.Lobby.UI;
 using Content.Client.Players.PlayTimeTracking;
@@ -41,6 +43,7 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
     private CharacterSetupGui? _characterSetup;
     private HumanoidProfileEditor? _profileEditor;
     private CharacterSetupGuiSavePanel? _savePanel;
+    private CharacterHistoryWindow? _historyWindow;
 
     /// <summary>
     /// This is the characher preview panel in the chat. This should only update if their character updates.
@@ -155,9 +158,11 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         PreviewPanel?.SetLoaded(false);
         _profileEditor?.Dispose();
         _characterSetup?.Dispose();
+        _historyWindow?.Dispose();
 
         _characterSetup = null;
         _profileEditor = null;
+        _historyWindow = null;
     }
 
     /// <summary>
@@ -329,6 +334,7 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         };
 
         _profileEditor.Save += SaveProfile;
+        _characterSetup.HistoryRequested += OpenCharacterHistory;
 
         _characterSetup.SelectCharacter += args =>
         {
@@ -362,5 +368,24 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         }
 
         return (_characterSetup, _profileEditor);
+    }
+
+    private void OpenCharacterHistory()
+    {
+        var prefs = _preferencesManager.Preferences;
+        if (prefs == null)
+            return;
+
+        var slot = prefs.SelectedCharacterIndex;
+        if (!prefs.Characters.TryGetValue(slot, out var profile))
+            return;
+
+        var entries = prefs.CharacterHistory.TryGetValue(slot, out var history)
+            ? history
+            : new List<CharacterHistoryEntry>();
+
+        _historyWindow ??= new CharacterHistoryWindow();
+        _historyWindow.SetEntries(profile, entries);
+        _historyWindow.OpenCentered();
     }
 }
