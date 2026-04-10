@@ -376,16 +376,14 @@ public sealed partial class LobbyUIController : UIController, IOnStateEntered<Lo
         if (prefs == null)
             return;
 
-        var slot = prefs.SelectedCharacterIndex;
-        if (!prefs.Characters.TryGetValue(slot, out var profile))
-            return;
-
-        var entries = prefs.CharacterHistory.TryGetValue(slot, out var history)
-            ? history
-            : new List<CharacterHistoryEntry>();
+        var entries = prefs.CharacterHistory.Values
+            .SelectMany(x => x)
+            .OrderByDescending(x => x.RoundEndedAt)
+            .ToList();
+        prefs.Characters.TryGetValue(prefs.SelectedCharacterIndex, out var selectedProfile);
 
         _historyWindow ??= new CharacterHistoryWindow();
-        _historyWindow.SetEntries(profile, entries);
+        _historyWindow.SetEntries(entries, selectedProfile);
         _historyWindow.OpenCentered();
     }
 }

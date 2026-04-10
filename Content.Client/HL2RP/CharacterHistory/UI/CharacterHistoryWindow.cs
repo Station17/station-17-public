@@ -10,6 +10,7 @@ namespace Content.Client.HL2RP.CharacterHistory.UI;
 public sealed class CharacterHistoryWindow : DefaultWindow
 {
     private readonly BoxContainer _entries;
+    private readonly HumanoidCharacterProfile _fallbackPreviewProfile = HumanoidCharacterProfile.Random();
 
     public CharacterHistoryWindow()
     {
@@ -32,7 +33,7 @@ public sealed class CharacterHistoryWindow : DefaultWindow
         Contents.AddChild(root);
     }
 
-    public void SetEntries(HumanoidCharacterProfile baseProfile, IReadOnlyList<CharacterHistoryEntry> entries)
+    public void SetEntries(IReadOnlyList<CharacterHistoryEntry> entries, HumanoidCharacterProfile? previewTemplate = null)
     {
         _entries.RemoveAllChildren();
         if (entries.Count == 0)
@@ -53,7 +54,7 @@ public sealed class CharacterHistoryWindow : DefaultWindow
             var name = string.IsNullOrWhiteSpace(entry.Surname)
                 ? entry.Name
                 : $"{entry.Name} {entry.Surname}";
-            var profile = baseProfile.WithName(name);
+            var profile = (previewTemplate ?? _fallbackPreviewProfile).WithName(name);
             var preview = new ProfilePreviewSpriteView
             {
                 Scale = new Vector2(2, 2),

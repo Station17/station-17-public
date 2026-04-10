@@ -124,15 +124,15 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         if (selected == null)
             return;
 
-        var snapshot = JsonSerializer.SerializeToDocument(BuildSnapshot(mob));
-        var (name, surname) = SplitName(selected.Name);
-        await _db.AppendCharacterHistorySnapshotAsync(userId, slot, roundId, roundEndedAt, name, surname, snapshot);
-
         if (selected.Species != HumanoidCharacterProfile.DefaultSpecies)
             return;
 
         if (!_mobState.IsDead(mob))
             return;
+
+        var snapshot = JsonSerializer.SerializeToDocument(BuildSnapshot(mob));
+        var (name, surname) = SplitName(selected.Name);
+        await _db.AppendCharacterHistorySnapshotAsync(userId, slot, roundId, roundEndedAt, name, surname, snapshot);
 
         if (selected.IsPermanentlyDead)
             return;

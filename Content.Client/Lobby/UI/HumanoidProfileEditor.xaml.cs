@@ -90,41 +90,42 @@ namespace Content.Client.Lobby.UI
         {
             var locked = IsProfileLocked();
             var dead = Profile?.IsPermanentlyDead == true;
-            ProfileLockNoticeLabel.Visible = locked;
-            ProfileLockNoticeLabel.SetMarkup(locked
+            var immutable = locked || dead;
+            ProfileLockNoticeLabel.Visible = immutable;
+            ProfileLockNoticeLabel.SetMarkup(immutable
                 ? dead
                     ? "[color=red]Этот персонаж мертв и недоступен для игры.[/color]\n[color=gray]Редактирование и смена роли отключены.[/color]"
                     : "[color=gray]Этот персонаж уже сохранен и заблокирован: редактирование и смена роли отключены.[/color]"
                 : string.Empty);
 
-            NameEdit.Editable = !locked;
-            AgeEdit.Editable = !locked;
-            RandomizeEverythingButton.Disabled = locked;
-            NameRandomize.Disabled = locked;
-            ImportButton.Disabled = locked;
-            TabContainer.MouseFilter = locked ? MouseFilterMode.Stop : MouseFilterMode.Pass;
+            NameEdit.Editable = !immutable;
+            AgeEdit.Editable = !immutable;
+            RandomizeEverythingButton.Disabled = immutable;
+            NameRandomize.Disabled = immutable;
+            ImportButton.Disabled = immutable;
+            TabContainer.MouseFilter = immutable ? MouseFilterMode.Stop : MouseFilterMode.Pass;
 
             // HL2RP role buttons
-            Hl2RpRoleCivilian.Disabled = locked;
-            Hl2RpRoleLoyalist.Disabled = locked;
-            Hl2RpRoleVortigauntSlave.Disabled = locked;
-            Hl2RpRoleCivilDefense.Disabled = locked;
-            Hl2RpRoleCwuWorker.Disabled = locked;
-            Hl2RpCivilDefenseRCT.Disabled = locked;
-            Hl2RpCivilDefenseI5.Disabled = locked;
-            Hl2RpCivilDefenseI4.Disabled = locked;
-            Hl2RpCivilDefenseI3.Disabled = locked;
-            Hl2RpCivilDefenseI2.Disabled = locked;
-            Hl2RpCivilDefenseI1.Disabled = locked;
-            Hl2RpCivilDefenseOFC.Disabled = locked;
-            Hl2RpRoleCityAdministrator.Disabled = locked;
-            Hl2RpRoleAdministratorSecretary.Disabled = locked;
-            Hl2RpRoleCwuHead.Disabled = locked;
-            Hl2RpRoleCivilDefenseSectorCommander.Disabled = locked;
-            Hl2RpRoleCivilDefenseDispatcher.Disabled = locked;
-            Hl2RpRoleResistanceCoordinator.Disabled = locked;
-            Hl2RpRoleRebel.Disabled = locked;
-            Hl2RpRoleVortigauntFree.Disabled = locked;
+            Hl2RpRoleCivilian.Disabled = immutable;
+            Hl2RpRoleLoyalist.Disabled = immutable;
+            Hl2RpRoleVortigauntSlave.Disabled = immutable;
+            Hl2RpRoleCivilDefense.Disabled = immutable;
+            Hl2RpRoleCwuWorker.Disabled = immutable;
+            Hl2RpCivilDefenseRCT.Disabled = immutable;
+            Hl2RpCivilDefenseI5.Disabled = immutable;
+            Hl2RpCivilDefenseI4.Disabled = immutable;
+            Hl2RpCivilDefenseI3.Disabled = immutable;
+            Hl2RpCivilDefenseI2.Disabled = immutable;
+            Hl2RpCivilDefenseI1.Disabled = immutable;
+            Hl2RpCivilDefenseOFC.Disabled = immutable;
+            Hl2RpRoleCityAdministrator.Disabled = immutable;
+            Hl2RpRoleAdministratorSecretary.Disabled = immutable;
+            Hl2RpRoleCwuHead.Disabled = immutable;
+            Hl2RpRoleCivilDefenseSectorCommander.Disabled = immutable;
+            Hl2RpRoleCivilDefenseDispatcher.Disabled = immutable;
+            Hl2RpRoleResistanceCoordinator.Disabled = immutable;
+            Hl2RpRoleRebel.Disabled = immutable;
+            Hl2RpRoleVortigauntFree.Disabled = immutable;
         }
         // HL2RP CHANGE END profile-lock-ui
 
@@ -637,11 +638,11 @@ namespace Content.Client.Lobby.UI
         private void UpdateSaveButton()
         {
             // HL2RP CHANGE START profile-lock-ui
-            var locked = IsProfileLocked();
-            SaveButton.Disabled = Profile is null || !IsDirty || locked;
-            ResetButton.Disabled = Profile is null || !IsDirty || locked;
-            SaveButton.ToolTip = locked ? "Персонаж заблокирован после первого сохранения." : null;
-            ResetButton.ToolTip = locked ? "Персонаж заблокирован после первого сохранения." : null;
+            var immutable = IsProfileLocked() || Profile?.IsPermanentlyDead == true;
+            SaveButton.Disabled = Profile is null || !IsDirty || immutable;
+            ResetButton.Disabled = Profile is null || !IsDirty || immutable;
+            SaveButton.ToolTip = immutable ? "Персонаж заблокирован для редактирования." : null;
+            ResetButton.ToolTip = immutable ? "Персонаж заблокирован для редактирования." : null;
             // HL2RP CHANGE END profile-lock-ui
         }
 
