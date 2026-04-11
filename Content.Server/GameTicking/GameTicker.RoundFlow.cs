@@ -411,7 +411,7 @@ namespace Content.Server.GameTicking
                     profile = HumanoidCharacterProfile.Random(speciesToBlacklist);
                 }
 
-                if (profile.IsPermanentlyDead)
+                if (_cfg.GetCVar(CCVars.GameMetaProgressionEnabled) && profile.IsPermanentlyDead)
                 {
                     _chatManager.DispatchServerMessage(session, Loc.GetString("game-ticker-character-permanently-dead"));
                     continue;

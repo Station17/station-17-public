@@ -207,7 +207,7 @@ namespace Content.Server.Preferences.Managers
                 antags.ToHashSet(),
                 traits.ToHashSet(),
                 loadouts,
-                profile.IsPermanentlyDead
+                _cfg.GetCVar(CCVars.GameMetaProgressionEnabled) && profile.IsPermanentlyDead
             );
         }
 
@@ -235,7 +235,7 @@ namespace Content.Server.Preferences.Managers
                 return;
             }
 
-            if (curPrefs.Characters[index].IsPermanentlyDead)
+            if (_cfg.GetCVar(CCVars.GameMetaProgressionEnabled) && curPrefs.Characters[index].IsPermanentlyDead)
             {
                 _sawmill.Warning($"User {userId} attempted to select permanently dead slot {index}.");
                 return;
@@ -312,6 +312,41 @@ namespace Content.Server.Preferences.Managers
                 await _db.SaveCharacterSlotAsync(userId, profile, slot);
         }
 
+        public async Task PersistMetaJobHighPriorityAsync(NetUserId userId, int slot, ProtoId<JobPrototype> jobId)
+        {
+            if (!_cachedPlayerPrefs.TryGetValue(userId, out var prefsData) || !prefsData.PrefsLoaded)
+                return;
+
+            if (slot < 0 || slot >= GetMaxUserCharacterSlots(userId))
+                return;
+
+            if (!prefsData.Prefs!.Characters.TryGetValue(slot, out var profile))
+                return;
+
+            var updated = profile.WithJobPriority(jobId, JobPriority.High);
+            var session = _playerManager.GetSessionById(userId);
+            if (session != null)
+            {
+                var sponsorPrototypes = _sponsors != null && _sponsors.TryGetServerPrototypes(session.UserId, out var prototypes)
+                    ? prototypes.ToArray()
+                    : [];
+                updated.EnsureValid(session, _dependencies, sponsorPrototypes);
+            }
+
+            var curPrefs = prefsData.Prefs;
+            var profiles = new Dictionary<int, HumanoidCharacterProfile>(curPrefs.Characters)
+            {
+                [slot] = updated
+            };
+            var selectedSlot = profiles.ContainsKey(curPrefs.SelectedCharacterIndex)
+                ? curPrefs.SelectedCharacterIndex
+                : slot;
+            prefsData.Prefs = new PlayerPreferences(profiles, selectedSlot, curPrefs.AdminOOCColor, curPrefs.ConstructionFavorites, new Dictionary<int, List<CharacterHistoryEntry>>(curPrefs.CharacterHistory));
+
+            if (session != null && ShouldStorePrefs(session.Channel.AuthType))
+                await _db.SaveCharacterSlotAsync(userId, updated, slot);
+        }
+
         public async Task SetConstructionFavorites(NetUserId userId, List<ProtoId<ConstructionPrototype>> favorites)
         {
             if (!_cachedPlayerPrefs.TryGetValue(userId, out var prefsData) || !prefsData.PrefsLoaded)
@@ -338,8 +373,12 @@ namespace Content.Server.Preferences.Managers
 
             var prefs = await GetOrCreatePreferencesAsync(userId, CancellationToken.None);
             var converted = ConvertPreferences(prefs);
-            var historyRows = await _db.GetCharacterHistorySnapshotsAsync(userId);
-            var history = BuildCharacterHistory(historyRows);
+            var history = new Dictionary<int, List<CharacterHistoryEntry>>();
+            if (_cfg.GetCVar(CCVars.GameMetaProgressionEnabled))
+            {
+                var historyRows = await _db.GetCharacterHistorySnapshotsAsync(userId);
+                history = BuildCharacterHistory(historyRows);
+            }
             prefsData.Prefs = new PlayerPreferences(converted.Characters, converted.SelectedCharacterIndex, converted.AdminOOCColor, converted.ConstructionFavorites, history);
             prefsData.Prefs = SanitizePreferences(session, prefsData.Prefs, _dependencies);
             prefsData.LockedSlots = GetLockedSlots(prefs);
@@ -486,8 +525,12 @@ namespace Content.Server.Preferences.Managers
                 {
                     var prefs = await GetOrCreatePreferencesAsync(session.UserId, cancel);
                     var converted = ConvertPreferences(prefs);
-                    var historyRows = await _db.GetCharacterHistorySnapshotsAsync(session.UserId);
-                    var history = BuildCharacterHistory(historyRows);
+                    var history = new Dictionary<int, List<CharacterHistoryEntry>>();
+                    if (_cfg.GetCVar(CCVars.GameMetaProgressionEnabled))
+                    {
+                        var historyRows = await _db.GetCharacterHistorySnapshotsAsync(session.UserId);
+                        history = BuildCharacterHistory(historyRows);
+                    }
                     prefsData.Prefs = new PlayerPreferences(converted.Characters, converted.SelectedCharacterIndex, converted.AdminOOCColor, converted.ConstructionFavorites, history);
                     // HL2RP CHANGE START profile-lock
                     prefsData.LockedSlots = GetLockedSlots(prefs);

@@ -24,6 +24,8 @@ namespace Content.Server.Preferences.Managers
         bool HavePreferencesLoaded(ICommonSession session);
 
         Task SetProfile(NetUserId userId, int slot, HumanoidCharacterProfile profile, bool bypassLock = false);
+        /// <summary>HL2RP: set one job to High priority for metaprogression (does not lock the character slot).</summary>
+        Task PersistMetaJobHighPriorityAsync(NetUserId userId, int slot, ProtoId<JobPrototype> jobId);
         Task RefreshPreferences(NetUserId userId);
         Task SetConstructionFavorites(NetUserId userId, List<ProtoId<ConstructionPrototype>> favorites);
     }

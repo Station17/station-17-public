@@ -139,7 +139,7 @@ namespace Content.Server.GameTicking
             bool silent = false)
         {
             var character = GetPlayerProfile(player);
-            if (character.IsPermanentlyDead)
+            if (_cfg.GetCVar(CCVars.GameMetaProgressionEnabled) && character.IsPermanentlyDead)
             {
                 _chatManager.DispatchServerMessage(player, Loc.GetString("game-ticker-character-permanently-dead"));
                 return;
@@ -168,7 +168,7 @@ namespace Content.Server.GameTicking
             bool lateJoin = true,
             bool silent = false)
         {
-            if (character.IsPermanentlyDead)
+            if (_cfg.GetCVar(CCVars.GameMetaProgressionEnabled) && character.IsPermanentlyDead)
             {
                 _chatManager.DispatchServerMessage(player, Loc.GetString("game-ticker-character-permanently-dead"));
                 return;

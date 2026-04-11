@@ -1,17 +1,30 @@
+using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Content.Server.HL2RP.CID.Services;
 using Content.Server.HL2RP.Denunciations.Systems;
+using Content.Server.Mind;
 using Content.Server.Popups;
+using Content.Server.Roles;
+using Content.Server.Roles.Jobs;
+using Content.Server.Station.Components;
+using Content.Server.Station.Systems;
 using Content.Shared.Access.Components;
 using Content.Shared.Containers.ItemSlots;
+using Content.Shared.HL2RP.CID;
 using Content.Shared.HL2RP.CID.Components;
 using Content.Shared.HL2RP.CID.Systems;
 using Content.Shared.HL2RP.CID.UI;
+using Content.Shared.Mind.Components;
 using Content.Shared.Popups;
+using Content.Shared.Roles;
+using Content.Shared.Roles.Jobs;
+using Content.Shared.Station;
 using Content.Shared.UserInterface;
 using Robust.Server.GameObjects;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 
 namespace Content.Server.HL2RP.CID.Systems;
@@ -26,6 +39,12 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
     [Dependency] private readonly PopupSystem _popup = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly DenunciationsSystem _denunciations = default!;
+    [Dependency] private readonly IPrototypeManager _prototype = default!;
+    [Dependency] private readonly MindSystem _mind = default!;
+    [Dependency] private readonly RoleSystem _roles = default!;
+    [Dependency] private readonly JobSystem _jobs = default!;
+    [Dependency] private readonly StationJobsSystem _stationJobs = default!;
+    [Dependency] private readonly SharedStationSystem _station = default!;
     private CIDNumberGenerator _numberGenerator = default!;
 
     private readonly Dictionary<EntityUid, EntityUid?> _selectedCards = new();
@@ -51,6 +70,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         SubscribeLocalEvent<CIDTabletComponent, CIDCancelDenunciationResolutionMessage>(OnCancelDenunciationResolution);
         SubscribeLocalEvent<CIDTabletComponent, CIDAcceptDenunciationMessage>(OnAcceptDenunciation);
         SubscribeLocalEvent<CIDTabletComponent, CIDRejectDenunciationMessage>(OnRejectDenunciation);
+        SubscribeLocalEvent<CIDTabletComponent, CIDChangeCitizenJobMessage>(OnChangeCitizenJob);
         _denunciations.ReportsChanged += RefreshAllOpenTabletUis;
     }
 
@@ -95,7 +115,8 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         if (!TryComp<CIDCardComponent>(ent.Comp.MainCard, out var mainCid))
             return;
 
-        if (mainCid.Access <= 2)
+        if (!mainCid.TabletPermissions.HasFlag(CidTabletPermissions.EditLoyaltyPoints)
+            || !mainCid.TabletPermissions.HasFlag(CidTabletPermissions.ViewExtendedCitizenInfo))
             return;
 
         var target = GetEntity(args.CardUid);
@@ -105,6 +126,125 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         cid.LPCount = Math.Clamp(args.LPCount, -9999, 9999);
         Dirty(target, cid);
         RefreshAllOpenTabletUis();
+    }
+
+    private void OnChangeCitizenJob(Entity<CIDTabletComponent> ent, ref CIDChangeCitizenJobMessage args)
+    {
+        if (!TryComp<CIDCardComponent>(ent.Comp.MainCard, out var mainCid)
+            || !mainCid.TabletPermissions.HasFlag(CidTabletPermissions.ViewExtendedCitizenInfo))
+            return;
+
+        var canAll = mainCid.TabletPermissions.HasFlag(CidTabletPermissions.ChangeJob);
+        var canDept = mainCid.TabletPermissions.HasFlag(CidTabletPermissions.ChangeJobDepartment);
+        if (!canAll && !canDept)
+            return;
+
+        if (_selectedCards.GetValueOrDefault(ent.Owner) != GetEntity(args.CardUid))
+            return;
+
+        var targetCard = GetEntity(args.CardUid);
+        if (!TryChangeCitizenJob(targetCard, args.NewJobId, canAll, canDept))
+            return;
+
+        RefreshAllOpenTabletUis();
+    }
+
+    private bool TryChangeCitizenJob(EntityUid targetCard, ProtoId<JobPrototype> newJobId, bool canAll, bool canDept)
+    {
+        if (!TryFindWearerMob(targetCard, out var wearer))
+            return false;
+
+        if (!_mind.TryGetMind(wearer, out var mindId, out var mind) || mind.UserId is not { } userId)
+            return false;
+
+        if (!_jobs.MindTryGetJobId(mindId, out var currentJobId))
+            return false;
+
+        if (currentJobId.Value == newJobId)
+            return false;
+
+        if (!_prototype.TryIndex(newJobId, out var newJobProto) || !newJobProto.SetPreference)
+            return false;
+
+        if (!canAll && (!canDept || !JobsShareDepartment(currentJobId.Value.Id, newJobId.Id)))
+            return false;
+
+        var station = _station.GetOwningStation(wearer);
+        if (station is not { } stationUid || !TryComp<StationJobsComponent>(stationUid, out var stationJobs))
+            return false;
+
+        stationJobs.PlayerJobs.TryAdd(userId, new List<ProtoId<JobPrototype>>());
+        if (!stationJobs.PlayerJobs.TryGetValue(userId, out var playerJobs))
+            return false;
+
+        var oldId = currentJobId.Value.Id;
+        if (!_stationJobs.TryAdjustJobSlot(stationUid, oldId, 1, clamp: true))
+            return false;
+
+        playerJobs.RemoveAll(j => j.Id == oldId);
+
+        if (!_stationJobs.TryAssignJob(stationUid, newJobId, userId))
+        {
+            _stationJobs.TryAdjustJobSlot(stationUid, oldId, -1, clamp: true);
+            playerJobs.Add(new ProtoId<JobPrototype>(oldId));
+            return false;
+        }
+
+        _roles.MindAddJobRole(mindId, mind, silent: true, newJobId.Id);
+
+        if (TryComp<CIDCardComponent>(targetCard, out var cid))
+        {
+            cid.Job = newJobProto.LocalizedName;
+            Dirty(targetCard, cid);
+        }
+
+        if (TryComp<IdCardComponent>(targetCard, out var idCard))
+        {
+            idCard.LocalizedJobTitle = newJobProto.LocalizedName;
+            Dirty(targetCard, idCard);
+        }
+
+        return true;
+    }
+
+    private static bool TryFindWearerMob(EntityUid uid, out EntityUid mobUid)
+    {
+        var current = uid;
+        while (current.IsValid())
+        {
+            if (TryComp<MindContainerComponent>(current, out var mc) && mc.HasMind)
+            {
+                mobUid = current;
+                return true;
+            }
+
+            var parent = Transform(current).ParentUid;
+            if (!parent.IsValid())
+                break;
+            current = parent;
+        }
+
+        mobUid = default;
+        return false;
+    }
+
+    private bool JobsShareDepartment(string jobA, string jobB)
+    {
+        if (!_jobs.TryGetAllDepartments(jobA, out var depsA) || depsA.Count == 0)
+            return false;
+        if (!_jobs.TryGetAllDepartments(jobB, out var depsB) || depsB.Count == 0)
+            return false;
+
+        foreach (var da in depsA)
+        {
+            foreach (var db in depsB)
+            {
+                if (da.ID == db.ID)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     private void OnSelectDenunciation(Entity<CIDTabletComponent> ent, ref CIDSelectDenunciationMessage args)
@@ -160,7 +300,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         if (!TryComp<CIDCardComponent>(ent.Comp.MainCard, out var mainCid))
             return;
 
-        if (mainCid.Access <= 1 || ent.Comp.IssueCard is not { } issueUid)
+        if (!mainCid.TabletPermissions.HasFlag(CidTabletPermissions.IssueCards) || ent.Comp.IssueCard is not { } issueUid)
             return;
 
         if (!TryComp<CIDCardComponent>(issueUid, out var issueCid) || !issueCid.IsBlank)
@@ -182,7 +322,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         issueCid.LPCount = 0;
         issueCid.LPLevel = 0;
         issueCid.TokensCount = 0;
-        issueCid.Access = 0;
+        issueCid.TabletPermissions = CidTabletPermissions.None;
         issueCid.Job = "Без должности";
         issueCid.IsBlank = false;
         Dirty(issueUid, issueCid);
@@ -257,8 +397,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         if (!_ui.HasUi(uid, CIDTabletUiKey.Key))
             return;
 
-        var canIssue = false;
-        var canViewDetails = false;
+        var mainPerms = CidTabletPermissions.None;
         var infoName = "-";
         var infoSurname = "-";
         var infoNumber = "-";
@@ -270,8 +409,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         if (comp.MainCard is { } mainCardUid &&
             TryComp<CIDCardComponent>(mainCardUid, out var mainCid))
         {
-            canIssue = mainCid.Access > 1;
-            canViewDetails = mainCid.Access > 2;
+            mainPerms = mainCid.TabletPermissions;
             infoNumber = string.IsNullOrWhiteSpace(mainCid.CNumber) ? "-" : mainCid.CNumber;
             lpCount = mainCid.LPCount;
             lpLevel = mainCid.LPLevel;
@@ -286,8 +424,13 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             }
         }
 
+        var canIssueCards = mainPerms.HasFlag(CidTabletPermissions.IssueCards);
+        var canViewExtendedCitizenInfo = mainPerms.HasFlag(CidTabletPermissions.ViewExtendedCitizenInfo);
+        var canEditLoyaltyPoints = mainPerms.HasFlag(CidTabletPermissions.EditLoyaltyPoints);
+        var canUseDenunciations = mainPerms.HasFlag(CidTabletPermissions.Denunciations);
+
         var records = new List<CIDDatabaseRecord>();
-        var selectedDetails = default(CIDRecordDetails);
+        CIDRecordDetails? selectedDetails = null;
         var selectedUid = _selectedCards.GetValueOrDefault(uid);
 
         var query = EntityQueryEnumerator<CIDCardComponent>();
@@ -300,7 +443,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             var (name, surname) = SplitName(id?.FullName);
             records.Add(new CIDDatabaseRecord(GetNetEntity(cardUid), name, surname, cid.CNumber));
 
-            if (canViewDetails && selectedUid == cardUid)
+            if (canViewExtendedCitizenInfo && selectedUid == cardUid)
             {
                 selectedDetails = new CIDRecordDetails(
                     GetNetEntity(cardUid),
@@ -310,7 +453,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
                     cid.LPCount,
                     cid.LPLevel,
                     cid.TokensCount,
-                    cid.Access,
+                    cid.TabletPermissions,
                     cid.Job);
             }
         }
@@ -326,7 +469,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         var denunciations = new List<CIDDenunciationListEntry>();
         CIDDenunciationDetails? selectedDenunciation = null;
         var selectedDenunciationId = _selectedDenunciations.GetValueOrDefault(uid);
-        if (canViewDetails)
+        if (canUseDenunciations)
         {
             foreach (var denunciation in _denunciations.GetEntriesSortedBySeverity())
             {
@@ -345,8 +488,8 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
                 var (resolverName, resolverSurname, resolverCode) = denunciation.ResolverCard is { } resolver
                     ? GetCidIdentity(resolver)
                     : ("-", "-", "-");
-                var canTake = denunciation.ResolverCard == null;
-                var canControl = comp.MainCard != null && denunciation.ResolverCard == comp.MainCard;
+                var canTake = canUseDenunciations && denunciation.ResolverCard == null;
+                var canControl = canUseDenunciations && comp.MainCard != null && denunciation.ResolverCard == comp.MainCard;
 
                 selectedDenunciation = new CIDDenunciationDetails(
                     denunciation.Id,
@@ -366,6 +509,35 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             }
         }
 
+        var jobChangeOptions = new List<CIDJobPickerEntry>();
+        if (canViewExtendedCitizenInfo
+            && (mainPerms.HasFlag(CidTabletPermissions.ChangeJob)
+                || mainPerms.HasFlag(CidTabletPermissions.ChangeJobDepartment))
+            && selectedUid is { } selCard
+            && Exists(selCard))
+        {
+            var canPickAll = mainPerms.HasFlag(CidTabletPermissions.ChangeJob);
+            var canPickDept = mainPerms.HasFlag(CidTabletPermissions.ChangeJobDepartment);
+            if (TryFindWearerMob(selCard, out var wearer)
+                && _mind.TryGetMind(wearer, out var mindEnt, out var mindComp)
+                && mindComp.UserId != null
+                && _jobs.MindTryGetJobId(mindEnt, out var curJob))
+            {
+                foreach (var jobProto in _prototype.EnumeratePrototypes<JobPrototype>().OrderBy(j => j.LocalizedName))
+                {
+                    if (!jobProto.SetPreference)
+                        continue;
+                    if (jobProto.ID == curJob.Value.Id)
+                        continue;
+                    if (!canPickAll && (!canPickDept || !JobsShareDepartment(curJob.Value.Id, jobProto.ID)))
+                        continue;
+
+                    var title = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(jobProto.LocalizedName);
+                    jobChangeOptions.Add(new CIDJobPickerEntry(jobProto.ID, title));
+                }
+            }
+        }
+
         var state = new CIDTabletBoundUiState(
             infoName,
             infoSurname,
@@ -374,15 +546,17 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             lpLevel,
             tokensCount,
             job,
-            canIssue,
-            canViewDetails,
+            canIssueCards,
+            canViewExtendedCitizenInfo,
+            canEditLoyaltyPoints,
             comp.IssueCard != null,
             generatedNumber,
             records,
             selectedDetails,
-            canViewDetails,
+            canUseDenunciations,
             denunciations,
-            selectedDenunciation);
+            selectedDenunciation,
+            jobChangeOptions);
 
         _ui.SetUiState(uid, CIDTabletUiKey.Key, state);
     }
@@ -421,7 +595,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
     {
         if (ent.Comp.MainCard is { } cardUid &&
             TryComp<CIDCardComponent>(cardUid, out var cid) &&
-            cid.Access > 2)
+            cid.TabletPermissions.HasFlag(CidTabletPermissions.Denunciations))
         {
             resolverCid = cardUid;
             return true;

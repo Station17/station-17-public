@@ -1,0 +1,263 @@
+# HL2RP City 17 — grey jumpsuit loadouts for placeholder jobs (roleLoadout id = "Job" + job id).
+
+- type: loadoutGroup
+  id: HL2RPCityJumpsuit
+  name: loadout-group-hl2rp-city-jumpsuit
+  loadouts:
+  - GreyJumpsuit
+  - GreyJumpskirt
+
+- type: roleLoadout
+  id: JobCityAdministrator
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobAdministratorSecretary
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobCWUHead
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobCWUWorker
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobCivilDefenseSectorCommander
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobCivilDefenseDispatcher
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobCivilDefenseOfficer
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobCivilDefenseUnit
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobCivilDefenseRecruit
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobLoyalist
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobCivilian
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobVortigauntSlave
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobResistanceCoordinator
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobRebel
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool
+
+- type: roleLoadout
+  id: JobVortigauntFree
+  groups:
+  - Inventory
+  - GroupTankHarness
+  - HL2RPCityJumpsuit
+  - CommonBackpack
+  - PassengerNeck
+  - PassengerFace
+  - PassengerGloves
+  - PassengerOuterClothing
+  - PassengerShoes
+  - Glasses
+  - Survival
+  - Trinkets
+  - GroupSpeciesBreathTool

@@ -1,6 +1,8 @@
 using Content.Shared.HL2RP.CID.UI;
+using Content.Shared.Roles;
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
+using Robust.Shared.Prototypes;
 
 namespace Content.Client.HL2RP.CID.UI;
 
@@ -29,6 +31,8 @@ public sealed class CIDTabletBoundUserInterface : BoundUserInterface
         _window.OnCancelDenunciationResolution += id => SendMessage(new CIDCancelDenunciationResolutionMessage(id));
         _window.OnAcceptDenunciation += id => SendMessage(new CIDAcceptDenunciationMessage(id));
         _window.OnRejectDenunciation += id => SendMessage(new CIDRejectDenunciationMessage(id));
+        _window.OnChangeCitizenJob += (cardUid, jobProtoId) =>
+            SendMessage(new CIDChangeCitizenJobMessage(cardUid, new ProtoId<JobPrototype>(jobProtoId)));
         _window.OnClose += Close;
         _window.OpenCentered();
     }

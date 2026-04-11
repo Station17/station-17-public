@@ -48,6 +48,7 @@
           components:
           - CIDCard
   - type: CIDTablet
+  - type: SaveComps
   - type: Tag
     tags:
     - DoorBumpOpener

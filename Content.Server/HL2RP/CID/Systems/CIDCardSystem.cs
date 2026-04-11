@@ -14,5 +14,8 @@ public sealed class CIDCardSystem : EntitySystem
     {
         if (string.IsNullOrWhiteSpace(ent.Comp.CNumber))
             ent.Comp.IsBlank = true;
+
+        if (ent.Comp.ApplyLegacyAccessIfPresent())
+            Dirty(ent);
     }
 }

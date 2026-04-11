@@ -6,6 +6,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "городской администратор"
 
 - type: job
   id: AdministratorSecretary
@@ -15,6 +19,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "секретарь администратора"
 
 - type: job
   id: CWUHead
@@ -24,6 +32,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "глава ГСР"
 
 - type: job
   id: CWUWorker
@@ -33,6 +45,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "работник ГСР"
 
 - type: job
   id: CivilDefenseSectorCommander
@@ -42,6 +58,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "секторный командир"
 
 - type: job
   id: CivilDefenseDispatcher
@@ -51,6 +71,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "диспетчер"
 
 - type: job
   id: CivilDefenseOfficer
@@ -60,6 +84,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "офицер ГО"
 
 - type: job
   id: CivilDefenseUnit
@@ -69,6 +97,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "юнит ГО"
 
 - type: job
   id: CivilDefenseRecruit
@@ -78,6 +110,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "рекрут ГО"
 
 - type: job
   id: Loyalist
@@ -87,6 +123,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "лоялист"
 
 - type: job
   id: Civilian
@@ -96,6 +136,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "гражданский"
 
 - type: job
   id: VortigauntSlave
@@ -105,6 +149,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "вортигонт-раб"
 
 - type: job
   id: ResistanceCoordinator
@@ -114,6 +162,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "координатор сопротивления"
 
 - type: job
   id: Rebel
@@ -123,6 +175,10 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "повстанец"
 
 - type: job
   id: VortigauntFree
@@ -132,3 +188,7 @@
   setPreference: true
   canBeAntag: false
   supervisors: job-supervisors-everyone
+  cidCardSpawn:
+    lpCount: 0
+    tabletPermissions: None
+    job: "вортигонт свободный"

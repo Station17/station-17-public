@@ -36,6 +36,12 @@ public sealed partial class CCVars
         GameLateJoinRestrictToSelectedRole = CVarDef.Create("game.latejoin_restrict_selected_role", true, CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);
 
     /// <summary>
+    ///     Master switch for HL2RP metaprogression systems (inventory snapshots, character necrology, permanent death).
+    /// </summary>
+    public static readonly CVarDef<bool>
+        GameMetaProgressionEnabled = CVarDef.Create("game.metaprogression_enabled", true, CVar.ARCHIVE | CVar.SERVER | CVar.REPLICATED);
+
+    /// <summary>
     ///     Controls the default game preset.
     /// </summary>
     public static readonly CVarDef<string>

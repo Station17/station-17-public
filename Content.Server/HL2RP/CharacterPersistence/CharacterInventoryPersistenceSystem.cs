@@ -5,23 +5,30 @@ using System.Threading.Tasks;
 using Content.Server.Database;
 using Content.Server.Hands.Systems;
 using Content.Server.Inventory;
+using Content.Server.Mind;
 using Content.Server.Preferences.Managers;
+using Content.Server.Roles.Jobs;
 using Content.Server.Stack;
+using Content.Server.HL2RP.CID.Services;
+using Content.Shared.Access.Components;
+using Content.Shared.CCVar;
 using Content.Shared.GameTicking;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.HL2RP.CharacterPersistence.Components;
+using Content.Shared.HL2RP.CID.Components;
 using Content.Shared.Inventory;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Preferences;
+using Content.Shared.Roles;
 using Robust.Server.Player;
+using Robust.Shared.Configuration;
 using Robust.Shared.Containers;
 using Robust.Shared.Enums;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Reflection;
-using Robust.Shared.Serialization.Manager.Attributes;
 
 namespace Content.Server.HL2RP.CharacterPersistence;
 
@@ -37,11 +44,20 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly IComponentFactory _componentFactory = default!;
     [Dependency] private readonly MobStateSystem _mobState = default!;
+    [Dependency] private readonly IConfigurationManager _cfg = default!;
+    [Dependency] private readonly MindSystem _mind = default!;
+    [Dependency] private readonly JobSystem _jobs = default!;
 
     private readonly Dictionary<NetUserId, EntityUid> _spawnedMobs = new();
+    private CIDNumberGenerator _cidNumbers = default!;
+
+    private bool MetaProgressionEnabled => _cfg.GetCVar(CCVars.GameMetaProgressionEnabled);
 
     public override void Initialize()
     {
+        _cidNumbers = new CIDNumberGenerator();
+        _cidNumbers.Initialize();
+
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawned);
         SubscribeLocalEvent<RoundEndedEvent>(OnRoundEnded);
         _players.PlayerStatusChanged += OnPlayerStatusChanged;
@@ -55,6 +71,9 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
     private async void OnPlayerStatusChanged(object? sender, SessionStatusEventArgs args)
     {
+        if (!MetaProgressionEnabled)
+            return;
+
         if (args.NewStatus != SessionStatus.Disconnected)
             return;
 
@@ -66,6 +85,9 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
     private async void OnRoundEnded(RoundEndedEvent ev)
     {
+        if (!MetaProgressionEnabled)
+            return;
+
         // Save is intentionally spread over multiple ticks to avoid hard frame stalls at round end.
         var roundEndedAt = DateTime.UtcNow;
         var roundEndMobs = new Dictionary<NetUserId, EntityUid>(_spawnedMobs);
@@ -84,17 +106,44 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
             await Task.Yield();
             await SaveSnapshot(userId, mob);
             await SaveHistoryAndPermadeath(userId, mob, ev.RoundId, roundEndedAt);
+            await PersistMetaJobHighPriorityAsync(userId, mob);
         }
+    }
+
+    private async Task PersistMetaJobHighPriorityAsync(NetUserId userId, EntityUid mob)
+    {
+        if (!_mind.TryGetMind(mob, out var mindId, out var mind))
+            return;
+
+        if (mind.UserId is not { } uid || uid != userId)
+            return;
+
+        if (!_jobs.MindTryGetJobId(mindId, out var jobId))
+            return;
+
+        var prefs = _preferences.GetPreferencesOrNull(userId);
+        if (prefs == null)
+            return;
+
+        await _preferences.PersistMetaJobHighPriorityAsync(userId, prefs.SelectedCharacterIndex, jobId.Value);
     }
 
     private async void OnPlayerSpawned(PlayerSpawnCompleteEvent ev)
     {
         _spawnedMobs[ev.Player.UserId] = ev.Mob;
-        await RestoreSnapshot(ev.Player.UserId, ev.Mob);
+        if (!MetaProgressionEnabled)
+            return;
+
+        var hadSnapshot = await TryRestoreSnapshot(ev.Player.UserId, ev.Mob);
+        if (!hadSnapshot)
+            TryGrantInitialCidFromJob(ev.Mob, ev.JobId, ev.Profile);
     }
 
     private async Task SaveSnapshot(NetUserId userId, EntityUid mob)
     {
+        if (!MetaProgressionEnabled)
+            return;
+
         var prefs = _preferences.GetPreferencesOrNull(userId);
         if (prefs == null)
             return;
@@ -106,6 +155,9 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
 
     private async Task SaveHistoryAndPermadeath(NetUserId userId, EntityUid mob, int roundId, DateTime roundEndedAt)
     {
+        if (!MetaProgressionEnabled)
+            return;
+
         var prefs = _preferences.GetPreferencesOrNull(userId);
         if (prefs == null)
             return;
@@ -144,15 +196,19 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         await _preferences.RefreshPreferences(userId);
     }
 
-    private async Task RestoreSnapshot(NetUserId userId, EntityUid mob)
+    /// <returns>True if a saved inventory snapshot existed and was applied.</returns>
+    private async Task<bool> TryRestoreSnapshot(NetUserId userId, EntityUid mob)
     {
+        if (!MetaProgressionEnabled)
+            return false;
+
         var prefs = _preferences.GetPreferencesOrNull(userId);
         if (prefs == null)
-            return;
+            return false;
 
         var snapshot = await _db.GetCharacterInventorySnapshotAsync(userId, prefs.SelectedCharacterIndex);
         if (snapshot == null)
-            return;
+            return false;
 
         CharacterInventorySnapshotData? data;
         try
@@ -161,14 +217,59 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         }
         catch
         {
-            return;
+            return false;
         }
 
         if (data == null)
-            return;
+            return false;
 
         ClearInventoryAndHands(mob);
         RestoreInventory(mob, data);
+        return true;
+    }
+
+    private void TryGrantInitialCidFromJob(EntityUid mob, string? jobId, HumanoidCharacterProfile profile)
+    {
+        if (string.IsNullOrEmpty(jobId)
+            || !_prototype.TryIndex<JobPrototype>(jobId, out var job)
+            || job.CidCardSpawn is not { } spawn)
+        {
+            return;
+        }
+
+        var card = Spawn("CIDCard", Transform(mob).Coordinates);
+        if (!TryComp<CIDCardComponent>(card, out var cid) || !TryComp<IdCardComponent>(card, out var idCard))
+        {
+            Del(card);
+            return;
+        }
+
+        var cNumber = _cidNumbers.GenerateUniqueNumber();
+        cid.CNumber = cNumber;
+        cid.LPCount = spawn.LPCount;
+        cid.LPLevel = 0;
+        cid.TokensCount = 0;
+        cid.TabletPermissions = spawn.TabletPermissions;
+        cid.Job = spawn.Job;
+        cid.IsBlank = false;
+        Dirty(card, cid);
+
+        var (first, last) = SplitName(profile.Name);
+        idCard.FullName = string.IsNullOrEmpty(last) ? first : $"{first} {last}";
+        idCard.LocalizedJobTitle = spawn.Job;
+        Dirty(card, idCard);
+
+        if (_inventory.TryEquip(mob, card, "id", silent: true, force: true))
+            return;
+
+        if (TryComp<HandsComponent>(mob, out var hands))
+        {
+            foreach (var handId in hands.Hands.Keys)
+            {
+                if (_hands.TryPickup(mob, card, handId, checkActionBlocker: false, animate: false))
+                    return;
+            }
+        }
     }
 
     private CharacterInventorySnapshotData BuildSnapshot(EntityUid mob)

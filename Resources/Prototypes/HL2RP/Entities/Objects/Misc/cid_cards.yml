@@ -15,7 +15,7 @@
     lpLevel: 0
     tokensCount: 0
     cNumber: ""
-    access: 0
+    tabletPermissions: None
     job: "Без должности"
     isBlank: true
   - type: SaveComps

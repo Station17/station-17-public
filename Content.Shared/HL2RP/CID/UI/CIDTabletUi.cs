@@ -1,3 +1,6 @@
+using Content.Shared.HL2RP.CID;
+using Content.Shared.Roles;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared.HL2RP.CID.UI;
@@ -33,8 +36,12 @@ public sealed record CIDRecordDetails(
     int LPCount,
     int LPLevel,
     int TokensCount,
-    int Access,
+    CidTabletPermissions TabletPermissions,
     string Job);
+
+/// <summary>Job option for CID tablet database job-change picker.</summary>
+[Serializable, NetSerializable]
+public sealed record CIDJobPickerEntry(string JobPrototypeId, string DisplayTitle);
 
 [Serializable, NetSerializable]
 public sealed record CIDDenunciationListEntry(
@@ -71,15 +78,17 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
     public int LPLevel { get; }
     public int TokensCount { get; }
     public string Job { get; }
-    public bool CanIssue { get; }
-    public bool CanViewDetails { get; }
+    public bool CanIssueCards { get; }
+    public bool CanViewExtendedCitizenInfo { get; }
+    public bool CanEditLoyaltyPoints { get; }
     public bool HasIssueCard { get; }
     public string? GeneratedNumber { get; }
     public List<CIDDatabaseRecord> Records { get; }
     public CIDRecordDetails? SelectedRecord { get; }
-    public bool CanViewDenunciations { get; }
+    public bool CanUseDenunciations { get; }
     public List<CIDDenunciationListEntry> Denunciations { get; }
     public CIDDenunciationDetails? SelectedDenunciation { get; }
+    public List<CIDJobPickerEntry> JobChangeOptions { get; }
 
     public CIDTabletBoundUiState(
         string name,
@@ -89,15 +98,17 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
         int lpLevel,
         int tokensCount,
         string job,
-        bool canIssue,
-        bool canViewDetails,
+        bool canIssueCards,
+        bool canViewExtendedCitizenInfo,
+        bool canEditLoyaltyPoints,
         bool hasIssueCard,
         string? generatedNumber,
         List<CIDDatabaseRecord> records,
         CIDRecordDetails? selectedRecord,
-        bool canViewDenunciations,
+        bool canUseDenunciations,
         List<CIDDenunciationListEntry> denunciations,
-        CIDDenunciationDetails? selectedDenunciation)
+        CIDDenunciationDetails? selectedDenunciation,
+        List<CIDJobPickerEntry> jobChangeOptions)
     {
         Name = name;
         Surname = surname;
@@ -106,15 +117,17 @@ public sealed class CIDTabletBoundUiState : BoundUserInterfaceState
         LPLevel = lpLevel;
         TokensCount = tokensCount;
         Job = job;
-        CanIssue = canIssue;
-        CanViewDetails = canViewDetails;
+        CanIssueCards = canIssueCards;
+        CanViewExtendedCitizenInfo = canViewExtendedCitizenInfo;
+        CanEditLoyaltyPoints = canEditLoyaltyPoints;
         HasIssueCard = hasIssueCard;
         GeneratedNumber = generatedNumber;
         Records = records;
         SelectedRecord = selectedRecord;
-        CanViewDenunciations = canViewDenunciations;
+        CanUseDenunciations = canUseDenunciations;
         Denunciations = denunciations;
         SelectedDenunciation = selectedDenunciation;
+        JobChangeOptions = jobChangeOptions;
     }
 }
 
@@ -144,6 +157,19 @@ public sealed class CIDUpdateSelectedLPMessage : BoundUserInterfaceMessage
     {
         CardUid = cardUid;
         LPCount = lpCount;
+    }
+}
+
+[Serializable, NetSerializable]
+public sealed class CIDChangeCitizenJobMessage : BoundUserInterfaceMessage
+{
+    public NetEntity CardUid { get; }
+    public ProtoId<JobPrototype> NewJobId { get; }
+
+    public CIDChangeCitizenJobMessage(NetEntity cardUid, ProtoId<JobPrototype> newJobId)
+    {
+        CardUid = cardUid;
+        NewJobId = newJobId;
     }
 }
 

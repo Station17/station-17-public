@@ -39,7 +39,14 @@
                                 <Label Name="SelectedLevelLabel" Text="LP уровень: -"/>
                                 <Label Name="SelectedTokensLabel" Text="Токены: -"/>
                                 <Label Name="SelectedJobLabel" Text="Должность: -"/>
-                                <Label Name="SelectedAccessLabel" Text="Доступ: -"/>
+                                <BoxContainer Name="JobChangeRow" Orientation="Vertical" SeparationOverride="4" Visible="False">
+                                    <Label Text="Смена должности (система)"/>
+                                    <BoxContainer Orientation="Horizontal" SeparationOverride="4">
+                                        <OptionButton Name="JobChangeOptionButton" HorizontalExpand="True"/>
+                                        <Button Name="ApplyJobChangeButton" Text="Применить"/>
+                                    </BoxContainer>
+                                </BoxContainer>
+                                <Label Name="SelectedAccessLabel" Text="Права планшета: -"/>
                             </BoxContainer>
                         </PanelContainer>
                     </BoxContainer>
