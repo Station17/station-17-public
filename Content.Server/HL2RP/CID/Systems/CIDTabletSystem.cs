@@ -157,36 +157,34 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         if (!_mind.TryGetMind(wearer, out var mindId, out var mind) || mind.UserId is not { } userId)
             return false;
 
-        if (!_jobs.MindTryGetJobId(mindId, out var currentJobId))
+        if (!_jobs.MindTryGetJobId(mindId, out var currentJobId) || currentJobId is not { } curJobId)
             return false;
 
-        if (currentJobId.Value == newJobId)
+        if (curJobId == newJobId)
             return false;
 
         if (!_prototype.TryIndex(newJobId, out var newJobProto) || !newJobProto.SetPreference)
             return false;
 
-        if (!canAll && (!canDept || !JobsShareDepartment(currentJobId.Value.Id, newJobId.Id)))
+        if (!canAll && (!canDept || !JobsShareDepartment(curJobId.Id, newJobId.Id)))
             return false;
 
         var station = _station.GetOwningStation(wearer);
         if (station is not { } stationUid || !TryComp<StationJobsComponent>(stationUid, out var stationJobs))
             return false;
 
-        stationJobs.PlayerJobs.TryAdd(userId, new List<ProtoId<JobPrototype>>());
-        if (!stationJobs.PlayerJobs.TryGetValue(userId, out var playerJobs))
-            return false;
+        _stationJobs.EnsurePlayerJobsList(stationUid, userId, stationJobs);
 
-        var oldId = currentJobId.Value.Id;
+        var oldId = curJobId.Id;
         if (!_stationJobs.TryAdjustJobSlot(stationUid, oldId, 1, clamp: true))
             return false;
 
-        playerJobs.RemoveAll(j => j.Id == oldId);
+        _stationJobs.RemoveJobFromPlayerJobsList(stationUid, userId, oldId, stationJobs);
 
         if (!_stationJobs.TryAssignJob(stationUid, newJobId, userId))
         {
             _stationJobs.TryAdjustJobSlot(stationUid, oldId, -1, clamp: true);
-            playerJobs.Add(new ProtoId<JobPrototype>(oldId));
+            _stationJobs.AddJobToPlayerJobsList(stationUid, userId, new ProtoId<JobPrototype>(oldId), stationJobs);
             return false;
         }
 
@@ -207,7 +205,7 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         return true;
     }
 
-    private static bool TryFindWearerMob(EntityUid uid, out EntityUid mobUid)
+    private bool TryFindWearerMob(EntityUid uid, out EntityUid mobUid)
     {
         var current = uid;
         while (current.IsValid())
@@ -521,15 +519,16 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             if (TryFindWearerMob(selCard, out var wearer)
                 && _mind.TryGetMind(wearer, out var mindEnt, out var mindComp)
                 && mindComp.UserId != null
-                && _jobs.MindTryGetJobId(mindEnt, out var curJob))
+                && _jobs.MindTryGetJobId(mindEnt, out var curJob)
+                && curJob is { } curJobId)
             {
                 foreach (var jobProto in _prototype.EnumeratePrototypes<JobPrototype>().OrderBy(j => j.LocalizedName))
                 {
                     if (!jobProto.SetPreference)
                         continue;
-                    if (jobProto.ID == curJob.Value.Id)
+                    if (jobProto.ID == curJobId.Id)
                         continue;
-                    if (!canPickAll && (!canPickDept || !JobsShareDepartment(curJob.Value.Id, jobProto.ID)))
+                    if (!canPickAll && (!canPickDept || !JobsShareDepartment(curJobId.Id, jobProto.ID)))
                         continue;
 
                     var title = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(jobProto.LocalizedName);

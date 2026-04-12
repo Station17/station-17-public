@@ -118,14 +118,14 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         if (mind.UserId is not { } uid || uid != userId)
             return;
 
-        if (!_jobs.MindTryGetJobId(mindId, out var jobId))
+        if (!_jobs.MindTryGetJobId(mindId, out var jobId) || jobId is not { } jobProtoId)
             return;
 
         var prefs = _preferences.GetPreferencesOrNull(userId);
         if (prefs == null)
             return;
 
-        await _preferences.PersistMetaJobHighPriorityAsync(userId, prefs.SelectedCharacterIndex, jobId.Value);
+        await _preferences.PersistMetaJobHighPriorityAsync(userId, prefs.SelectedCharacterIndex, jobProtoId);
     }
 
     private async void OnPlayerSpawned(PlayerSpawnCompleteEvent ev)

@@ -114,6 +114,45 @@ public sealed partial class StationJobsSystem : EntitySystem
         return true;
     }
 
+    /// <summary>
+    /// Ensures <see cref="StationJobsComponent.PlayerJobs"/> has an entry for the player (empty list if new).
+    /// </summary>
+    public void EnsurePlayerJobsList(EntityUid station, NetUserId userId, StationJobsComponent? stationJobs = null)
+    {
+        if (!Resolve(station, ref stationJobs, false))
+            return;
+
+        stationJobs.PlayerJobs.TryAdd(userId, new());
+    }
+
+    /// <summary>
+    /// Removes all assignments of the given job prototype from the player's list on this station (slot counts unchanged).
+    /// </summary>
+    public int RemoveJobFromPlayerJobsList(EntityUid station, NetUserId userId, string jobPrototypeId,
+        StationJobsComponent? stationJobs = null)
+    {
+        if (!Resolve(station, ref stationJobs, false))
+            return 0;
+
+        if (!stationJobs.PlayerJobs.TryGetValue(userId, out var list))
+            return 0;
+
+        return list.RemoveAll(j => j.Id == jobPrototypeId);
+    }
+
+    /// <summary>
+    /// Appends a job to the player's station job list without adjusting job slots (for use after manual slot changes).
+    /// </summary>
+    public void AddJobToPlayerJobsList(EntityUid station, NetUserId userId, ProtoId<JobPrototype> job,
+        StationJobsComponent? stationJobs = null)
+    {
+        if (!Resolve(station, ref stationJobs, false))
+            return;
+
+        stationJobs.PlayerJobs.TryAdd(userId, new());
+        stationJobs.PlayerJobs[userId].Add(job);
+    }
+
     /// <inheritdoc cref="TryAdjustJobSlot(Robust.Shared.GameObjects.EntityUid,string,int,bool,bool,Content.Server.Station.Components.StationJobsComponent?)"/>
     /// <param name="station">Station to adjust the job slot on.</param>
     /// <param name="job">Job to adjust.</param>
