@@ -26,6 +26,22 @@
           mapNameTemplate: "Dev"
         - type: StationJobs
           availableJobs:
+            # HL2RP city roles (unlimited slots for local dev)
+            CityAdministrator: [ -1, -1 ]
+            AdministratorSecretary: [ -1, -1 ]
+            CWUHead: [ -1, -1 ]
+            CWUWorker: [ -1, -1 ]
+            CivilDefenseSectorCommander: [ -1, -1 ]
+            CivilDefenseDispatcher: [ -1, -1 ]
+            CivilDefenseOfficer: [ -1, -1 ]
+            CivilDefenseUnit: [ -1, -1 ]
+            CivilDefenseRecruit: [ -1, -1 ]
+            Loyalist: [ -1, -1 ]
+            Civilian: [ -1, -1 ]
+            VortigauntSlave: [ -1, -1 ]
+            ResistanceCoordinator: [ -1, -1 ]
+            Rebel: [ -1, -1 ]
+            VortigauntFree: [ -1, -1 ]
             Captain: [ -1, -1 ]
 
 - type: gameMap
