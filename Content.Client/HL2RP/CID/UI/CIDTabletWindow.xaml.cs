@@ -148,6 +148,11 @@ public sealed partial class CIDTabletWindow : DefaultWindow
     {
         var show = details != null && jobChangeOptions.Count > 0;
         JobChangeRow.Visible = show;
+
+        string? prevJobId = null;
+        if (show && JobChangeOptionButton.ItemCount > 0)
+            prevJobId = JobChangeOptionButton.SelectedMetadata as string;
+
         JobChangeOptionButton.Clear();
         if (!show)
         {
@@ -164,7 +169,22 @@ public sealed partial class CIDTabletWindow : DefaultWindow
 
         ApplyJobChangeButton.Disabled = JobChangeOptionButton.ItemCount == 0;
         if (JobChangeOptionButton.ItemCount > 0)
-            JobChangeOptionButton.TrySelect(0);
+        {
+            var selectIdx = 0;
+            if (prevJobId != null)
+            {
+                for (var i = 0; i < JobChangeOptionButton.ItemCount; i++)
+                {
+                    if (JobChangeOptionButton.GetItemMetadata(i) as string == prevJobId)
+                    {
+                        selectIdx = i;
+                        break;
+                    }
+                }
+            }
+
+            JobChangeOptionButton.TrySelect(selectIdx);
+        }
     }
 
     private void TryApplyJobChange()

@@ -252,9 +252,11 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         cid.TabletPermissions = spawn.TabletPermissions;
         cid.Job = spawn.Job;
         cid.IsBlank = false;
+        var (first, last) = SplitName(profile.Name);
+        cid.FirstName = first;
+        cid.LastName = last;
         Dirty(card, cid);
 
-        var (first, last) = SplitName(profile.Name);
         idCard.FullName = string.IsNullOrEmpty(last) ? first : $"{first} {last}";
         idCard.LocalizedJobTitle = spawn.Job;
         Dirty(card, idCard);
@@ -458,8 +460,30 @@ public sealed class CharacterInventoryPersistenceSystem : EntitySystem
         }
 
         RestoreComponentStates(item, data);
+        ApplyCidCardIdentityToIdCard(item);
 
         return item;
+    }
+
+    /// <summary>
+    /// IdCard is not included in inventory snapshots; copy persisted CID identity onto it after restore.
+    /// </summary>
+    private void ApplyCidCardIdentityToIdCard(EntityUid card)
+    {
+        if (!TryComp<CIDCardComponent>(card, out var cid)
+            || !TryComp<IdCardComponent>(card, out var idCard)
+            || cid.IsBlank)
+            return;
+
+        var fn = cid.FirstName.Trim();
+        var ln = cid.LastName.Trim();
+        if (fn.Length > 0 || ln.Length > 0)
+            idCard.FullName = string.IsNullOrEmpty(ln) ? fn : $"{fn} {ln}";
+
+        if (!string.IsNullOrWhiteSpace(cid.Job))
+            idCard.LocalizedJobTitle = cid.Job;
+
+        Dirty(card, idCard);
     }
 
     private void RestoreComponentStates(EntityUid item, SnapshotItemData data)

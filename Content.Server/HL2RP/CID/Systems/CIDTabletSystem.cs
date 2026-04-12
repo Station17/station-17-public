@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,6 +32,13 @@ namespace Content.Server.HL2RP.CID.Systems;
 
 public sealed class CIDTabletSystem : SharedCIDTabletSystem
 {
+    /// <summary>Jobs the CID tablet must not assign (non-human / special roles).</summary>
+    private static readonly HashSet<string> TabletJobChangeDisallowedTargets = new(StringComparer.Ordinal)
+    {
+        "VortigauntSlave",
+        "VortigauntFree",
+    };
+
     private static readonly Regex NumberRegex = new("^[0-9]{6}$", RegexOptions.Compiled);
     private const float GlobalUiRefreshInterval = 1.0f;
     private static readonly SoundSpecifier NotifyBeep = new SoundPathSpecifier("/Audio/Machines/scan_finish.ogg");
@@ -143,6 +151,9 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             return;
 
         var targetCard = GetEntity(args.CardUid);
+        if (ent.Comp.MainCard == targetCard)
+            return;
+
         if (!TryChangeCitizenJob(targetCard, args.NewJobId, canAll, canDept))
             return;
 
@@ -164,6 +175,9 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
             return false;
 
         if (!_prototype.TryIndex(newJobId, out var newJobProto) || !newJobProto.SetPreference)
+            return false;
+
+        if (TabletJobChangeDisallowedTargets.Contains(newJobId.Id))
             return false;
 
         if (!canAll && (!canDept || !JobsShareDepartment(curJobId.Id, newJobId.Id)))
@@ -323,6 +337,8 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         issueCid.TabletPermissions = CidTabletPermissions.None;
         issueCid.Job = "Без должности";
         issueCid.IsBlank = false;
+        issueCid.FirstName = name;
+        issueCid.LastName = surname;
         Dirty(issueUid, issueCid);
 
         issueId.FullName = $"{name} {surname}";
@@ -508,7 +524,12 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         }
 
         var jobChangeOptions = new List<CIDJobPickerEntry>();
+        var isOperatorsOwnRecord = comp.MainCard is { } mainSlotCard
+            && selectedUid is { } selUid
+            && selUid == mainSlotCard;
+
         if (canViewExtendedCitizenInfo
+            && !isOperatorsOwnRecord
             && (mainPerms.HasFlag(CidTabletPermissions.ChangeJob)
                 || mainPerms.HasFlag(CidTabletPermissions.ChangeJobDepartment))
             && selectedUid is { } selCard
@@ -525,6 +546,8 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
                 foreach (var jobProto in _prototype.EnumeratePrototypes<JobPrototype>().OrderBy(j => j.LocalizedName))
                 {
                     if (!jobProto.SetPreference)
+                        continue;
+                    if (TabletJobChangeDisallowedTargets.Contains(jobProto.ID))
                         continue;
                     if (jobProto.ID == curJobId.Id)
                         continue;

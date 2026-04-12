@@ -18,6 +18,14 @@ public sealed partial class CIDCardComponent : Component
     [DataField, AutoNetworkedField]
     public string CNumber = string.Empty;
 
+    /// <summary>Given name on the card; persisted with metaprogression (IdCard is not snapshotted).</summary>
+    [DataField, AutoNetworkedField]
+    public string FirstName = string.Empty;
+
+    /// <summary>Family name on the card; persisted with metaprogression.</summary>
+    [DataField, AutoNetworkedField]
+    public string LastName = string.Empty;
+
     [DataField, AutoNetworkedField]
     public CidTabletPermissions TabletPermissions;
 
