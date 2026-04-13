@@ -537,26 +537,38 @@ public sealed class CIDTabletSystem : SharedCIDTabletSystem
         {
             var canPickAll = mainPerms.HasFlag(CidTabletPermissions.ChangeJob);
             var canPickDept = mainPerms.HasFlag(CidTabletPermissions.ChangeJobDepartment);
+            ProtoId<JobPrototype>? currentTargetJob = null;
+
             if (TryFindWearerMob(selCard, out var wearer)
                 && _mind.TryGetMind(wearer, out var mindEnt, out var mindComp)
                 && mindComp.UserId != null
                 && _jobs.MindTryGetJobId(mindEnt, out var curJob)
                 && curJob is { } curJobId)
             {
-                foreach (var jobProto in _prototype.EnumeratePrototypes<JobPrototype>().OrderBy(j => j.LocalizedName))
-                {
-                    if (!jobProto.SetPreference)
-                        continue;
-                    if (TabletJobChangeDisallowedTargets.Contains(jobProto.ID))
-                        continue;
-                    if (jobProto.ID == curJobId.Id)
-                        continue;
-                    if (!canPickAll && (!canPickDept || !JobsShareDepartment(curJobId.Id, jobProto.ID)))
-                        continue;
+                currentTargetJob = curJobId;
+            }
 
-                    var title = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(jobProto.LocalizedName);
-                    jobChangeOptions.Add(new CIDJobPickerEntry(jobProto.ID, title));
+            foreach (var jobProto in _prototype.EnumeratePrototypes<JobPrototype>().OrderBy(j => j.LocalizedName))
+            {
+                if (!jobProto.SetPreference)
+                    continue;
+                if (TabletJobChangeDisallowedTargets.Contains(jobProto.ID))
+                    continue;
+                if (currentTargetJob is { } current && jobProto.ID == current.Id)
+                    continue;
+
+                // For department-only permission, if current target job is unknown (card not worn right now),
+                // keep options visible instead of hiding the whole control.
+                if (!canPickAll
+                    && canPickDept
+                    && currentTargetJob is { } knownCurrent
+                    && !JobsShareDepartment(knownCurrent.Id, jobProto.ID))
+                {
+                    continue;
                 }
+
+                var title = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(jobProto.LocalizedName);
+                jobChangeOptions.Add(new CIDJobPickerEntry(jobProto.ID, title));
             }
         }
 
